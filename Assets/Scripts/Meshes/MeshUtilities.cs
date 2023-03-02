@@ -5,32 +5,6 @@ using UnityEngine;
 
 public static class MeshUtilities {
 
-   
-    public static void PopulateMeshTriangles(MeshData meshData) {
-        int[] triangles = new int[12];
-        int vertIndex = 0;
-        int numTriangles = meshData.vertices.Count / 3;
-        for (int i = 0; i < numTriangles - 1; i++) {
-            triangles[0] = vertIndex + 0;
-            triangles[1] = vertIndex + 1;
-            triangles[2] = vertIndex + 3;
-
-            triangles[3] = vertIndex + 1;
-            triangles[4] = vertIndex + 4;
-            triangles[5] = vertIndex + 3;
-
-            triangles[6] = vertIndex + 1;
-            triangles[7] = vertIndex + 2;
-            triangles[8] = vertIndex + 4;
-
-            triangles[9] = vertIndex + 2;
-            triangles[10] = vertIndex + 5;
-            triangles[11] = vertIndex + 4;
-
-            vertIndex += 3;
-            meshData.AddTriangles(triangles);
-        }
-    }
 
     public static void PopulateNodeMeshVertices(MeshData meshData, float roadWidth, Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition, int resolution = 20) {
         float t;
@@ -61,6 +35,38 @@ public static class MeshUtilities {
         }
     }
 
+    public static void PopulateNodeMeshVertices(MeshData meshData, RoadObject roadObject, Node startNode, Node endNode, int resolution = 10) {
+
+        float roadWidth = roadObject.GetRoadWidth();
+        Vector3 nodePosition = startNode.Position;
+        Vector3 controlPosition = roadObject.ControlNodeObject.transform.position;
+        Vector3 roadPosition = roadObject.transform.position;
+
+        // If node has no intersection just run the normal function
+        if (!startNode.HasIntersection()) {
+            nodePosition = roadPosition - startNode.Position;
+            controlPosition = roadObject.ControlNodeObject.transform.position - roadPosition;
+            PopulateNodeMeshVertices(meshData, roadWidth, nodePosition, endNode.transform.position, controlPosition, resolution) ;
+            return;
+        }
+    }
+
+    public static void PopulateRoadMeshVertices(MeshData meshData, RoadObject roadObject, int resolution = 10) {
+        Vector3 roadPosition = roadObject.transform.position;
+
+        Vector3 startPosition = roadPosition - roadObject.StartNode.Position;
+        Vector3 endPosition = roadPosition - roadObject.EndNode.Position;
+        Vector3 controlPosition = roadObject.ControlNodeObject.transform.position - roadPosition;
+        float offsetDistance = roadObject.GetRoadWidth();
+        float roadWidth = roadObject.GetRoadWidth();
+
+        Vector3 offsettedStartPosition = Bezier.GetOffsettedPosition(startPosition, endPosition, controlPosition, offsetDistance);
+        Vector3 offsettedEndPosition = Bezier.GetOffsettedPosition(endPosition, startPosition, controlPosition, offsetDistance);
+
+        PopulateRoadMeshVertices(meshData, roadWidth, offsettedStartPosition, offsettedEndPosition, controlPosition, resolution);
+    }
+
+
     public static void PopulateRoadMeshVertices(MeshData meshData, float roadWidth, Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition, int resolution = 20) {
 
         resolution = resolution * 3;
@@ -86,19 +92,6 @@ public static class MeshUtilities {
             controlLeft = controlPosition + n0 * roadWidth / 2;
             controlRight = controlPosition - n1 * roadWidth / 2;
         }
-        /*
-        Debug.DrawLine(startLeft, controlLeft, Color.red);
-        Debug.DrawLine(controlLeft, endRight, Color.red);
-
-        Debug.DrawLine(startRight, controlRight, Color.green);
-        Debug.DrawLine(controlRight, endLeft, Color.green);
-
-        Debug.DrawLine(controlLeft, controlPosition, Color.black);
-        Debug.DrawLine(controlPosition, controlRight, Color.black);
-
-        Debug.DrawLine(startPosition, controlPosition, Color.cyan);
-        Debug.DrawLine(controlPosition, endPosition, Color.cyan);
-        */
 
         for (int i = 0; i < resolution; i++) {
             t = i / (float)(resolution - 1);
@@ -125,4 +118,31 @@ public static class MeshUtilities {
             meshData.AddUvs(uvs);
         }
     }
+
+    public static void PopulateMeshTriangles(MeshData meshData) {
+        int[] triangles = new int[12];
+        int vertIndex = 0;
+        int numTriangles = meshData.vertices.Count / 3;
+        for (int i = 0; i < numTriangles - 1; i++) {
+            triangles[0] = vertIndex + 0;
+            triangles[1] = vertIndex + 1;
+            triangles[2] = vertIndex + 3;
+
+            triangles[3] = vertIndex + 1;
+            triangles[4] = vertIndex + 4;
+            triangles[5] = vertIndex + 3;
+
+            triangles[6] = vertIndex + 1;
+            triangles[7] = vertIndex + 2;
+            triangles[8] = vertIndex + 4;
+
+            triangles[9] = vertIndex + 2;
+            triangles[10] = vertIndex + 5;
+            triangles[11] = vertIndex + 4;
+
+            vertIndex += 3;
+            meshData.AddTriangles(triangles);
+        }
+    }
+
 }
