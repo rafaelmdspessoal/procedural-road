@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fc32a08244e2734cb89d3acac23b637, type: 3}
+  m_Name: New Road Segment
+  m_EditorClassIdentifier: 
+  resolution: 2
+  roadObject: {fileID: 5671751708458776127, guid: 3916ca158456e39448dcb330fb1ed205, type: 3}
+  nodeGFX: {fileID: 2107811969717312095, guid: cf8ae71838ee0a04ab89a9a95087d8eb, type: 3}
+  roadWidth: 5
+  spacing: 0.327
+  roadMaterial: {fileID: 2100000, guid: 97eea5cdb1de9445fb7f71ee7ce5083c, type: 2}
+  tiling: 50.39
+  leftIntersectionPoint: {x: 32.814117, y: 0.020944372, z: 17.59335}
+  rightIntersectionPoint: {x: -42.883778, y: 0.009991666, z: 27.376575}

@@ -1,0 +1,116 @@
+﻿using System;
+using System.Collections;
+using UnityEngine;
+
+
+public static class MeshUtilities {
+
+   
+    public static void PopulateMeshTriangles(MeshData meshData) {
+        int[] triangles = new int[6];
+        int vertIndex = 0;
+        int numTriangles = meshData.vertices.Count / 2;
+        for (int i = 0; i < numTriangles - 1; i++) {
+            triangles[0] = vertIndex + 0;
+            triangles[1] = vertIndex + 1;
+            triangles[2] = vertIndex + 2;
+
+            triangles[3] = vertIndex + 1;
+            triangles[4] = vertIndex + 3;
+            triangles[5] = vertIndex + 2;
+
+            vertIndex += 2;
+            meshData.AddTriangles(triangles);
+        }
+    }
+
+    public static void PopulateNodeMeshVertices(MeshData meshData, float roadWidth, Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition, int resolution = 20) {
+        float t;
+        // Assumes no intersection, start for left and right are the same
+        Vector3 startNodeMeshPosition = startPosition + (startPosition - controlPosition).normalized * roadWidth / 2;
+
+        Vector3 endNodeMeshLeftPosition = RoadUtilities.GetRoadLeftSideVertice(roadWidth, startPosition, controlPosition);
+        Vector3 endNodeMeshRightPosition = RoadUtilities.GetRoadRightSideVertice(roadWidth, startPosition, controlPosition);
+
+        Vector3 left = (endNodeMeshLeftPosition - startPosition).normalized;
+        Vector3 leftControlNodePostion = startNodeMeshPosition + left * roadWidth / 2;
+        Vector3 rightControlNodePosition = startNodeMeshPosition - left * roadWidth / 2;
+
+        Debug.DrawLine(endNodeMeshLeftPosition, leftControlNodePostion, Color.red);
+        Debug.DrawLine(leftControlNodePostion, startNodeMeshPosition, Color.red);
+        Debug.DrawLine(startNodeMeshPosition, rightControlNodePosition, Color.red);
+        Debug.DrawLine(rightControlNodePosition, endNodeMeshRightPosition, Color.red);
+
+        for (int i = 0; i < resolution; i++) {
+            t = i / (float)(resolution - 1);
+            Vector3 leftRoadVertice = Bezier.QuadraticCurve(startNodeMeshPosition, endNodeMeshLeftPosition, leftControlNodePostion, t);
+            Vector3 rightRoadVertice = Bezier.QuadraticCurve(startNodeMeshPosition, endNodeMeshRightPosition, rightControlNodePosition, t);
+
+            meshData.AddVertice(leftRoadVertice);
+            meshData.AddVertice(rightRoadVertice);
+        }
+    }
+
+    public static void PopulateRoadMeshVertices(MeshData meshData, float roadWidth, Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition, int resolution = 20) {
+
+        float t;
+        Vector3 startLeft = RoadUtilities.GetRoadLeftSideVertice(roadWidth, startPosition, controlPosition);
+        Vector3 endLeft = RoadUtilities.GetRoadLeftSideVertice(roadWidth, endPosition, controlPosition);
+        Vector3 controlLeft;
+
+        Vector3 startRight = RoadUtilities.GetRoadRightSideVertice(roadWidth, startPosition, controlPosition);
+        Vector3 endRight = RoadUtilities.GetRoadRightSideVertice(roadWidth, endPosition, controlPosition);
+        Vector3 controlRight;
+
+        Vector3 n0 = (startLeft - startPosition).normalized;
+        Vector3 n1 = (endRight - endPosition).normalized;
+
+        if (Vector3.Angle(n0, n1) != 0) {
+            // Road is NOT straight, so the DOT product is not 0!
+            // This fails for angles > 90, so we must deal with it later
+            controlLeft = controlPosition + ((n0 + n1) * roadWidth)/Vector3.Dot((n0 + n1), (n0 + n1));
+            controlRight = controlPosition - ((n0 + n1) * roadWidth) / Vector3.Dot((n0 + n1), (n0 + n1));
+        } else {
+            // Road is traight, so calculations are easier
+            controlLeft = controlPosition + n0 * roadWidth / 2;
+            controlRight = controlPosition - n1 * roadWidth / 2;
+        }
+        /*
+        Debug.DrawLine(startLeft, controlLeft, Color.red);
+        Debug.DrawLine(controlLeft, endRight, Color.red);
+
+        Debug.DrawLine(startRight, controlRight, Color.green);
+        Debug.DrawLine(controlRight, endLeft, Color.green);
+
+        Debug.DrawLine(controlLeft, controlPosition, Color.black);
+        Debug.DrawLine(controlPosition, controlRight, Color.black);
+
+        Debug.DrawLine(startPosition, controlPosition, Color.cyan);
+        Debug.DrawLine(controlPosition, endPosition, Color.cyan);
+        */
+
+        for (int i = 0; i < resolution; i++) {
+            t = i / (float)(resolution - 1);
+            Vector3 leftRoadVertice = Bezier.QuadraticCurve(startLeft, endRight, controlLeft, t);
+            //Vector3 centerRoadVertice = Bezier.QuadraticCurve(startPosition, endPosition, controlPosition, t);
+            Vector3 rightRoadVertice = Bezier.QuadraticCurve(startRight, endLeft, controlRight, t);
+
+            meshData.AddVertice(leftRoadVertice);
+            // meshData.AddVertice(centerRoadVertice);
+            meshData.AddVertice(rightRoadVertice);
+        }
+    }
+
+    internal static void PopulateMeshUvs(MeshData meshData) {
+        Vector2[] uvs = new Vector2[2];
+        int numUvs = meshData.vertices.Count / 2;
+        for (int i = 0; i < numUvs; i++) {
+            float completionPercent = i / (float)(numUvs - 1);
+
+            uvs[0] = new Vector2(0, completionPercent);
+            uvs[1] = new Vector2(1, completionPercent);
+
+            meshData.AddUvs(uvs);
+        }
+    }
+}
