@@ -7,25 +7,34 @@ public static class MeshUtilities {
 
    
     public static void PopulateMeshTriangles(MeshData meshData) {
-        int[] triangles = new int[6];
+        int[] triangles = new int[12];
         int vertIndex = 0;
-        int numTriangles = meshData.vertices.Count / 2;
+        int numTriangles = meshData.vertices.Count / 3;
         for (int i = 0; i < numTriangles - 1; i++) {
             triangles[0] = vertIndex + 0;
             triangles[1] = vertIndex + 1;
-            triangles[2] = vertIndex + 2;
+            triangles[2] = vertIndex + 3;
 
             triangles[3] = vertIndex + 1;
-            triangles[4] = vertIndex + 3;
-            triangles[5] = vertIndex + 2;
+            triangles[4] = vertIndex + 4;
+            triangles[5] = vertIndex + 3;
 
-            vertIndex += 2;
+            triangles[6] = vertIndex + 1;
+            triangles[7] = vertIndex + 2;
+            triangles[8] = vertIndex + 4;
+
+            triangles[9] = vertIndex + 2;
+            triangles[10] = vertIndex + 5;
+            triangles[11] = vertIndex + 4;
+
+            vertIndex += 3;
             meshData.AddTriangles(triangles);
         }
     }
 
     public static void PopulateNodeMeshVertices(MeshData meshData, float roadWidth, Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition, int resolution = 20) {
         float t;
+        resolution *= 3;
         // Assumes no intersection, start for left and right are the same
         Vector3 startNodeMeshPosition = startPosition + (startPosition - controlPosition).normalized * roadWidth / 2;
 
@@ -53,6 +62,7 @@ public static class MeshUtilities {
 
     public static void PopulateRoadMeshVertices(MeshData meshData, float roadWidth, Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition, int resolution = 20) {
 
+        resolution = resolution * 3;
         float t;
         Vector3 startLeft = RoadUtilities.GetRoadLeftSideVertice(roadWidth, startPosition, controlPosition);
         Vector3 endLeft = RoadUtilities.GetRoadLeftSideVertice(roadWidth, endPosition, controlPosition);
@@ -92,23 +102,24 @@ public static class MeshUtilities {
         for (int i = 0; i < resolution; i++) {
             t = i / (float)(resolution - 1);
             Vector3 leftRoadVertice = Bezier.QuadraticCurve(startLeft, endRight, controlLeft, t);
-            //Vector3 centerRoadVertice = Bezier.QuadraticCurve(startPosition, endPosition, controlPosition, t);
+            Vector3 centerRoadVertice = Bezier.QuadraticCurve(startPosition, endPosition, controlPosition, t);
             Vector3 rightRoadVertice = Bezier.QuadraticCurve(startRight, endLeft, controlRight, t);
 
             meshData.AddVertice(leftRoadVertice);
-            // meshData.AddVertice(centerRoadVertice);
+            meshData.AddVertice(centerRoadVertice);
             meshData.AddVertice(rightRoadVertice);
         }
     }
 
     internal static void PopulateMeshUvs(MeshData meshData) {
-        Vector2[] uvs = new Vector2[2];
-        int numUvs = meshData.vertices.Count / 2;
+        Vector2[] uvs = new Vector2[3];
+        int numUvs = meshData.vertices.Count / 3;
         for (int i = 0; i < numUvs; i++) {
             float completionPercent = i / (float)(numUvs - 1);
 
             uvs[0] = new Vector2(0, completionPercent);
             uvs[1] = new Vector2(1, completionPercent);
+            uvs[2] = new Vector2(0, completionPercent);
 
             meshData.AddUvs(uvs);
         }
