@@ -21,8 +21,8 @@ public class RoadMeshBuilder : MonoBehaviour {
         Vector3 roadPosition = roadObject.transform.position;
         MeshData meshData = PopulateMeshData(
             roadObject.GetRoadWidth(),
-            roadPosition - roadObject.StartNode.Position,
-            roadPosition - roadObject.EndNode.Position,
+            roadObject.StartNode.Position - roadPosition,
+            roadObject.EndNode.Position - roadPosition,
             roadObject.ControlNodeObject.transform.position - roadPosition);
 
         Mesh mesh = LoadMesh(meshData);
@@ -34,7 +34,7 @@ public class RoadMeshBuilder : MonoBehaviour {
         MeshData meshData = new MeshData();
         MeshUtilities.PopulateNodeMeshVertices(meshData, roadWidth, startPosition, endPosition, controlPosition);
         MeshUtilities.PopulateRoadMeshVertices(meshData, roadWidth, startPosition, endPosition, controlPosition);
-        // MeshUtilities.PopulateNodeMeshVertices(meshData, roadWidth, startPosition, endPosition, controlPosition);
+        MeshUtilities.PopulateNodeMeshVertices(meshData, roadWidth, endPosition, startPosition, controlPosition);
         MeshUtilities.PopulateMeshTriangles(meshData);
         MeshUtilities.PopulateMeshUvs(meshData);
 

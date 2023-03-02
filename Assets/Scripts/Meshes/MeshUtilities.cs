@@ -56,6 +56,7 @@ public static class MeshUtilities {
             Vector3 rightRoadVertice = Bezier.QuadraticCurve(startNodeMeshPosition, endNodeMeshRightPosition, rightControlNodePosition, t);
 
             meshData.AddVertice(leftRoadVertice);
+            meshData.AddVertice(startPosition);
             meshData.AddVertice(rightRoadVertice);
         }
     }
