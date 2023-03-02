@@ -31,6 +31,7 @@ public class RoadObject : MonoBehaviour
         this.startNode = startNode;
         this.endNode = endNode;
         this.controlNodeObject = controlNodeObject;
+        controlNodeObject.transform.parent = this.transform;
 
         this.startNode.AddRoadSegment(this);
         this.endNode.AddRoadSegment(this);
@@ -47,14 +48,6 @@ public class RoadObject : MonoBehaviour
         float roadLengh = Bezier.GetLengh(startNode.transform.position, endNode.transform.position);
         int textureRepead = Mathf.RoundToInt(roadObjectSO.roadTextureTiling * roadLengh * .05f);
         meshRenderer.material.mainTextureScale = new Vector2(.5f, textureRepead);
-        meshRenderer.material.mainTextureOffset = new Vector2(0, 0);
-    }
-
-    private void Update() {
-        float roadLengh = Bezier.GetLengh(startNode.transform.position, endNode.transform.position);
-
-        int textureRepead = Mathf.RoundToInt(roadObjectSO.roadTextureTiling * roadLengh * .05f);
-        meshRenderer.material.mainTextureScale = new Vector2(0.5f, textureRepead);
         meshRenderer.material.mainTextureOffset = new Vector2(0, 0);
     }
 

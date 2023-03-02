@@ -42,6 +42,7 @@ public class RoadPlacement : MonoBehaviour {
     private Vector3 endNodePosition;
 
     private Dictionary<Vector3, RoadObject> roadsToSplit;
+    private List<RoadObject> roadsToUpdate;
 
     private void Start() {
         gameManager = GameManager.Instance;
@@ -55,6 +56,7 @@ public class RoadPlacement : MonoBehaviour {
         buildingState = BuildingState.StartNode;
 
         roadsToSplit = new Dictionary<Vector3, RoadObject>();
+        roadsToUpdate = new List<RoadObject>();
 
         meshFilter = GetComponent<MeshFilter>();
         meshRenderer = GetComponent<MeshRenderer>();
@@ -145,16 +147,31 @@ public class RoadPlacement : MonoBehaviour {
 
         if (startNode == null && endNode == null)
             newRoadObject = roadBuilder.CreateRoadSegment(startNodePosition, endNodePosition, controlNodePosition, roadObjectSO);
-        else if (startNode != null && endNode == null)
+        else if (startNode != null && endNode == null) {
             newRoadObject = roadBuilder.CreateRoadSegment(startNode, endNodePosition, controlNodePosition, roadObjectSO);
-        else if(startNode == null && endNode != null)
+            roadsToUpdate.AddRange(startNode.GetConnectedRoads());
+        } else if (startNode == null && endNode != null) {
             newRoadObject = roadBuilder.CreateRoadSegment(startNodePosition, endNode, controlNodePosition, roadObjectSO);
-        else
+            roadsToUpdate.AddRange(endNode.GetConnectedRoads());
+        } else {
             newRoadObject = roadBuilder.CreateRoadSegment(startNode, endNode, controlNodePosition, roadObjectSO);
+            roadsToUpdate.AddRange(startNode.GetConnectedRoads());
+            roadsToUpdate.AddRange(endNode.GetConnectedRoads());
+        }
 
         startNode = newRoadObject.EndNode;
 
         SplitRoads(newRoadObject);
+        roadsToUpdate.Add(newRoadObject);
+        UpdateRoads();
+    }
+
+    private void UpdateRoads() {
+        foreach (RoadObject roadToUpdate in roadsToUpdate) {
+            Mesh roadMesh = RoadMeshBuilder.Instance.CreateRoadMesh(roadToUpdate);
+            roadToUpdate.SetRoadMesh(roadMesh);
+        }
+        roadsToUpdate.Clear();
     }
 
     private void SplitRoads(RoadObject newRoadObject) {
@@ -167,10 +184,10 @@ public class RoadPlacement : MonoBehaviour {
                     node = newRoadObject.StartNode;
                 else 
                     node = newRoadObject.EndNode;
-                roadBuilder.SplitRoadSegment(roadObject, roadObjectSO, node);
+                roadBuilder.SplitRoadSegment(roadObject, roadObjectSO, node);                
             }
-            roadsToSplit.Clear();
         }
+        roadsToSplit.Clear();
     }
 
     private void CreateNodeGfx() {
@@ -207,6 +224,7 @@ public class RoadPlacement : MonoBehaviour {
         startNode = null;
         endNode = null;
         roadsToSplit.Clear();
+        roadsToUpdate.Clear();
         buildingState = BuildingState.StartNode;
 
     }

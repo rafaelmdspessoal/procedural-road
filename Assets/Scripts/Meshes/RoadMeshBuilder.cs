@@ -29,9 +29,9 @@ public class RoadMeshBuilder : MonoBehaviour {
 
         MeshData meshData = new MeshData();
 
-        MeshUtilities.PopulateNodeMeshVertices(meshData, roadObject, endNode, startNode);
-        MeshUtilities.PopulateRoadMeshVertices(meshData, roadObject);
         MeshUtilities.PopulateNodeMeshVertices(meshData, roadObject, startNode, endNode);
+        MeshUtilities.PopulateRoadMeshVertices(meshData, roadObject);
+        MeshUtilities.PopulateNodeMeshVertices(meshData, roadObject, endNode, startNode);
 
         MeshUtilities.PopulateMeshTriangles(meshData);
         MeshUtilities.PopulateMeshUvs(meshData);
@@ -45,6 +45,7 @@ public class RoadMeshBuilder : MonoBehaviour {
         MeshUtilities.PopulateNodeMeshVertices(meshData, roadWidth, startPosition, endPosition, controlPosition);
         MeshUtilities.PopulateRoadMeshVertices(meshData, roadWidth, startPosition, endPosition, controlPosition);
         MeshUtilities.PopulateNodeMeshVertices(meshData, roadWidth, endPosition, startPosition, controlPosition);
+
         MeshUtilities.PopulateMeshTriangles(meshData);
         MeshUtilities.PopulateMeshUvs(meshData);
 

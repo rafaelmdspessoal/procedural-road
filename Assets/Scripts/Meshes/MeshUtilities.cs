@@ -19,11 +19,6 @@ public static class MeshUtilities {
         Vector3 leftControlNodePostion = startNodeMeshPosition + left * roadWidth / 2;
         Vector3 rightControlNodePosition = startNodeMeshPosition - left * roadWidth / 2;
 
-        Debug.DrawLine(endNodeMeshLeftPosition, leftControlNodePostion, Color.red);
-        Debug.DrawLine(leftControlNodePostion, startNodeMeshPosition, Color.red);
-        Debug.DrawLine(startNodeMeshPosition, rightControlNodePosition, Color.red);
-        Debug.DrawLine(rightControlNodePosition, endNodeMeshRightPosition, Color.red);
-
         for (int i = 0; i < resolution; i++) {
             t = i / (float)(resolution - 1);
             Vector3 leftRoadVertice = Bezier.QuadraticCurve(startNodeMeshPosition, endNodeMeshLeftPosition, leftControlNodePostion, t);
@@ -44,7 +39,7 @@ public static class MeshUtilities {
 
         // If node has no intersection just run the normal function
         if (!startNode.HasIntersection()) {
-            nodePosition = roadPosition - startNode.Position;
+            nodePosition = startNode.Position - roadPosition;
             controlPosition = roadObject.ControlNodeObject.transform.position - roadPosition;
             PopulateNodeMeshVertices(meshData, roadWidth, nodePosition, endNode.transform.position, controlPosition, resolution) ;
             return;
@@ -60,7 +55,7 @@ public static class MeshUtilities {
         Vector3 endPosition = endNode.Position - roadPosition;
         Vector3 controlPosition = roadObject.ControlNodeObject.transform.position - roadPosition;
 
-        float offsetDistance = roadObject.GetRoadWidth();
+        float offsetDistance = roadObject.GetRoadWidth() / 2;
         float roadWidth = roadObject.GetRoadWidth();
 
         if (startNode.HasIntersection()) {
@@ -76,7 +71,7 @@ public static class MeshUtilities {
 
     public static void PopulateRoadMeshVertices(MeshData meshData, float roadWidth, Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition, int resolution = 20) {
 
-        resolution = resolution * 3;
+        resolution *= 3;
         float t;
         Vector3 startLeft = RoadUtilities.GetRoadLeftSideVertice(roadWidth, startPosition, controlPosition);
         Vector3 endLeft = RoadUtilities.GetRoadLeftSideVertice(roadWidth, endPosition, controlPosition);

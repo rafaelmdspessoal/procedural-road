@@ -42,7 +42,6 @@ public class RoadBuilder : MonoBehaviour
 
         roadObject.Init(startNode, endNode, controlNodeObject);
         Mesh roadMesh = RoadMeshBuilder.Instance.CreateRoadMesh(roadObject);
-
         roadObject.SetRoadMesh(roadMesh);
         return roadObject;
     }
@@ -62,7 +61,6 @@ public class RoadBuilder : MonoBehaviour
         CreateRoadSegment(startNode, newNode, newStartControlPointPosition, roadObjectSO);
         CreateRoadSegment(newNode, endNode, newEndControlPointPosition, roadObjectSO);
 
-
         return newNode;
     }
 
@@ -76,7 +74,6 @@ public class RoadBuilder : MonoBehaviour
         GameObject controlNodeObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         controlNodeObject.transform.localScale = 0.25f * roadObjectSO.roadWidth * Vector3.one;
         controlNodeObject.transform.position = controlNodePosition;
-        controlNodeObject.transform.parent = this.transform;
         return controlNodeObject;
     }
 
