@@ -52,18 +52,25 @@ public static class MeshUtilities {
     }
 
     public static void PopulateRoadMeshVertices(MeshData meshData, RoadObject roadObject, int resolution = 10) {
+        Node startNode = roadObject.StartNode;
+        Node endNode = roadObject.EndNode;
+        
         Vector3 roadPosition = roadObject.transform.position;
-
-        Vector3 startPosition = roadPosition - roadObject.StartNode.Position;
-        Vector3 endPosition = roadPosition - roadObject.EndNode.Position;
+        Vector3 startPosition = startNode.Position - roadPosition;
+        Vector3 endPosition = endNode.Position - roadPosition;
         Vector3 controlPosition = roadObject.ControlNodeObject.transform.position - roadPosition;
+
         float offsetDistance = roadObject.GetRoadWidth();
         float roadWidth = roadObject.GetRoadWidth();
 
-        Vector3 offsettedStartPosition = Bezier.GetOffsettedPosition(startPosition, endPosition, controlPosition, offsetDistance);
-        Vector3 offsettedEndPosition = Bezier.GetOffsettedPosition(endPosition, startPosition, controlPosition, offsetDistance);
+        if (startNode.HasIntersection()) {
+            startPosition = Bezier.GetOffsettedPosition(startPosition, endPosition, controlPosition, offsetDistance);
+        }
+        if (endNode.HasIntersection()) {
+            endPosition = Bezier.GetOffsettedPosition(endPosition, startPosition, controlPosition, offsetDistance);
+        }
 
-        PopulateRoadMeshVertices(meshData, roadWidth, offsettedStartPosition, offsettedEndPosition, controlPosition, resolution);
+        PopulateRoadMeshVertices(meshData, roadWidth, startPosition, endPosition, controlPosition, resolution);
     }
 
 
