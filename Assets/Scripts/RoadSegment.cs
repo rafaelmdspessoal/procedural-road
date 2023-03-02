@@ -24,18 +24,6 @@ public class RoadSegment: ScriptableObject
     public Vector3 leftIntersectionPoint;
     public Vector3 rightIntersectionPoint;
 
-    public GameObject CreateRoadSegment(GameObject node_1, GameObject node_2, GameObject controlPoint)
-    {
-        Vector3[] pointsPositions = new Vector3[3];
-        pointsPositions[0] = node_1.transform.position;
-        pointsPositions[1] = node_2.transform.position;
-        pointsPositions[2] = controlPoint.transform.position;
-
-        GameObject roadSegmentModel = Instantiate(roadObject);
-        roadSegmentModel.GetComponent<RoadSegmentObject>().RoadSegmentSO = this;
-        return roadObject;
-    }
-
     public RoadSegmentObject CreateRoadSegment(GameObject node_1, GameObject node_2)
     {
         Vector3 startPos = node_1.transform.position;
@@ -203,21 +191,4 @@ public class RoadSegment: ScriptableObject
         return mesh;
     }
 
-
-    public Mesh CreateTemporaryRoadMesh(Vector3 startPos, Vector3 endPos)
-    {
-        Vector3[] points = new Vector3[resolution];
-        Vector3 bezierPosition;
-        float t;
-        for (int i = 0; i < resolution; i++)
-        {
-            t = i / (float)(resolution - 1);
-            bezierPosition = Bezier.LinearCurve(startPos, endPos, t);
-            points[i] = bezierPosition;
-        }
-
-        Mesh mesh = GetRoadMesh(points);
-
-        return mesh;
-    }
 }

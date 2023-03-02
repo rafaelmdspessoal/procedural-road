@@ -54,7 +54,7 @@ public static class Bezier
         float minDistanceToSegment = Mathf.Infinity;
         Vector3 tangent = Vector3.negativeInfinity;
 
-        Vector3 startPossition = roadObject.StartNode.transform.position;
+        Vector3 startPosition = roadObject.StartNode.transform.position;
         Vector3 endPosition = roadObject.EndNode.transform.position;
         Vector3 controlPointPosition = roadObject.ControlNodeObject.transform.position;
 
@@ -64,7 +64,7 @@ public static class Bezier
         while (t <= 1) {
             t += .001f;
             Vector3 bezierPoint = QuadraticCurve(
-                startPossition,
+                startPosition,
                 endPosition,
                 controlPointPosition,
                 t
@@ -73,7 +73,7 @@ public static class Bezier
             if (distance <= minDistanceToSegment)
                 minDistanceToSegment = distance;
             else {
-                pointA = Lerp(startPossition, controlPointPosition, t);
+                pointA = Lerp(startPosition, controlPointPosition, t);
                 pointB = Lerp(controlPointPosition, endPosition, t);
                 tangent = pointB - pointA;
                 break;
@@ -82,36 +82,24 @@ public static class Bezier
         return tangent;
     }
 
-    //public static Vector3 GetNormal(Vector3 startPos, Vector3 endPos, Vector3 pointOfContact)
-    //{
-    //    Vector3 tng = GetTangentAt(startPos, endPos, pointOfContact);
-    //    Vector3 binomial = Vector3.Cross(Vector3.up, tng);
-    //    return Vector3.Cross(tng, binomial).normalized;
-    //}
-
-    //public static Quaternion GetOrientation(Vector3 startPos, Vector3 endPos, Vector3 pointOfContact, float t)
-    //{
-    //    Vector3 tng = GetTangentAt(startPos, endPos, pointOfContact);
-    //    Vector3 nrm = GetNormal(startPos, endPos, pointOfContact);
-    //    return Quaternion.LookRotation(tng, nrm);
-    //}
-
-    public static Vector3 GetOffsettedPosition(Vector3 startPos, Vector3 endPos, float distance)
+    public static Vector3 GetOffsettedPosition(Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition, float offsetDistance)
     {
-        float t;
-        Vector3 offset = Vector3.zero;
-        Vector3 bezierPosition;
+        float t = 0;
+        Vector3 offsetPosition = Vector3.zero;
 
-        for (int i = 0; i < 100; i++)
-        {
-            t = i / (float)(100 - 1);
-            bezierPosition = LinearCurve(startPos, endPos, t);
-            if (Mathf.Abs((bezierPosition - startPos).magnitude) >= distance)
-            {
-                offset = bezierPosition;
-                return offset;
+        while (t <= 1) {
+            t += .001f;
+            Vector3 bezierPoint = QuadraticCurve(
+                startPosition,
+                endPosition,
+                controlPosition,
+                t
+            );
+            if ((bezierPoint - startPosition).magnitude >= offsetDistance) {
+                offsetPosition = bezierPoint;
+                return offsetPosition;
             }
         }
-        return offset;
+        return offsetPosition;
     }
 }

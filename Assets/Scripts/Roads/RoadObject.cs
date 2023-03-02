@@ -54,7 +54,7 @@ public class RoadObject : MonoBehaviour
         float roadLengh = Bezier.GetLengh(startNode.transform.position, endNode.transform.position);
 
         int textureRepead = Mathf.RoundToInt(roadObjectSO.roadTextureTiling * roadLengh * .05f);
-        meshRenderer.material.mainTextureScale = new Vector2(1, textureRepead);
+        meshRenderer.material.mainTextureScale = new Vector2(0.5f, textureRepead);
         meshRenderer.material.mainTextureOffset = new Vector2(0, 0);
     }
 

@@ -80,16 +80,6 @@ public class Node : MonoBehaviour
         }
     }
 
-    private void Start()
-    {
-        //SphereCollider collider = transform.GetComponent<SphereCollider>();
-        //collider.radius = GetMaxRoadWidth() / 2;
-        //transform.position = new Vector3(
-        //    transform.position.x,
-        //    transform.position.y + 0.01f,
-        //    transform.position.z
-        //);
-    }
 
     //public List<RoadSegmentObject> GetAdjacentRoadsTo(RoadObject segment)
     //{
@@ -101,27 +91,6 @@ public class Node : MonoBehaviour
 
     //    return adjacentRoads;
     //}
-
-
-    private void Update()
-    {
-        UpdateNode();
-    }
-
-
-    public void UpdateNode()
-    {
-        //Mesh mesh = CreateNodeMesh();
-        //int textureRepead = Mathf.RoundToInt(roadSegmentSO.tiling * Bezier.GetLengh(
-        //    startNode.Position,
-        //    EndNode.Position
-        //) * roadSegmentSO.spacing * .005f);
-        //MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
-        //meshRenderer.material = roadSegment.RoadMaterial;
-        //meshRenderer.material.mainTextureScale = new Vector2(.5f, 1);
-        //meshRenderer.material.mainTextureOffset = new Vector2(0, 0);
-        //GetComponent<MeshFilter>().mesh = mesh;
-    }
 
 
     //Vector3[] GetNodePoints()
@@ -239,48 +208,5 @@ public class Node : MonoBehaviour
     //    return nodePoints;
     //}
 
-
-    //public Mesh CreateNodeMesh()
-    //{
-    //    Vector3[] verts = GetNodePoints();
-    //    Vector2[] uvs = new Vector2[verts.Length];
-
-    //    int numTris = 2 * (verts.Length - 1);
-    //    int[] tris = new int[numTris * 3];
-    //    int vertIndex = 0;
-    //    int triIndex = 0;
-
-
-    //    for (int i = 0; i < verts.Length / 2 - 1; i++)
-    //    {
-    //        tris[triIndex + 0] = vertIndex + 2;
-    //        tris[triIndex + 1] = vertIndex + 1;
-    //        tris[triIndex + 2] = vertIndex + 0;
-
-    //        triIndex += 3;
-    //        vertIndex += 2;
-    //    }
-    //    for (int i = 0; i < verts.Length - 1; i++)
-    //    {
-    //        Debug.DrawLine(transform.TransformPoint(verts[i]), transform.TransformPoint(verts[i + 1]), Color.red);
-    //    }
-    //    vertIndex = 0;
-    //    for (int i = 0; i < verts.Length / 2; i++)
-    //    {
-    //        float completionPercent = i / (float)(verts.Length / 2 - 1);
-    //        uvs[vertIndex + 0] = new Vector2(0, completionPercent);
-    //        uvs[vertIndex + 1] = new Vector2(1, 0);
-    //        vertIndex += 2;
-    //    }
-
-    //    Mesh mesh = new Mesh
-    //    {
-    //        vertices = verts,
-    //        triangles = tris,
-    //        uv = uvs
-    //    };
-
-    //    return mesh;
-    //}
 
 }
