@@ -24,7 +24,7 @@ public static class Bezier
     {
         float t = 0;
         float minDistanceToSegment = Mathf.Infinity;
-        Vector3 point = Vector3.negativeInfinity;
+        Vector3 point = Vector3.positiveInfinity;
         while (t <= 1)
         {
             t += .001f;
@@ -40,6 +40,8 @@ public static class Bezier
             else
                 break;
         }
+        if (point == Vector3.positiveInfinity)
+            Debug.LogError("closest point is infinity");
         return point;
     }
 
@@ -52,7 +54,7 @@ public static class Bezier
     {
         float t = 0;
         float minDistanceToSegment = Mathf.Infinity;
-        Vector3 tangent = Vector3.negativeInfinity;
+        Vector3 tangent = Vector3.positiveInfinity;
 
         Vector3 startPosition = roadObject.StartNode.transform.position;
         Vector3 endPosition = roadObject.EndNode.transform.position;
@@ -79,13 +81,19 @@ public static class Bezier
                 break;
             }
         }
+        if (tangent == Vector3.positiveInfinity)
+            Debug.LogError("tangent point is infinity");
+        if (pointA == Vector3.positiveInfinity)
+            Debug.LogError("pointA point is infinity");
+        if (pointB == Vector3.positiveInfinity)
+            Debug.LogError("pointB point is infinity");
         return tangent;
     }
 
     public static Vector3 GetOffsettedPosition(Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition, float offsetDistance)
     {
         float t = 0;
-        Vector3 offsetPosition = Vector3.zero;
+        Vector3 offsetPosition = Vector3.positiveInfinity;
 
         while (t <= 1) {
             t += .001f;
@@ -100,6 +108,10 @@ public static class Bezier
                 return offsetPosition;
             }
         }
+
+        if (offsetPosition == Vector3.positiveInfinity)
+            Debug.LogError("offsetPosition is infinity");
+
         return offsetPosition;
     }
 }

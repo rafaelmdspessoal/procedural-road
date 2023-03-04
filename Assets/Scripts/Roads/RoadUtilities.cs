@@ -21,12 +21,8 @@ public static class RoadUtilities {
         return (verticePosition - controlPosition).normalized;
     }
 
-    private static float GetControlNodeAngle(Vector3 startVertice, Vector3 endVertice, Vector3 controlVertice) {
-        Vector3 startVerticeDirection = GetVerticeNormalizedDirection(controlVertice, startVertice);
-        Vector3 endVerticeDirection = GetVerticeNormalizedDirection(controlVertice, endVertice);
-
-        float angle = Vector3.Angle(startVerticeDirection, endVerticeDirection);
-        return angle * Mathf.Deg2Rad;
+    public static Vector3 GetRoadNormalizedDirection(RoadObject roadObject, Node node) {
+        return (node.Position - roadObject.ControlNodeObject.transform.position).normalized;
     }
 
 }

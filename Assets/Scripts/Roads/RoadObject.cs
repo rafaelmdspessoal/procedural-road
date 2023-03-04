@@ -21,6 +21,12 @@ public class RoadObject : MonoBehaviour
     public Node EndNode { get { return endNode; } }
     public GameObject ControlNodeObject { get { return controlNodeObject; } }
 
+    public Node OtherNodeTo(Node thisNode) {
+        if (thisNode == startNode)
+            return endNode;
+        return startNode;
+    }
+
     private void Awake() {
         meshFilter = GetComponent<MeshFilter>();
         meshRenderer = GetComponent<MeshRenderer>();
@@ -33,8 +39,8 @@ public class RoadObject : MonoBehaviour
         this.controlNodeObject = controlNodeObject;
         controlNodeObject.transform.parent = this.transform;
 
-        this.startNode.AddRoadSegment(this);
-        this.endNode.AddRoadSegment(this);
+        this.startNode.AddRoad(this);
+        this.endNode.AddRoad(this);
     }
 
     public void SetRoadMesh(Mesh mesh) {
@@ -51,7 +57,7 @@ public class RoadObject : MonoBehaviour
         meshRenderer.material.mainTextureOffset = new Vector2(0, 0);
     }
 
-    public float GetRoadWidth() {
+    public int GetRoadWidth() {
         return roadObjectSO.roadWidth;
     }
 }

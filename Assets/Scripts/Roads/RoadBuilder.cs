@@ -40,6 +40,9 @@ public class RoadBuilder : MonoBehaviour
         GameObject controlNodeObject = CreateControlNode(roadObjectSO, controlPosition);
         RoadObject roadObject = roadGameObject.GetComponent<RoadObject>();
 
+        startNode.transform.localScale = 0.5f * roadObjectSO.roadWidth * Vector3.one;
+        endNode.transform.localScale = 0.5f * roadObjectSO.roadWidth * Vector3.one;
+
         roadObject.Init(startNode, endNode, controlNodeObject);
         Mesh roadMesh = RoadMeshBuilder.Instance.CreateRoadMesh(roadObject);
         roadObject.SetRoadMesh(roadMesh);
@@ -65,8 +68,8 @@ public class RoadBuilder : MonoBehaviour
     }
 
     public void RemoveSegment(RoadObject roadObject) {
-        roadObject.StartNode.RemoveRoadSegment(roadObject);
-        roadObject.EndNode.RemoveRoadSegment(roadObject);
+        roadObject.StartNode.RemoveRoad(roadObject);
+        roadObject.EndNode.RemoveRoad(roadObject);
         Destroy(roadObject.gameObject);
     }
 

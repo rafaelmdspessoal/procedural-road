@@ -11,8 +11,8 @@ public class RoadMeshBuilder : MonoBehaviour {
         Instance = this;
     }
 
-    public Mesh CreateRoadMesh(float roadWidth, Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition) {
-        MeshData meshData = PopulateMeshData(roadWidth, startPosition, endPosition, controlPosition);
+    public Mesh CreateRoadMesh(int roadWidth, Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition, int resolution = 20) {
+        MeshData meshData = PopulateMeshData(roadWidth, startPosition, endPosition, controlPosition, resolution);
         Mesh mesh = LoadMesh(meshData);
         return mesh;
     }
@@ -23,15 +23,15 @@ public class RoadMeshBuilder : MonoBehaviour {
         return mesh;
     }
 
-    private MeshData PopulateMeshData(RoadObject roadObject) {
+    private MeshData PopulateMeshData(RoadObject roadObject, int resolution = 10) {
         Node startNode = roadObject.StartNode;
         Node endNode = roadObject.EndNode;
 
         MeshData meshData = new MeshData();
 
-        MeshUtilities.PopulateNodeMeshVertices(meshData, roadObject, startNode, endNode);
+        MeshUtilities.PopulateStartNodeWIntersection(meshData, roadObject, startNode, endNode, resolution);
         MeshUtilities.PopulateRoadMeshVertices(meshData, roadObject);
-        MeshUtilities.PopulateNodeMeshVertices(meshData, roadObject, endNode, startNode);
+        MeshUtilities.PopulateEndNodeWIntersections(meshData, roadObject, startNode, endNode, resolution);
 
         MeshUtilities.PopulateMeshTriangles(meshData);
         MeshUtilities.PopulateMeshUvs(meshData);
@@ -39,12 +39,12 @@ public class RoadMeshBuilder : MonoBehaviour {
         return meshData;
     }
 
-    private MeshData PopulateMeshData(float roadWidth, Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition) {
+    private MeshData PopulateMeshData(int roadWidth, Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition, int resolution = 20) {
 
         MeshData meshData = new MeshData();
-        MeshUtilities.PopulateNodeMeshVertices(meshData, roadWidth, startPosition, endPosition, controlPosition);
-        MeshUtilities.PopulateRoadMeshVertices(meshData, roadWidth, startPosition, endPosition, controlPosition);
-        MeshUtilities.PopulateNodeMeshVertices(meshData, roadWidth, endPosition, startPosition, controlPosition);
+        MeshUtilities.PopulateStartNodeWOIntersection(meshData, roadWidth, startPosition, controlPosition, resolution);
+        MeshUtilities.PopulateRoadMeshVertices(meshData, roadWidth, startPosition, endPosition, controlPosition, resolution);
+        MeshUtilities.PopulateEndtNodeWOIntersection(meshData, roadWidth, endPosition, controlPosition, resolution);
 
         MeshUtilities.PopulateMeshTriangles(meshData);
         MeshUtilities.PopulateMeshUvs(meshData);
