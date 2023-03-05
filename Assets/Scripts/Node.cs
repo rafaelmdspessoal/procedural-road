@@ -85,6 +85,7 @@ public class Node : MonoBehaviour
 
     public Dictionary<RoadObject, float> GetAdjacentRoadsTo(RoadObject roadObject) {
         Dictionary<RoadObject, float> adjacentRoads = new Dictionary<RoadObject, float>();
+        Dictionary<RoadObject, float> adjacentRoads2 = new Dictionary<RoadObject, float>();
 
         if (HasIntersection() && roadObject != null) {
             Vector3 roadObjectDirection = this.Position - roadObject.transform.position;
@@ -97,6 +98,18 @@ public class Node : MonoBehaviour
                     adjacentRoads.Add(road, angle);
                 }
             }
+        }
+
+
+        if (adjacentRoads.Count >= 2) {
+            adjacentRoads.OrderBy(x => Mathf.Abs(x.Value));
+            int i = 0;
+            foreach (var item in adjacentRoads) {
+                if (i > 1) break;
+                adjacentRoads2.Add(item.Key, item.Value);
+                i++;
+            }
+            return adjacentRoads2;
         }
         return adjacentRoads;
     }

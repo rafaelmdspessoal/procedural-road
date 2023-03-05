@@ -75,6 +75,7 @@
     <Compile Include="Assets\Scripts\Bezier.cs" />
     <Compile Include="Assets\Scripts\RoadSegmentObject.cs" />
     <Compile Include="Assets\Scripts\Roads\RoadObject.cs" />
+    <Compile Include="Assets\Scripts\TestVectorScript.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
