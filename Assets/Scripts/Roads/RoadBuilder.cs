@@ -53,6 +53,9 @@ public class RoadBuilder : MonoBehaviour
         Node startNode = roadObject.StartNode;
         Node endNode = roadObject.EndNode;
 
+        Vector3 startNodePosition = startNode.Position;
+        Vector3 endNodePosition = endNode.Position;
+
         Bezier.GetTangentAt(
             roadObject,
             newNode.Position,
@@ -60,9 +63,24 @@ public class RoadBuilder : MonoBehaviour
             out Vector3 newEndControlPointPosition);
 
         RemoveSegment(roadObject);
+        Debug.Log(startNode);
+        Debug.Log(endNode);
 
-        CreateRoadSegment(startNode, newNode, newStartControlPointPosition, roadObjectSO);
-        CreateRoadSegment(newNode, endNode, newEndControlPointPosition, roadObjectSO);
+        if (startNode != null && endNode != null) {
+            CreateRoadSegment(startNode, newNode, newStartControlPointPosition, roadObjectSO);
+            CreateRoadSegment(newNode, endNode, newEndControlPointPosition, roadObjectSO);
+        }
+        else if (startNode == null && endNode != null) {
+            CreateRoadSegment(startNodePosition, newNode, newStartControlPointPosition, roadObjectSO);
+            CreateRoadSegment(newNode, startNodePosition, newStartControlPointPosition, roadObjectSO);
+        }
+        else if (endNode == null && startNode != null) {
+            CreateRoadSegment(endNodePosition, newNode, newStartControlPointPosition, roadObjectSO);
+            CreateRoadSegment(newNode, endNodePosition, newStartControlPointPosition, roadObjectSO);
+        } else {
+            CreateRoadSegment(startNodePosition, newNode, newStartControlPointPosition, roadObjectSO);
+            CreateRoadSegment(newNode, endNodePosition, newEndControlPointPosition, roadObjectSO);
+        }
 
         return newNode;
     }

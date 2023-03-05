@@ -68,11 +68,12 @@ public class Node : MonoBehaviour
 
     public void RemoveRoad(RoadObject roadObject)
     {
-        if (connectedRoads.Contains(roadObject))
+        if (connectedRoads.Contains(roadObject)) {
             connectedRoads.Remove(roadObject);
 
-        if (connectedRoads.Count <= 0)
-            Destroy(gameObject);
+            //if (connectedRoads.Count <= 0)
+            //    Destroy(gameObject);
+        }
     }
 
     public List<RoadObject> GetConnectedRoads()
@@ -105,23 +106,9 @@ public class Node : MonoBehaviour
             }
         }
 
-        var ordered = adjacentRoads.OrderBy(x => Mathf.Abs(x.Key)).ToDictionary(x => x.Key, x => x.Value).Take(2);
+        var ordered = adjacentRoads.OrderBy(x => Mathf.Abs(x.Key)).Take(2).ToDictionary(x => x.Key, x => x.Value);
 
-        print("###################");
-        print("len: " + ordered.Count());
-        print("road " + roadObject);
-        print("is connected to: ");
-
-        print(ordered.First().Value.transform.name);
-        print("and");
-        print(ordered.Last().Value.transform.name);
-
-        print("HHHHHHHHHHHHHHHHHH");
-
-        //print(ordered.First().Value + " " + ordered.First().Key);
-        //print(ordered.Last().Value + " " + ordered.Last().Key);
-
-        return adjacentRoads;
+        return ordered;
     }
 
 }

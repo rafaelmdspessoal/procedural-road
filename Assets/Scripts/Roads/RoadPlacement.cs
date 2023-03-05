@@ -72,8 +72,13 @@ public class RoadPlacement : MonoBehaviour {
     }
 
     private void RemoveRoad(GameObject obj) {
-        if (obj.TryGetComponent(out RoadObject roadObject))
+        if (obj.TryGetComponent(out RoadObject roadObject)) {
             roadBuilder.RemoveSegment(roadObject);
+            roadsToUpdate.AddRange(roadObject.StartNode.GetConnectedRoads());
+            roadsToUpdate.AddRange(roadObject.EndNode.GetConnectedRoads());
+        }
+        print("roads destroyed");
+        UpdateRoads();
     }
 
     private void RoadUiController_OnCurvedRoadPlacement(RoadObjectSO roadObjectSO) {
@@ -192,13 +197,13 @@ public class RoadPlacement : MonoBehaviour {
         if (roadsToSplit.Count > 0) {
             foreach (Vector3 positionToSplit in roadsToSplit.Keys) {
                 RoadObject roadObject = roadsToSplit[positionToSplit];
-                Node node;
+                Node centerNode;
 
                 if (newRoadObject.StartNode.Position == positionToSplit)
-                    node = newRoadObject.StartNode;
+                    centerNode = newRoadObject.StartNode;
                 else 
-                    node = newRoadObject.EndNode;
-                roadBuilder.SplitRoadSegment(roadObject, roadObjectSO, node);                
+                    centerNode = newRoadObject.EndNode;
+                roadBuilder.SplitRoadSegment(roadObject, roadObjectSO, centerNode);                
             }
         }
         roadsToSplit.Clear();
