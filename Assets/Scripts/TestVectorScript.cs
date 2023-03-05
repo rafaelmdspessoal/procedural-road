@@ -12,26 +12,38 @@ public class TestVectorScript : MonoBehaviour
     GameObject endMid;
     GameObject endRight;
 
+    Vector3 centerPos;
+    Vector3 endMainPos;
+    Vector3 endLeftPos;
+    Vector3 endMidPos;
+    Vector3 endRightPos;
+
     // Start is called before the first frame update
-    void _Start()
+    void Start()
     {
         center = RafaelUtils.CreateSphere(Vector3.zero, "center", 1);
         endMain = RafaelUtils.CreateSphere(Vector3.zero, "end main", 1);
         endLeft = RafaelUtils.CreateSphere(Vector3.zero, "end left", 1);
         endMid = RafaelUtils.CreateSphere(Vector3.zero, "end mid", 1);
         endRight = RafaelUtils.CreateSphere(Vector3.zero, "end right", 1);
+
+        center.transform.position = Vector3.zero;
+        endMain.transform.position = new Vector3(0, 0, -1);
+        endLeft.transform.position = new Vector3(-1, 0, 1);
+        endMid.transform.position = new Vector3(0, 0, 1);
+        endRight.transform.position = new Vector3(1, 0, 0);
     }
 
     // Update is called once per frame
-    void _Update()
+    void Update()
     {
-        List<float> angles = new List<float>();
+        Dictionary<float, string> angles = new Dictionary<float, string>();
 
-        Vector3 centerPos = center.transform.position;
-        Vector3 endMainPos = endMain.transform.position;
-        Vector3 endLeftPos = endLeft.transform.position;
-        Vector3 endMidPos = endMid.transform.position;
-        Vector3 endRightPos = endRight.transform.position;
+       centerPos = center.transform.position;
+       endMainPos = endMain.transform.position;
+       endLeftPos = endLeft.transform.position;
+       endMidPos = endMid.transform.position;
+       endRightPos = endRight.transform.position;
 
         Vector3 mainRoadDir = GetNormalizedDirection(centerPos, endMainPos);
         Vector3 leftRoadDir = GetNormalizedDirection(centerPos, endLeftPos);
@@ -42,29 +54,30 @@ public class TestVectorScript : MonoBehaviour
         float midAngle = Vector3.SignedAngle(mainRoadDir, midRoadDir, Vector3.up);
         float rightAngle = Vector3.SignedAngle(mainRoadDir, rightRoadDir, Vector3.up);
 
-        angles.Add(rightAngle);
-        angles.Add(midAngle);
-        angles.Add(leftAngle);
+        angles.Add(rightAngle, "rightAngle");
+        angles.Add(midAngle, "midAngle");
+        angles.Add(leftAngle, "leftAngle");
 
         Debug.DrawLine(centerPos, endMainPos, Color.blue);
         Debug.DrawLine(centerPos, endLeftPos, Color.cyan);
         Debug.DrawLine(centerPos, endMidPos, Color.green);
         Debug.DrawLine(centerPos, endRightPos, Color.black);
 
-        print("leftAngle: " + leftAngle);
-        print("midAngle: " + midAngle);
-        print("rightAngle: " + rightAngle);
-
         PrintAngles(angles);
 
     }
 
-    void PrintAngles(List<float> angles) {
-        angles.OrderBy(x => angles).ToList<float>();
-        angles = angles.GetRange(0, 3);
-        foreach (float angle in angles) {
-            print("new angle: " + angle);
-        }
+    void PrintAngles(Dictionary<float, string> angles) {
+
+        var ordered = angles.OrderBy(x => Mathf.Abs(x.Key)).ToDictionary(x => x.Key, x => x.Value).Take(2);
+        //print("###################");
+        //print(angles.First().Value + " " + angles.First().Key);
+        //print(angles.Last().Value + " " + angles.Last().Key);
+
+        print("###################");
+        print("len: " + ordered.Count());
+        print(ordered.First().Value + " " + ordered.First().Key);
+        print(ordered.Last().Value + " " + ordered.Last().Key);
     }
 
 

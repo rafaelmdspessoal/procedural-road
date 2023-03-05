@@ -74,12 +74,13 @@ public static class MeshUtilities {
             PopulateStartNodeWOIntersection(meshData, roadWidth, startNodePostion, controlPosition, resolution);
             return;
         }
-        Dictionary<RoadObject, float> adjacentRoads = startNode.GetAdjacentRoadsTo(roadObject);
+        Dictionary<float, RoadObject> adjacentRoads = startNode.GetAdjacentRoadsTo(roadObject);
         endPosition = Bezier.GetOffsettedPosition(startNodePostion, endNodePosition, controlPosition, thiRoadOffsetDistance);
 
 
         if (adjacentRoads.Count == 1) {
-            foreach (RoadObject adjecentRoad in adjacentRoads.Keys) {
+            foreach (float adjecentRoadAngle in adjacentRoads.Keys) {
+                RoadObject adjecentRoad = adjacentRoads.GetValueOrDefault(adjecentRoadAngle);
                 Node otherNode = adjecentRoad.OtherNodeTo(startNode);
                 float otherRoadOffsetDistance = startNode.GetNodeSizeForRoad(adjecentRoad);
                 Vector3 adjacentRoadPosition = adjecentRoad.transform.position;
@@ -102,8 +103,9 @@ public static class MeshUtilities {
         Vector3 leftRoadNodeControlPostion = Vector3.negativeInfinity;
         Vector3 rightRoadNodeControlPosition = Vector3.negativeInfinity;
 
-        foreach (RoadObject adjecentRoad in adjacentRoads.Keys) {
-            if (adjacentRoads.GetValueOrDefault(adjecentRoad) > 0) {
+        foreach (float adjecentRoadAngle in adjacentRoads.Keys) {
+            RoadObject adjecentRoad = adjacentRoads.GetValueOrDefault(adjecentRoadAngle);
+            if (adjecentRoadAngle > 0) {
                 // road is to the left
                 Node leftRoadOtherNode = adjecentRoad.OtherNodeTo(startNode);
                 float leftRoadOffsetDistance = startNode.GetNodeSizeForRoad(adjecentRoad);
@@ -215,12 +217,13 @@ public static class MeshUtilities {
             PopulateStartNodeWOIntersection(meshData, roadWidth, endNodePosition, controlPosition, resolution);
             return;
         }
-        Dictionary<RoadObject, float> adjacentRoads = endNode.GetAdjacentRoadsTo(roadObject);
+        Dictionary<float, RoadObject> adjacentRoads = endNode.GetAdjacentRoadsTo(roadObject);
         startPosition = Bezier.GetOffsettedPosition(endNodePosition, startNodePosition, controlPosition, thiRoadOffsetDistance);
 
 
         if (adjacentRoads.Count == 1) {
-            foreach (RoadObject adjecentRoad in adjacentRoads.Keys) {
+            foreach (float adjecentRoadAngle in adjacentRoads.Keys) {
+                RoadObject adjecentRoad = adjacentRoads.GetValueOrDefault(adjecentRoadAngle);
                 Node otherNode = adjecentRoad.OtherNodeTo(endNode);
                 float otherRoadOffsetDistance = endNode.GetNodeSizeForRoad(adjecentRoad);
                 Vector3 adjacentRoadPosition = adjecentRoad.transform.position;
@@ -244,8 +247,9 @@ public static class MeshUtilities {
         Vector3 leftRoadNodeControlPostion = Vector3.negativeInfinity;
         Vector3 rightRoadNodeControlPosition = Vector3.negativeInfinity;
 
-        foreach (RoadObject adjecentRoad in adjacentRoads.Keys) {
-            if (adjacentRoads.GetValueOrDefault(adjecentRoad) > 0) {
+        foreach (float adjecentRoadAngle in adjacentRoads.Keys) {
+            RoadObject adjecentRoad = adjacentRoads.GetValueOrDefault(adjecentRoadAngle);
+            if (adjecentRoadAngle > 0) {
                 // road is to the left
                 Node leftRoadOtherNode = adjecentRoad.OtherNodeTo(endNode);
                 float leftRoadOffsetDistance = endNode.GetNodeSizeForRoad(adjecentRoad);

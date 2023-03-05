@@ -11,6 +11,7 @@ public class RoadPlacement : MonoBehaviour {
         Idle,
         StraightRoad,
         CurvedRoad,
+        RemovingRoad,
     }
 
     private enum BuildingState {
@@ -51,6 +52,7 @@ public class RoadPlacement : MonoBehaviour {
 
         roadUIController.OnStraightRoadPlacement += RoadUIController_OnStraightRoadPlacement;
         roadUIController.OnCurveRoadPlacement += RoadUiController_OnCurvedRoadPlacement;
+        roadUIController.OnRoadRemoved += RoadUIController_OnRoadRemoved;
 
         state = State.Idle;
         buildingState = BuildingState.StartNode;
@@ -60,6 +62,18 @@ public class RoadPlacement : MonoBehaviour {
 
         meshFilter = GetComponent<MeshFilter>();
         meshRenderer = GetComponent<MeshRenderer>();
+
+    }
+
+    private void RoadUIController_OnRoadRemoved() {
+        ResetBuildingState();
+        InputManager.Instance.OnMouseClick += RemoveRoad;
+        state = State.RemovingRoad;
+    }
+
+    private void RemoveRoad(GameObject obj) {
+        if (obj.TryGetComponent(out RoadObject roadObject))
+            roadBuilder.RemoveSegment(roadObject);
     }
 
     private void RoadUiController_OnCurvedRoadPlacement(RoadObjectSO roadObjectSO) {
@@ -207,7 +221,7 @@ public class RoadPlacement : MonoBehaviour {
     }
 
     public bool IsBuilding() {
-        return state != State.Idle;
+        return state != State.Idle && state != State.RemovingRoad;
     }
 
     void DisplayTemporaryMesh(Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition) {
@@ -226,6 +240,7 @@ public class RoadPlacement : MonoBehaviour {
         roadsToSplit.Clear();
         roadsToUpdate.Clear();
         buildingState = BuildingState.StartNode;
+        InputManager.Instance.OnMouseClick -= RemoveRoad;
 
     }
 

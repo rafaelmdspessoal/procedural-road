@@ -70,6 +70,7 @@ public class RoadBuilder : MonoBehaviour
     public void RemoveSegment(RoadObject roadObject) {
         roadObject.StartNode.RemoveRoad(roadObject);
         roadObject.EndNode.RemoveRoad(roadObject);
+
         Destroy(roadObject.gameObject);
     }
 

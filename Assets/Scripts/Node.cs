@@ -21,12 +21,12 @@ public class Node : MonoBehaviour
         if (!HasIntersection()) return 0;
 
         
-        Dictionary<RoadObject, float> adjacentRoads = GetAdjacentRoadsTo(roadObject);
+        Dictionary<float, RoadObject> adjacentRoads = GetAdjacentRoadsTo(roadObject);
 
         float smallestAngle = 180f;
-        foreach (RoadObject road in adjacentRoads.Keys) {
+        foreach (float roadAngle in adjacentRoads.Keys) {
+            RoadObject road = adjacentRoads.GetValueOrDefault(roadAngle);
             if (road != roadObject) {
-                float roadAngle = adjacentRoads.GetValueOrDefault(road);
                 if (Mathf.Abs(roadAngle) < smallestAngle) {
                     smallestAngle = Mathf.Abs(roadAngle);
                 }
@@ -59,14 +59,20 @@ public class Node : MonoBehaviour
 
     public void AddRoad(RoadObject segment)
     {
-        if (!connectedRoads.Contains(segment))
+        if (!connectedRoads.Contains(segment)) {
             connectedRoads.Add(segment);
+            segment.transform.name = "Road number " + connectedRoads.Count;
+        }
+
     }
 
     public void RemoveRoad(RoadObject roadObject)
     {
         if (connectedRoads.Contains(roadObject))
             connectedRoads.Remove(roadObject);
+
+        if (connectedRoads.Count <= 0)
+            Destroy(gameObject);
     }
 
     public List<RoadObject> GetConnectedRoads()
@@ -83,9 +89,8 @@ public class Node : MonoBehaviour
     }
 
 
-    public Dictionary<RoadObject, float> GetAdjacentRoadsTo(RoadObject roadObject) {
-        Dictionary<RoadObject, float> adjacentRoads = new Dictionary<RoadObject, float>();
-        Dictionary<RoadObject, float> adjacentRoads2 = new Dictionary<RoadObject, float>();
+    public Dictionary<float, RoadObject> GetAdjacentRoadsTo(RoadObject roadObject) {
+        Dictionary<float, RoadObject> adjacentRoads = new Dictionary<float, RoadObject>();
 
         if (HasIntersection() && roadObject != null) {
             Vector3 roadObjectDirection = this.Position - roadObject.transform.position;
@@ -95,22 +100,27 @@ public class Node : MonoBehaviour
                 if (road != roadObject) {
                     connectedRoadDirection = this.Position - road.transform.position;
                     float angle = Vector3.SignedAngle(roadObjectDirection, connectedRoadDirection, transform.up);
-                    adjacentRoads.Add(road, angle);
+                    adjacentRoads.Add(angle, road);
                 }
             }
         }
 
+        var ordered = adjacentRoads.OrderBy(x => Mathf.Abs(x.Key)).ToDictionary(x => x.Key, x => x.Value).Take(2);
 
-        if (adjacentRoads.Count >= 2) {
-            adjacentRoads.OrderBy(x => Mathf.Abs(x.Value));
-            int i = 0;
-            foreach (var item in adjacentRoads) {
-                if (i > 1) break;
-                adjacentRoads2.Add(item.Key, item.Value);
-                i++;
-            }
-            return adjacentRoads2;
-        }
+        print("###################");
+        print("len: " + ordered.Count());
+        print("road " + roadObject);
+        print("is connected to: ");
+
+        print(ordered.First().Value.transform.name);
+        print("and");
+        print(ordered.Last().Value.transform.name);
+
+        print("HHHHHHHHHHHHHHHHHH");
+
+        //print(ordered.First().Value + " " + ordered.First().Key);
+        //print(ordered.Last().Value + " " + ordered.Last().Key);
+
         return adjacentRoads;
     }
 

@@ -8,9 +8,9 @@ public class RoadUIController : MonoBehaviour
 {
     public static RoadUIController Instance { get; private set; }
 
-    public Action OnStartPlacingRoads;
+    public Action OnStartPlacingRoads, OnRoadRemoved;
     public Action<RoadObjectSO> OnStraightRoadPlacement, OnCurveRoadPlacement;
-    public Button buildRoadButton, placeStraightButton, placeCurveRoadButton;
+    public Button buildRoadButton, placeStraightButton, placeCurveRoadButton, removeRoadButton;
 
     public Color outlineColor;
     List<Button> buttonList;
@@ -23,7 +23,7 @@ public class RoadUIController : MonoBehaviour
 
     private void Start()
     {
-        buttonList = new List<Button> { placeStraightButton, placeCurveRoadButton, buildRoadButton };
+        buttonList = new List<Button> { placeStraightButton, placeCurveRoadButton, buildRoadButton, removeRoadButton };
 
         buildRoadButton.onClick.AddListener(() =>
         {
@@ -44,6 +44,12 @@ public class RoadUIController : MonoBehaviour
             ResetButtonColor();
             ModifyOutline(placeCurveRoadButton);
             OnCurveRoadPlacement?.Invoke(roadObjectSO);
+
+        });
+        removeRoadButton.onClick.AddListener(() => {
+            ResetButtonColor();
+            ModifyOutline(removeRoadButton);
+            OnRoadRemoved?.Invoke();
 
         });
         placeStraightButton.gameObject.SetActive(false);
