@@ -70,12 +70,12 @@
     <Compile Include="Assets\Scripts\Meshes\MeshData.cs" />
     <Compile Include="Assets\Scripts\RoadSegment.cs" />
     <Compile Include="Assets\Scripts\RoadUIController.cs" />
+    <Compile Include="Assets\Scripts\TestVectorScript.cs" />
     <Compile Include="Assets\Scripts\PathCreator.cs" />
     <Compile Include="Assets\Scripts\PathManager.cs" />
     <Compile Include="Assets\Scripts\Bezier.cs" />
     <Compile Include="Assets\Scripts\RoadSegmentObject.cs" />
     <Compile Include="Assets\Scripts\Roads\RoadObject.cs" />
-    <Compile Include="Assets\Scripts\TestVectorScript.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
