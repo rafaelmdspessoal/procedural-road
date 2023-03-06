@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using rafael.utils;
 using System.Linq;
 
 [RequireComponent(typeof(MeshRenderer))]
@@ -9,9 +8,7 @@ using System.Linq;
 [RequireComponent(typeof(SphereCollider))]
 public class Node : MonoBehaviour
 {
-    [SerializeField] private List<RoadObject> connectedRoads = new List<RoadObject>();
-
-    [SerializeField] private int resolution = 10;
+    [SerializeField] private List<RoadObject> connectedRoads = new();
 
     // FOR TESTING ONLY
     private RoadObject roadObjectForTesting;
@@ -37,20 +34,6 @@ public class Node : MonoBehaviour
         float offset = (1.1f + cosAngle) * roadObject.GetRoadWidth();
         return offset;
     }
-
-
-    //float GetMaxRoadWidth()
-    //{
-    //float roadWidth = 0;
-    //foreach (RoadObject road in connectedRoads)
-    //{
-    //    float currentRoadWidth = road.RoadSegmentSO.roadWidth;
-
-    //    if (currentRoadWidth > roadWidth)
-    //        roadWidth = currentRoadWidth;
-    //}
-    //return roadWidth;
-    //}
 
     public bool HasIntersection()
     {

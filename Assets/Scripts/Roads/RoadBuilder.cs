@@ -63,8 +63,6 @@ public class RoadBuilder : MonoBehaviour
             out Vector3 newEndControlPointPosition);
 
         RemoveSegment(roadObject);
-        Debug.Log(startNode);
-        Debug.Log(endNode);
 
         if (startNode != null && endNode != null) {
             CreateRoadSegment(startNode, newNode, newStartControlPointPosition, roadObjectSO);

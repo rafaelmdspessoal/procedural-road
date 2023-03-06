@@ -29,7 +29,7 @@ public class RoadMeshBuilder : MonoBehaviour {
 
         MeshData meshData = new MeshData();
 
-        MeshUtilities.PopulateStartNodeWIntersection(meshData, roadObject, startNode, endNode, resolution);
+        MeshUtilities.PopulateStartNode(meshData, roadObject, startNode, endNode, resolution);
         MeshUtilities.PopulateRoadMeshVertices(meshData, roadObject);
         MeshUtilities.PopulateEndNodeWIntersections(meshData, roadObject, startNode, endNode, resolution);
 
@@ -42,9 +42,9 @@ public class RoadMeshBuilder : MonoBehaviour {
     private MeshData PopulateMeshData(int roadWidth, Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition, int resolution = 20) {
 
         MeshData meshData = new MeshData();
-        MeshUtilities.PopulateStartNodeWOIntersection(meshData, roadWidth, startPosition, controlPosition, resolution);
+        MeshUtilities.PopulateStartNode(meshData, roadWidth, startPosition, controlPosition, resolution);
         MeshUtilities.PopulateRoadMeshVertices(meshData, roadWidth, startPosition, endPosition, controlPosition, resolution);
-        MeshUtilities.PopulateEndtNodeWOIntersection(meshData, roadWidth, endPosition, controlPosition, resolution);
+        MeshUtilities.PopulateEndNode(meshData, roadWidth, endPosition, controlPosition, resolution);
 
         MeshUtilities.PopulateMeshTriangles(meshData);
         MeshUtilities.PopulateMeshUvs(meshData);

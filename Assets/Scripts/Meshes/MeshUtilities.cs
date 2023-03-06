@@ -6,59 +6,121 @@ using UnityEngine;
 
 public static class MeshUtilities {
 
-
-    public static void PopulateStartNodeWOIntersection(MeshData meshData, int roadWidth, Vector3 startPosition, Vector3 controlPosition, int resolution) {
-        float t;
+    /// <summary>
+    /// Builds a mesh that has the same point for 
+    /// both sides of the mesh AKA a Node without
+    /// intersection
+    /// </summary>
+    /// <param name="meshData"></param>
+    /// <param name="resolution"></param>
+    /// <param name="centerRoadVertice"></param>
+    /// <param name="leftStartPosition"></param>
+    /// <param name="leftEndPosition"></param>
+    /// <param name="leftControlNodePosition"></param>
+    /// <param name="rightStartPosition"></param>
+    /// <param name="rightEndPosition"></param>
+    /// <param name="rightControlNodePosition"></param>
+    private static void PopulateRoadVertices(
+        MeshData meshData,
+        int resolution,
+        Vector3 centerRoadVertice,
+        Vector3 leftStartPosition, 
+        Vector3 leftEndPosition, 
+        Vector3 leftControlNodePosition,
+        Vector3 rightStartPosition,
+        Vector3 rightEndPosition,
+        Vector3 rightControlNodePosition
+    ) {
         resolution *= 3;
-        // Assumes no intersection, start for left and right are the same
-        Vector3 startNodeMeshPosition = startPosition + (startPosition - controlPosition).normalized * roadWidth / 2;
-
-        Vector3 endNodeMeshLeftPosition = RoadUtilities.GetRoadLeftSideVertice(roadWidth, startPosition, controlPosition);
-        Vector3 endNodeMeshRightPosition = RoadUtilities.GetRoadRightSideVertice(roadWidth, startPosition, controlPosition);
-
-        Vector3 left = (endNodeMeshLeftPosition - startPosition).normalized;
-        Vector3 leftControlNodePostion = startNodeMeshPosition + left * roadWidth / 2;
-        Vector3 rightControlNodePosition = startNodeMeshPosition - left * roadWidth / 2;
-
+        float t;
+        Vector3 leftRoadVertice;
+        Vector3 rightRoadVertice;
         for (int i = 0; i < resolution; i++) {
             t = i / (float)(resolution - 1);
-            Vector3 leftRoadVertice = Bezier.QuadraticCurve(startNodeMeshPosition, endNodeMeshLeftPosition, leftControlNodePostion, t);
-            Vector3 rightRoadVertice = Bezier.QuadraticCurve(startNodeMeshPosition, endNodeMeshRightPosition, rightControlNodePosition, t);
+            leftRoadVertice = Bezier.QuadraticCurve(leftStartPosition, leftEndPosition, leftControlNodePosition, t);
+            rightRoadVertice = Bezier.QuadraticCurve(rightStartPosition, rightEndPosition, rightControlNodePosition, t);
 
             meshData.AddVertice(leftRoadVertice);
-            meshData.AddVertice(startPosition);
+            meshData.AddVertice(centerRoadVertice);
             meshData.AddVertice(rightRoadVertice);
         }
     }
 
-    public static void PopulateEndtNodeWOIntersection(MeshData meshData, int roadWidth, Vector3 endPosition, Vector3 controlPosition, int resolution) {
-        float t;
-        resolution *= 3;
-        // Assumes no intersection, start for left and right are the same
-        Vector3 startNodeMeshPosition = endPosition + (endPosition - controlPosition).normalized * roadWidth / 2;
+    /// <summary>
+    /// Populate vertices for the start Node of a road
+    /// assuming that it has no intersection.
+    /// It will start on the meeting point of the road
+    /// and end at the left and right side of the road.
+    /// </summary>
+    /// <param name="meshData"></param>
+    /// <param name="roadWidth"></param>
+    /// <param name="nodePosition"></param>
+    /// <param name="controlPosition"></param>
+    /// <param name="resolution"></param>
+    public static void PopulateStartNode(MeshData meshData, int roadWidth, Vector3 nodePosition, Vector3 controlPosition, int resolution) {        
+        Vector3 startPosition = nodePosition + (nodePosition - controlPosition).normalized * roadWidth / 2;
 
-        Vector3 endNodeMeshLeftPosition = RoadUtilities.GetRoadLeftSideVertice(roadWidth, endPosition, controlPosition);
-        Vector3 endNodeMeshRightPosition = RoadUtilities.GetRoadRightSideVertice(roadWidth, endPosition, controlPosition);
+        Vector3 leftEndPosition = RoadUtilities.GetRoadLeftSideVertice(roadWidth, nodePosition, controlPosition);
+        Vector3 rightEndPosition = RoadUtilities.GetRoadRightSideVertice(roadWidth, nodePosition, controlPosition);
 
-        Vector3 left = (endNodeMeshLeftPosition - endPosition).normalized;
-        Vector3 leftControlNodePostion = startNodeMeshPosition + left * roadWidth / 2;
-        Vector3 rightControlNodePosition = startNodeMeshPosition - left * roadWidth / 2;
+        Vector3 left = (leftEndPosition - nodePosition).normalized;
+        Vector3 leftControlNodePosition = startPosition + left * roadWidth / 2;
+        Vector3 rightControlNodePosition = startPosition - left * roadWidth / 2;
 
-        for (int i = 0; i < resolution; i++) {
-            t = i / (float)(resolution - 1);
-            Vector3 leftRoadVertice = Bezier.QuadraticCurve(endNodeMeshLeftPosition, startNodeMeshPosition, leftControlNodePostion, t);
-            Vector3 rightRoadVertice = Bezier.QuadraticCurve(endNodeMeshRightPosition, startNodeMeshPosition, rightControlNodePosition, t);
-
-            meshData.AddVertice(rightRoadVertice);
-            meshData.AddVertice(endPosition);
-            meshData.AddVertice(leftRoadVertice);
-        }
+        PopulateRoadVertices(
+            meshData,
+            resolution,
+            nodePosition,
+            startPosition,
+            leftEndPosition,
+            leftControlNodePosition,
+            startPosition,
+            rightEndPosition,
+            rightControlNodePosition
+            );
     }
 
-    public static void PopulateStartNodeWIntersection(MeshData meshData, RoadObject roadObject, Node startNode, Node endNode, int resolution) {
+    /// <summary>
+    /// Populate vertes for the end Node of a road
+    /// assuming that it has no intersection.
+    /// It will start at the left and right points 
+    /// and move towards a common center point at the end
+    /// of the Node
+    /// </summary>
+    /// <param name="meshData"></param>
+    /// <param name="roadWidth"></param>
+    /// <param name="nodePosition"></param>
+    /// <param name="controlPosition"></param>
+    /// <param name="resolution"></param>
+    public static void PopulateEndNode(MeshData meshData, int roadWidth, Vector3 nodePosition, Vector3 controlPosition, int resolution) {
+        Vector3 endPosition = nodePosition + (nodePosition - controlPosition).normalized * roadWidth / 2;
+
+        // Because this is the last node left and right get inverted
+        Vector3 rightStartPosition = RoadUtilities.GetRoadLeftSideVertice(roadWidth, nodePosition, controlPosition);
+        Vector3 leftStartPosition = RoadUtilities.GetRoadRightSideVertice(roadWidth, nodePosition, controlPosition);
+
+        Vector3 left = (leftStartPosition - nodePosition).normalized;
+        Vector3 leftControlNodePosition = endPosition + left * roadWidth / 2;
+        Vector3 rightControlNodePosition = endPosition - left * roadWidth / 2;
+
+        PopulateRoadVertices(
+            meshData,
+            resolution,
+            nodePosition,
+            leftStartPosition,
+            endPosition,
+            leftControlNodePosition,
+            rightStartPosition,
+            endPosition,
+            rightControlNodePosition
+            );
+    }
+
+    public static void PopulateStartNode(MeshData meshData, RoadObject roadObject, Node startNode, Node endNode, int resolution) {
 
         int roadWidth = roadObject.GetRoadWidth();
-        float thiRoadOffsetDistance = startNode.GetNodeSizeForRoad(roadObject);
+        float thisRoadOffsetDistance = startNode.GetNodeSizeForRoad(roadObject);
+
         Vector3 roadPosition = roadObject.transform.position;
         Vector3 startNodePostion = startNode.Position;
         Vector3 endNodePosition = endNode.Position;
@@ -71,11 +133,11 @@ public static class MeshUtilities {
         if (!startNode.HasIntersection()) {
             startNodePostion -= roadPosition;
             controlPosition -= roadPosition;
-            PopulateStartNodeWOIntersection(meshData, roadWidth, startNodePostion, controlPosition, resolution);
+            PopulateStartNode(meshData, roadWidth, startNodePostion, controlPosition, resolution);
             return;
         }
         Dictionary<float, RoadObject> adjacentRoads = startNode.GetAdjacentRoadsTo(roadObject);
-        endPosition = Bezier.GetOffsettedPosition(startNodePostion, endNodePosition, controlPosition, thiRoadOffsetDistance);
+        endPosition = Bezier.GetOffsettedPosition(startNodePostion, endNodePosition, controlPosition, thisRoadOffsetDistance);
 
 
         if (adjacentRoads.Count == 1) {
@@ -214,7 +276,7 @@ public static class MeshUtilities {
         if (!endNode.HasIntersection()) {
             endNodePosition -= roadPosition;
             controlPosition -= roadPosition;
-            PopulateStartNodeWOIntersection(meshData, roadWidth, endNodePosition, controlPosition, resolution);
+            PopulateEndNode(meshData, roadWidth, endNodePosition, controlPosition, resolution);
             return;
         }
         Dictionary<float, RoadObject> adjacentRoads = endNode.GetAdjacentRoadsTo(roadObject);
