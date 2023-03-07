@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Road.Mesh.NodeVertices;
 
 public class RoadMeshBuilder : MonoBehaviour {
 
@@ -29,9 +30,9 @@ public class RoadMeshBuilder : MonoBehaviour {
 
         MeshData meshData = new MeshData();
 
-        MeshUtilities.PopulateStartNode(meshData, roadObject, startNode, endNode, resolution);
-        MeshUtilities.PopulateRoadMeshVertices(meshData, roadObject);
-        MeshUtilities.PopulateEndNodeWIntersections(meshData, roadObject, startNode, endNode, resolution);
+        new CalculateNodeWIMeshData(roadObject, startNode, endNode, resolution).PopulateStartNode(meshData);
+        CalculateRoadMeshData.PopulateRoadMeshVertices(meshData, roadObject);
+        new CalculateNodeWIMeshData(roadObject, startNode, endNode, resolution).PopulateEndNode(meshData);
 
         MeshUtilities.PopulateMeshTriangles(meshData);
         MeshUtilities.PopulateMeshUvs(meshData);
@@ -39,12 +40,14 @@ public class RoadMeshBuilder : MonoBehaviour {
         return meshData;
     }
 
+    // NOTE: This is only used to populate temporary road for display when building
+    // Consider having a module just for this.
     private MeshData PopulateMeshData(int roadWidth, Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition, int resolution = 20) {
 
         MeshData meshData = new MeshData();
-        MeshUtilities.PopulateStartNode(meshData, roadWidth, startPosition, controlPosition, resolution);
-        MeshUtilities.PopulateRoadMeshVertices(meshData, roadWidth, startPosition, endPosition, controlPosition, resolution);
-        MeshUtilities.PopulateEndNode(meshData, roadWidth, endPosition, controlPosition, resolution);
+        CalculateNodeWOIMeshData.PopulateStartNode(meshData, roadWidth, startPosition, controlPosition, resolution);
+        CalculateRoadMeshData.PopulateRoadMeshVertices(meshData, roadWidth, startPosition, endPosition, controlPosition, resolution);
+        CalculateNodeWOIMeshData.PopulateEndNode(meshData, roadWidth, endPosition, controlPosition, resolution);
 
         MeshUtilities.PopulateMeshTriangles(meshData);
         MeshUtilities.PopulateMeshUvs(meshData);

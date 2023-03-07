@@ -58,23 +58,23 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\RafaelUtils.cs" />
     <Compile Include="Assets\Scripts\Roads\RoadBuilder.cs" />
+    <Compile Include="Assets\Scripts\Meshes\CalculateNodeWOIMeshData.cs" />
     <Compile Include="Assets\Scripts\Roads\RoadObjectSO.cs" />
     <Compile Include="Assets\Scripts\Meshes\MeshUtilities.cs" />
     <Compile Include="Assets\Scripts\GameManager.cs" />
+    <Compile Include="Assets\Scripts\Meshes\CalculateRoadMeshData.cs" />
     <Compile Include="Assets\Scripts\InputManager.cs" />
     <Compile Include="Assets\Scripts\SimpleCameraController.cs" />
     <Compile Include="Assets\Scripts\Meshes\RoadMeshBuilder.cs" />
     <Compile Include="Assets\Scripts\Roads\RoadPlacement.cs" />
+    <Compile Include="Assets\Scripts\Meshes\CalculateNodeWIMeshData.cs" />
     <Compile Include="Assets\Scripts\Node.cs" />
     <Compile Include="Assets\Scripts\Roads\RoadUtilities.cs" />
     <Compile Include="Assets\Scripts\Meshes\MeshData.cs" />
-    <Compile Include="Assets\Scripts\RoadSegment.cs" />
     <Compile Include="Assets\Scripts\RoadUIController.cs" />
     <Compile Include="Assets\Scripts\TestVectorScript.cs" />
-    <Compile Include="Assets\Scripts\PathCreator.cs" />
-    <Compile Include="Assets\Scripts\PathManager.cs" />
     <Compile Include="Assets\Scripts\Bezier.cs" />
-    <Compile Include="Assets\Scripts\RoadSegmentObject.cs" />
+    <Compile Include="Assets\Scripts\Meshes\CalculateNodeWSIMeshData.cs" />
     <Compile Include="Assets\Scripts\Roads\RoadObject.cs" />
   </ItemGroup>
   <ItemGroup>
