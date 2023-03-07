@@ -24,15 +24,12 @@ public class RoadMeshBuilder : MonoBehaviour {
         return mesh;
     }
 
-    private MeshData PopulateMeshData(RoadObject roadObject, int resolution = 10) {
-        Node startNode = roadObject.StartNode;
-        Node endNode = roadObject.EndNode;
-
+    private MeshData PopulateMeshData(RoadObject roadObject, int resolution = 10) {        
         MeshData meshData = new MeshData();
-
-        new CalculateNodeWIMeshData(roadObject, startNode, endNode, resolution).PopulateStartNode(meshData);
+        CalculateNodeWIMeshData meshDataCalculator = new CalculateNodeWIMeshData(roadObject);
+        meshDataCalculator.PopulateStartNode(meshData);
         CalculateRoadMeshData.PopulateRoadMeshVertices(meshData, roadObject);
-        new CalculateNodeWIMeshData(roadObject, startNode, endNode, resolution).PopulateEndNode(meshData);
+        meshDataCalculator.PopulateEndNode(meshData);
 
         MeshUtilities.PopulateMeshTriangles(meshData);
         MeshUtilities.PopulateMeshUvs(meshData);

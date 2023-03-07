@@ -57,7 +57,7 @@ public class RoadObject : MonoBehaviour
         meshRenderer.material.mainTextureOffset = new Vector2(0, 0);
     }
 
-    public int GetRoadWidth() {
-        return roadObjectSO.roadWidth;
-    }
+    public int RoadWidth => roadObjectSO.roadWidth;
+
+    public int RoadResolution => roadObjectSO.roadResolution;
 }

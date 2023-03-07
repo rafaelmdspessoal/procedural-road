@@ -15,7 +15,7 @@ namespace Road.Mesh.NodeVertices {
             Vector3 endPosition = endNode.Position;
             Vector3 controlPosition = roadObject.ControlNodeObject.transform.position;
 
-            int roadWidth = roadObject.GetRoadWidth();
+            int roadWidth = roadObject.RoadWidth;
             float offsetDistance;
 
             if (startNode.HasIntersection()) {

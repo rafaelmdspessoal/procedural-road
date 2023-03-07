@@ -31,7 +31,7 @@ public class Node : MonoBehaviour
         }
         float cosAngle = Mathf.Cos(smallestAngle*Mathf.Deg2Rad);
         Mathf.Clamp01(cosAngle);
-        float offset = (1.1f + cosAngle) * roadObject.GetRoadWidth();
+        float offset = (1.1f + cosAngle) * roadObject.RoadWidth;
         return offset;
     }
 

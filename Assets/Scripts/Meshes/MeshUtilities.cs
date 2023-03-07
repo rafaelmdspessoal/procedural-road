@@ -34,7 +34,7 @@ public static class MeshUtilities {
         adjacentRoadNodeMeshPosition = Bezier.GetOffsettedPosition(nodePosition, otherNodePostion, adjacentRoadControlNodePosition, offsetDistance);
     }
 
-    public static MeshData PopulateMeshVertices(
+    public static MeshData PopulateStartNodeMeshVertices(
         MeshData meshData, 
         int resolution, 
         Vector3 startLeft, 
@@ -60,6 +60,33 @@ public static class MeshUtilities {
         return meshData;
     }
 
+    public static MeshData PopulateStartNodeMeshVertices(
+        MeshData meshData,
+        int resolution,
+        Vector3 startLeft,
+        Vector3 endLeft,
+        Vector3 controlLeft,
+        Vector3 startCenter,
+        Vector3 endCenter,
+        Vector3 controlCenter,
+        Vector3 startRight,
+        Vector3 endRight,
+        Vector3 controlRight) {
+        resolution *= 3;
+        float t;
+        for (int i = resolution / 2 - 1; i < resolution - 1; i++) {
+            t = i / (float)(resolution - 2);
+            Vector3 leftRoadVertice = Bezier.QuadraticCurve(startLeft, endRight, controlLeft, t);
+            Vector3 centerRoadVertice = Bezier.QuadraticCurve(startCenter, endCenter, controlCenter, t);
+            Vector3 rightRoadVertice = Bezier.QuadraticCurve(startRight, endLeft, controlRight, t);
+
+            meshData.AddVertice(leftRoadVertice);
+            meshData.AddVertice(centerRoadVertice);
+            meshData.AddVertice(rightRoadVertice);
+        }
+        return meshData;
+    }
+
     public static MeshData PopulateEndNodeMeshVertices(
         MeshData meshData,
         int resolution,
@@ -67,7 +94,7 @@ public static class MeshUtilities {
         Vector3 endLeft,
         Vector3 controlLeft,
         Vector3 startCenter,
-        Vector3 endCenterNode,
+        Vector3 endCenter,
         Vector3 startRight,
         Vector3 endRight,
         Vector3 controlRight) {
@@ -77,7 +104,7 @@ public static class MeshUtilities {
         for (int i = 0; i < resolution / 2; i++) {
             t = i / (float)(resolution - 2);
             Vector3 leftRoadVertice = Bezier.QuadraticCurve(startLeft, endLeft, controlLeft, t);
-            Vector3 centerRoadVertice = Bezier.LinearCurve(startCenter, endCenterNode, t);
+            Vector3 centerRoadVertice = Bezier.LinearCurve(startCenter, endCenter, t);
             Vector3 rightRoadVertice = Bezier.QuadraticCurve(startRight, endRight, controlRight, t);
 
             meshData.AddVertice(leftRoadVertice);
@@ -87,7 +114,37 @@ public static class MeshUtilities {
         return meshData;
     }
 
-internal static void PopulateMeshUvs(MeshData meshData) {
+
+    public static MeshData PopulateEndNodeMeshVertices(
+        MeshData meshData,
+        int resolution,
+        Vector3 startLeft,
+        Vector3 endLeft,
+        Vector3 controlLeft,
+        Vector3 startCenter,
+        Vector3 endCenter,
+        Vector3 controlCenter,
+        Vector3 startRight,
+        Vector3 endRight,
+        Vector3 controlRight) {
+        resolution *= 3;
+        float t;
+
+        for (int i = 0; i < resolution / 2; i++) {
+            t = i / (float)(resolution - 2);
+            Vector3 leftRoadVertice = Bezier.QuadraticCurve(startLeft, endRight, controlLeft, t);
+            Vector3 centerRoadVertice = Bezier.QuadraticCurve(startCenter, endCenter, controlCenter, t);
+            Vector3 rightRoadVertice = Bezier.QuadraticCurve(startRight, endLeft, controlRight, t);
+
+            meshData.AddVertice(leftRoadVertice);
+            meshData.AddVertice(centerRoadVertice);
+            meshData.AddVertice(rightRoadVertice);
+        }
+        return meshData;
+    }
+
+
+    internal static void PopulateMeshUvs(MeshData meshData) {
         Vector2[] uvs = new Vector2[3];
         int numUvs = meshData.vertices.Count / 3;
         for (int i = 0; i < numUvs; i++) {

@@ -9,5 +9,6 @@ public class RoadObjectSO : ScriptableObject
     public Material roadMaterial;
 
     public int roadWidth;
+    public int roadResolution;
     public int roadTextureTiling;
 }

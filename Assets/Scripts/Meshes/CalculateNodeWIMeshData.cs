@@ -8,6 +8,7 @@ namespace Road.Mesh.NodeVertices {
         private readonly RoadObject roadObject;
         private readonly Node startNode;
         private readonly Node endNode;
+
         private readonly int resolution;
         private readonly int roadWidth;
 
@@ -17,6 +18,8 @@ namespace Road.Mesh.NodeVertices {
         Vector3 startNodePosition;
         Vector3 endNodePosition;
         Vector3 controlPosition;
+
+        private static RoadObject adjecentRoad;
 
         private static Vector3 startCenterNode;
         private static Vector3 endCenterNode;
@@ -30,27 +33,19 @@ namespace Road.Mesh.NodeVertices {
         private static Vector3 controlLeft;
         private static Vector3 controlRight;
 
-        private static RoadObject adjecentRoad;
-
-        public CalculateNodeWIMeshData(
-            RoadObject roadObject,
-            Node startNode, 
-            Node endNode, 
-            int resolution
-            
-            ) {
+        public CalculateNodeWIMeshData(RoadObject roadObject) {
             // Offet nodes by the road postion so we build the mesh in
             // world space, not local
             this.roadObject = roadObject;
-            this.startNode = startNode;
-            this.endNode = endNode;
-            this.resolution = resolution;
 
+            startNode = roadObject.StartNode;
+            endNode = roadObject.EndNode;     
             roadPosition = roadObject.transform.position;
             startNodePosition = startNode.Position - roadPosition;
             endNodePosition = endNode.Position - roadPosition;
             controlPosition = roadObject.ControlNodeObject.transform.position - roadPosition;
-            roadWidth = roadObject.GetRoadWidth();
+            roadWidth = roadObject.RoadWidth;
+            resolution = roadObject.RoadResolution;
         }
 
         public MeshData PopulateStartNode(MeshData meshData) {
@@ -105,17 +100,17 @@ namespace Road.Mesh.NodeVertices {
 
             }
 
-            Vector3 leftRoadRight = RoadUtilities.GetRoadRightSideVertice(roadWidth, leftRoadCenter, leftRoadControlNode);
-            Vector3 thisRoadRight = RoadUtilities.GetRoadRightSideVertice(roadWidth, endCenterNode, controlPosition);
+            Vector3 startLeft = RoadUtilities.GetRoadRightSideVertice(roadWidth, leftRoadCenter, leftRoadControlNode);
+            Vector3 endRight = RoadUtilities.GetRoadRightSideVertice(roadWidth, endCenterNode, controlPosition);
 
-            Vector3 rightRoadLeft = RoadUtilities.GetRoadLeftSideVertice(roadWidth, rightRoadCenter, rightRoadControlNode);
-            Vector3 thisRoadLeft = RoadUtilities.GetRoadLeftSideVertice(roadWidth, endCenterNode, controlPosition);
+            Vector3 startRight = RoadUtilities.GetRoadLeftSideVertice(roadWidth, rightRoadCenter, rightRoadControlNode);
+            Vector3 endLeft = RoadUtilities.GetRoadLeftSideVertice(roadWidth, endCenterNode, controlPosition);
 
-            Vector3 n0Left = (leftRoadRight - leftRoadCenter).normalized;
-            Vector3 n1Left = (thisRoadLeft - endCenterNode).normalized;
+            Vector3 n0Left = (startLeft - leftRoadCenter).normalized;
+            Vector3 n1Left = (endLeft - endCenterNode).normalized;
 
-            Vector3 n0Right = (rightRoadLeft - rightRoadCenter).normalized;
-            Vector3 n1Right = (thisRoadRight - endCenterNode).normalized;
+            Vector3 n0Right = (startRight - rightRoadCenter).normalized;
+            Vector3 n1Right = (endRight - endCenterNode).normalized;
 
             if (Vector3.Angle(n0Left, n1Left) != 0) {
                 // Road is NOT straight, so the DOT product is not 0!
@@ -135,16 +130,16 @@ namespace Road.Mesh.NodeVertices {
                 controlRight = startNodePosition + n1Right * roadWidth / 2;
             }
 
-            meshData = MeshUtilities.PopulateMeshVertices(
+            meshData = MeshUtilities.PopulateStartNodeMeshVertices(
                 meshData,
                 resolution,
-                leftRoadRight,
-                thisRoadLeft,
+                startLeft,
+                endLeft,
                 controlLeft,
                 startCenterNode,
                 endCenterNode,
-                rightRoadLeft,
-                thisRoadRight,
+                startRight,
+                endRight,
                 controlRight);
 
             return meshData;
@@ -244,7 +239,6 @@ namespace Road.Mesh.NodeVertices {
                 thisRoadLeft,
                 leftRoadRight,
                 controlLeft);
-
 
             return meshData;
         }
