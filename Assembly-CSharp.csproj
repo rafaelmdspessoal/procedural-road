@@ -74,7 +74,6 @@
     <Compile Include="Assets\Scripts\RoadUIController.cs" />
     <Compile Include="Assets\Scripts\TestVectorScript.cs" />
     <Compile Include="Assets\Scripts\Bezier.cs" />
-    <Compile Include="Assets\Scripts\Meshes\CalculateNodeWSIMeshData.cs" />
     <Compile Include="Assets\Scripts\Roads\RoadObject.cs" />
   </ItemGroup>
   <ItemGroup>

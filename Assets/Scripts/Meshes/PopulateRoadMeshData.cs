@@ -85,7 +85,6 @@ namespace Road.Mesh.Data {
             }
 
             CalculateRoadMeshConnections(startCenterNode, endCenterNode, controlPosition);
-
             meshData = MeshUtilities.PopulateRoadMeshVertices(
                 meshData,
                 resolution,
@@ -130,20 +129,21 @@ namespace Road.Mesh.Data {
                         startNodePosition,
                         out Vector3 otherRoadCenter,
                         out _);
-                    //Xuxa(otherRoadCenter, endCenterNode, startNodePosition);
-                    //meshData = MeshUtilities.PopulateStartNodeMeshVertices(
-                    //    meshData,
-                    //    resolution,
-                    //    startLeft,
-                    //    endLeft,
-                    //    controlLeft,
-                    //    otherRoadCenter,
-                    //    endCenterNode,
-                    //    controlPosition,
-                    //    startRight,
-                    //    endRight,
-                    //    controlRight);
-                    meshData = CalculateNodeWSIMeshData.PopulateStartNode(meshData, startNodeMeshPosition, endCenterNode, startNodePosition, roadWidth, resolution);
+                    // A node with two connections is the same thing as a Road, so we can calculate
+                    // it's connections using the same method
+                    CalculateRoadMeshConnections(otherRoadCenter, endCenterNode, startNodePosition);
+                    meshData = MeshUtilities.PopulateStartNodeMeshVertices(
+                       meshData,
+                       resolution,
+                       startLeft,
+                       endLeft,
+                       controlLeft,
+                       otherRoadCenter,
+                       endCenterNode,
+                       startNodePosition,
+                       startRight,
+                       endRight,
+                       controlRight);
                     return meshData;
                 }
             }
@@ -169,11 +169,9 @@ namespace Road.Mesh.Data {
                         out rightRoadCenter,
                         out rightRoadControlNode);
                 }
-
             }
 
             CalculateNodeMeshConnections(endCenterNode, startNodePosition);
-
             meshData = MeshUtilities.PopulateStartNodeMeshVertices(
                 meshData,
                 resolution,
@@ -215,10 +213,23 @@ namespace Road.Mesh.Data {
                         endNode,
                         roadPosition,
                         endNodePosition,
-                        out leftRoadCenter,
+                        out Vector3 otherRoadCenter,
                         out _);
-
-                    meshData = CalculateNodeWSIMeshData.PopulateEndNode(meshData, startCenterNode, leftRoadCenter, endNodePosition, roadWidth, resolution);
+                    // A node with two connections is the same thing as a Road, so we can calculate
+                    // it's connections using the same method
+                    CalculateRoadMeshConnections(startCenterNode, otherRoadCenter, endNodePosition);
+                    meshData = MeshUtilities.PopulateEndNodeMeshVertices(
+                       meshData,
+                       resolution,
+                       startLeft,
+                       endLeft,
+                       controlLeft,
+                       startCenterNode,
+                       otherRoadCenter,
+                       endNodePosition,
+                       startRight,
+                       endRight,
+                       controlRight);
                     return meshData;
                 }
             }
@@ -298,6 +309,12 @@ namespace Road.Mesh.Data {
             }
         }
 
+        /// <summary>
+        /// Calculate whe each node will be in order to build a Road mesh
+        /// </summary>
+        /// <param name="centerNode"></param>
+        /// <param name="nodePosition"></param>
+        /// <param name="controlPosition"></param>
         private void CalculateRoadMeshConnections(Vector3 centerNode, Vector3 nodePosition, Vector3 controlPosition) {
 
             startLeft = RoadUtilities.GetRoadLeftSideVertice(roadWidth, centerNode, controlPosition);
@@ -308,27 +325,6 @@ namespace Road.Mesh.Data {
 
             n0 = (startLeft - centerNode).normalized;
             n1 = (endRight - nodePosition).normalized;
-
-            if (Vector3.Angle(n0, n1) != 0) {
-                // Road is NOT straight, so the DOT product is not 0!
-                // This fails for angles > 90, so we must deal with it later
-                controlLeft = controlPosition + ((n0 + n1) * roadWidth) / Vector3.Dot((n0 + n1), (n0 + n1));
-                controlRight = controlPosition - ((n0 + n1) * roadWidth) / Vector3.Dot((n0 + n1), (n0 + n1));
-            } else {
-                // Road is traight, so calculations are easier
-                controlLeft = controlPosition + n0 * roadWidth / 2;
-                controlRight = controlPosition - n1 * roadWidth / 2;
-            }
-        }
-        public void Xuxa(Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition) {
-            startLeft = RoadUtilities.GetRoadLeftSideVertice(roadWidth, startPosition, controlPosition);
-            endLeft = RoadUtilities.GetRoadLeftSideVertice(roadWidth, endPosition, controlPosition);
-
-            startRight = RoadUtilities.GetRoadRightSideVertice(roadWidth, startPosition, controlPosition);
-            endRight = RoadUtilities.GetRoadRightSideVertice(roadWidth, endPosition, controlPosition);
-
-            n0 = (startLeft - startPosition).normalized;
-            n1 = (endRight - endPosition).normalized;
 
             if (Vector3.Angle(n0, n1) != 0) {
                 // Road is NOT straight, so the DOT product is not 0!
