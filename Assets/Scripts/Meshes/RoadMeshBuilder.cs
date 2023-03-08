@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Road.Mesh.NodeVertices;
+using Road.Mesh.Data;
 
 public class RoadMeshBuilder : MonoBehaviour {
 
@@ -24,12 +24,12 @@ public class RoadMeshBuilder : MonoBehaviour {
         return mesh;
     }
 
-    private MeshData PopulateMeshData(RoadObject roadObject, int resolution = 10) {        
+    private MeshData PopulateMeshData(RoadObject roadObject) {        
         MeshData meshData = new MeshData();
-        CalculateNodeWIMeshData meshDataCalculator = new CalculateNodeWIMeshData(roadObject);
-        meshDataCalculator.PopulateStartNode(meshData);
-        CalculateRoadMeshData.PopulateRoadMeshVertices(meshData, roadObject);
-        meshDataCalculator.PopulateEndNode(meshData);
+        PopulateRoadMeshData meshDataCalculator = new PopulateRoadMeshData(roadObject);
+        meshDataCalculator.PopulateStartNodeMesh(meshData);
+        meshDataCalculator.PopulateRoadMeshVertices(meshData);
+        meshDataCalculator.PopulateEndNodeMesh(meshData);
 
         MeshUtilities.PopulateMeshTriangles(meshData);
         MeshUtilities.PopulateMeshUvs(meshData);
@@ -43,7 +43,7 @@ public class RoadMeshBuilder : MonoBehaviour {
 
         MeshData meshData = new MeshData();
         CalculateNodeWOIMeshData.PopulateStartNode(meshData, roadWidth, startPosition, controlPosition, resolution);
-        CalculateRoadMeshData.PopulateRoadMeshVertices(meshData, roadWidth, startPosition, endPosition, controlPosition, resolution);
+        CalculateRoadTemporaryMesh.PopulateRoadMeshVertices(meshData, roadWidth, startPosition, endPosition, controlPosition, resolution);
         CalculateNodeWOIMeshData.PopulateEndNode(meshData, roadWidth, endPosition, controlPosition, resolution);
 
         MeshUtilities.PopulateMeshTriangles(meshData);

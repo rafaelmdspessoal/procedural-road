@@ -2,37 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Road.Mesh.NodeVertices {
+namespace Road.Mesh.Data {
 
-    public class CalculateRoadMeshData : MonoBehaviour {
-
-        public static MeshData PopulateRoadMeshVertices(MeshData meshData, RoadObject roadObject, int resolution = 10) {
-            Node startNode = roadObject.StartNode;
-            Node endNode = roadObject.EndNode;
-
-            Vector3 roadPosition = roadObject.transform.position;
-            Vector3 startPosition = startNode.Position;
-            Vector3 endPosition = endNode.Position;
-            Vector3 controlPosition = roadObject.ControlNodeObject.transform.position;
-
-            int roadWidth = roadObject.RoadWidth;
-            float offsetDistance;
-
-            if (startNode.HasIntersection()) {
-                offsetDistance = startNode.GetNodeSizeForRoad(roadObject);
-                startPosition = Bezier.GetOffsettedPosition(startPosition, endPosition, controlPosition, offsetDistance);
-            }
-            if (endNode.HasIntersection()) {
-                offsetDistance = endNode.GetNodeSizeForRoad(roadObject);
-                endPosition = Bezier.GetOffsettedPosition(endPosition, startPosition, controlPosition, offsetDistance);
-            }
-
-            startPosition -= roadPosition;
-            endPosition -= roadPosition;
-            controlPosition -= roadPosition;
-            meshData = PopulateRoadMeshVertices(meshData, roadWidth, startPosition, endPosition, controlPosition, resolution);
-            return meshData;
-        }
+    public class CalculateRoadTemporaryMesh : MonoBehaviour {
 
         public static MeshData PopulateRoadMeshVertices(MeshData meshData, int roadWidth, Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition, int resolution) {
 

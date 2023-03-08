@@ -62,12 +62,12 @@
     <Compile Include="Assets\Scripts\Roads\RoadObjectSO.cs" />
     <Compile Include="Assets\Scripts\Meshes\MeshUtilities.cs" />
     <Compile Include="Assets\Scripts\GameManager.cs" />
-    <Compile Include="Assets\Scripts\Meshes\CalculateRoadMeshData.cs" />
+    <Compile Include="Assets\Scripts\Meshes\CalculateRoadTemporaryMesh.cs" />
     <Compile Include="Assets\Scripts\InputManager.cs" />
     <Compile Include="Assets\Scripts\SimpleCameraController.cs" />
     <Compile Include="Assets\Scripts\Meshes\RoadMeshBuilder.cs" />
     <Compile Include="Assets\Scripts\Roads\RoadPlacement.cs" />
-    <Compile Include="Assets\Scripts\Meshes\CalculateNodeWIMeshData.cs" />
+    <Compile Include="Assets\Scripts\Meshes\PopulateRoadMeshData.cs" />
     <Compile Include="Assets\Scripts\Node.cs" />
     <Compile Include="Assets\Scripts\Roads\RoadUtilities.cs" />
     <Compile Include="Assets\Scripts\Meshes\MeshData.cs" />

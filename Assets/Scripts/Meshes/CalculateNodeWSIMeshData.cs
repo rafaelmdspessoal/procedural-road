@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-namespace Road.Mesh.NodeVertices {
+namespace Road.Mesh.Data {
     public class CalculateNodeWSIMeshData : MonoBehaviour {
 
         public static MeshData PopulateStartNode(MeshData meshData, Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition, int roadWidth, int resolution) {

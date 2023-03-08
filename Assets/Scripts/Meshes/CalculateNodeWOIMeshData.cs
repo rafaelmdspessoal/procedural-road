@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Road.Mesh.NodeVertices {
+namespace Road.Mesh.Data {
     public class CalculateNodeWOIMeshData {
         /// <summary>
         /// Populate vertes for the end Node of a road
