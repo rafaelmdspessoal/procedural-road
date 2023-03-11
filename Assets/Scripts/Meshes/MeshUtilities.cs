@@ -96,7 +96,7 @@ namespace MeshHandler.Utilities {
             float t;
 
             for (int i = resolution / 2 - 1; i < resolution - 1; i++) {
-                t = i / (float)(resolution - 3);
+                t = i / (float)(resolution - 2);
                 Vector3 leftRoadVertice = Bezier.QuadraticCurve(startLeft, endLeft, controlLeft, t);
                 Vector3 centerRoadVertice = Bezier.QuadraticCurve(startCenter, endCenter, controlCenter, t);
                 Vector3 rightRoadVertice = Bezier.QuadraticCurve(startRight, endRight, controlRight, t);
@@ -117,7 +117,7 @@ namespace MeshHandler.Utilities {
         public MeshData PopulateEndtNodeMeshVerticesWSIntersection(MeshData meshData) {
             float t;
             for (int i = 0; i < resolution / 2; i++) {
-                t = i / (float)(resolution - 3);
+                t = i / (float)(resolution - 2);
                 Vector3 leftRoadVertice = Bezier.QuadraticCurve(startLeft, endLeft, controlLeft, t);
                 Vector3 centerRoadVertice = Bezier.QuadraticCurve(startCenter, endCenter, controlCenter, t);
                 Vector3 rightRoadVertice = Bezier.QuadraticCurve(startRight, endRight, controlRight, t);
@@ -144,7 +144,7 @@ namespace MeshHandler.Utilities {
         public MeshData PopulateStartNodeMeshVerticesWDIntersection(MeshData meshData) {
             float t;
             for (int i = resolution / 2 - 1; i < resolution - 1; i++) {
-                t = i / (float)(resolution - 3);
+                t = i / (float)(resolution - 2);
                 Vector3 leftRoadVertice = Bezier.QuadraticCurve(startLeft, endLeft, controlLeft, t);
                 Vector3 centerRoadVertice = Bezier.LinearCurve(startCenter, endCenter, t);
                 Vector3 rightRoadVertice = Bezier.QuadraticCurve(startRight, endRight, controlRight, t);
@@ -170,7 +170,7 @@ namespace MeshHandler.Utilities {
             float t;
 
             for (int i = 0; i < resolution / 2; i++) {
-                t = i / (float)(resolution - 3);
+                t = i / (float)(resolution - 2);
                 Vector3 leftRoadVertice = Bezier.QuadraticCurve(startLeft, endLeft, controlLeft, t);
                 Vector3 centerRoadVertice = Bezier.LinearCurve(startCenter, endCenter, t);
                 Vector3 rightRoadVertice = Bezier.QuadraticCurve(startRight, endRight, controlRight, t);
@@ -273,6 +273,30 @@ namespace MeshHandler.Utilities {
             adjacentRoadControlNodePosition = adjecentRoad.ControlNodeObject.transform.position - roadPosition;
 
             adjacentRoadNodeMeshPosition = Bezier.GetOffsettedPosition(nodePosition, otherNodePostion, adjacentRoadControlNodePosition, offsetDistance);
+        }
+
+        /// <summary>
+        /// Loads the mesh data into a actual Mesh
+        /// </summary>
+        /// <param name="meshData"></param>
+        /// <returns></returns>
+        public static Mesh LoadMesh(MeshData meshData) {
+            Mesh mesh = LoadMeshData(meshData);
+            return mesh;
+        }
+
+        /// <summary>
+        /// Create Mesh properties from tiven mesh data
+        /// </summary>
+        /// <param name="meshData"></param>
+        /// <returns></returns>
+        public static Mesh LoadMeshData(MeshData meshData) {
+            Mesh mesh = new() {
+                vertices = meshData.vertices.ToArray(),
+                uv = meshData.uvs.ToArray(),
+                triangles = meshData.triangles.ToArray(),
+            };
+            return mesh;
         }
     }
 }
