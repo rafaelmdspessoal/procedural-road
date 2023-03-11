@@ -21,11 +21,11 @@ public class TestVectorScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        center = RafaelUtils.CreateSphere(Vector3.zero, "center", 1);
-        endMain = RafaelUtils.CreateSphere(Vector3.zero, "end main", 1);
-        endLeft = RafaelUtils.CreateSphere(Vector3.zero, "end left", 1);
-        endMid = RafaelUtils.CreateSphere(Vector3.zero, "end mid", 1);
-        endRight = RafaelUtils.CreateSphere(Vector3.zero, "end right", 1);
+        center = RafaelUtils.CreateSphere(Vector3.zero, "center", transform, 1);
+        endMain = RafaelUtils.CreateSphere(Vector3.zero, "end main", transform, 1);
+        endLeft = RafaelUtils.CreateSphere(Vector3.zero, "end left", transform, 1);
+        endMid = RafaelUtils.CreateSphere(Vector3.zero, "end mid", transform, 1);
+        endRight = RafaelUtils.CreateSphere(Vector3.zero, "end right", transform, 1);
 
         center.transform.position = Vector3.zero;
         endMain.transform.position = new Vector3(0, 0, -1);

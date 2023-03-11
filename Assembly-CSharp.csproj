@@ -58,7 +58,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\RafaelUtils.cs" />
     <Compile Include="Assets\Scripts\Roads\RoadBuilder.cs" />
-    <Compile Include="Assets\Scripts\Meshes\CalculateNodeWOIMeshData.cs" />
+    <Compile Include="Assets\Scripts\Meshes\PopulateNodeMeshData.cs" />
     <Compile Include="Assets\Scripts\Roads\RoadObjectSO.cs" />
     <Compile Include="Assets\Scripts\Meshes\MeshUtilities.cs" />
     <Compile Include="Assets\Scripts\GameManager.cs" />

@@ -36,11 +36,12 @@ namespace rafael.utils
             }
         }
 
-        public static GameObject CreateSphere(Vector3 position, string name, float scale = .25f) {
+        public static GameObject CreateSphere(Vector3 position, string name, Transform parent, float scale = .25f) {
             GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             sphere.transform.localScale = scale * Vector3.one;
             sphere.transform.position = position;
             sphere.transform.name = name;
+            sphere.transform.parent = parent;
             return sphere;
         }
     }
