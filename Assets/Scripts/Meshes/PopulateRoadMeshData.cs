@@ -1,8 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using MeshHandler.Utilities;
 
-namespace Road.Mesh.RoadData {
+namespace MeshHandler.Road.RoadMeshData {
     public class PopulateRoadMeshData {
 
         private readonly RoadObject roadObject;

@@ -1,10 +1,9 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using rafael.utils;
+using MeshHandler.Utilities;
 
-namespace Road.Mesh.NodeData {
+namespace MeshHandler.Road.NodeMeshData {
     public class PopulateNodeMeshData {
 
         private readonly RoadObject roadObject;
