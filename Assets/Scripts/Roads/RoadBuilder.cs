@@ -96,6 +96,5 @@ public class RoadBuilder : MonoBehaviour
         controlNodeObject.transform.position = controlNodePosition;
         return controlNodeObject;
     }
-
 }
 

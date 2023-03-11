@@ -5,7 +5,7 @@ using MeshHandler.Utilities;
 namespace MeshHandler.Road.Temp.Builder {
 
     public class RoadTempMeshBuilder {
-        private readonly CalculateRoadTempMesh displayRoadMeshData;
+        private readonly PopulateTempRoadMeshData displayRoadMeshData;
 
         public RoadTempMeshBuilder(Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition, int roadWidth, int resolution) {
             displayRoadMeshData = new(startPosition, endPosition, controlPosition, resolution, roadWidth);
@@ -19,7 +19,7 @@ namespace MeshHandler.Road.Temp.Builder {
 
         private MeshData PopulateDisplayRoadMeshData() {
             MeshData meshData = new();
-            meshData = displayRoadMeshData.PopulateRoadMeshVertices(meshData);
+            meshData = displayRoadMeshData.PopulateTempRoadMeshVertices(meshData);
             return meshData;
         }
     }

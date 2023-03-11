@@ -230,7 +230,7 @@ public class RoadPlacement : MonoBehaviour {
     }
 
     void DisplayTemporaryMesh(Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition) {
-        RoadTempMeshBuilder tempMeshBuilder = new(startPosition, endPosition, controlPosition, roadObjectSO.roadWidth, roadObjectSO.roadResolution);
+        RoadTempMeshBuilder tempMeshBuilder = new(startPosition, endPosition, controlPosition, roadObjectSO.roadResolution, roadObjectSO.roadWidth);
 
         Mesh mesh = tempMeshBuilder.CreateTempRoadMesh();
         meshRenderer.sharedMaterial = temporaryRoadMaterial;

@@ -3,7 +3,7 @@ using MeshHandler.Utilities;
 
 namespace MeshHandler.Road.Temp.Visual {
 
-    public class CalculateRoadTempMesh {
+    public class PopulateTempRoadMeshData {
 
         private Vector3 startNodePosition;
         private Vector3 endNodePosition;
@@ -12,15 +12,15 @@ namespace MeshHandler.Road.Temp.Visual {
         private readonly int resolution;
         private readonly int roadWidth;
 
-        public CalculateRoadTempMesh(Vector3 startNodePosition, Vector3 endNodePosition, Vector3 controlPosition, int roadWidth, int resolution) {
+        public PopulateTempRoadMeshData(Vector3 startNodePosition, Vector3 endNodePosition, Vector3 controlPosition, int roadWidth, int resolution) {
             this.startNodePosition = startNodePosition;
             this.endNodePosition = endNodePosition;
             this.controlPosition = controlPosition;
             this.roadWidth = roadWidth;
-            this.resolution = resolution;
+            this.resolution = resolution * 3;
         }
 
-        public MeshData PopulateRoadMeshVertices(MeshData meshData) {
+        public MeshData PopulateTempRoadMeshVertices(MeshData meshData) {
 
             Vector3 startPosition = startNodePosition + (startNodePosition - controlPosition).normalized * roadWidth / 2;
             Vector3 endPosition = endNodePosition + (endNodePosition - controlPosition).normalized * roadWidth / 2;

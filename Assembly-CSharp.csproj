@@ -62,7 +62,7 @@
     <Compile Include="Assets\Scripts\Roads\RoadObjectSO.cs" />
     <Compile Include="Assets\Scripts\Meshes\MeshUtilities.cs" />
     <Compile Include="Assets\Scripts\GameManager.cs" />
-    <Compile Include="Assets\Scripts\Meshes\CalculateRoadTempMesh.cs" />
+    <Compile Include="Assets\Scripts\Meshes\PopulateTempRoadMeshData.cs" />
     <Compile Include="Assets\Scripts\InputManager.cs" />
     <Compile Include="Assets\Scripts\SimpleCameraController.cs" />
     <Compile Include="Assets\Scripts\Meshes\RoadMeshBuilder.cs" />
