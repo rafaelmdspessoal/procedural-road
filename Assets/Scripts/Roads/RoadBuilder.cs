@@ -1,6 +1,6 @@
 using UnityEngine;
 
-using MeshHandler.Road;
+using MeshHandler.Road.Builder;
 
 public class RoadBuilder : MonoBehaviour
 {

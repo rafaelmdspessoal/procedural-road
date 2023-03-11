@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-
-using MeshHandler.Road;
+using MeshHandler.Road.Builder;
+using MeshHandler.Road.Temp.Builder;
 
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
@@ -230,7 +230,9 @@ public class RoadPlacement : MonoBehaviour {
     }
 
     void DisplayTemporaryMesh(Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition) {
-        Mesh mesh = RoadMeshBuilder.Instance.CreateRoadMesh(roadObjectSO.roadWidth, startPosition, endPosition, controlPosition);
+        RoadTempMeshBuilder tempMeshBuilder = new(startPosition, endPosition, controlPosition, roadObjectSO.roadWidth, roadObjectSO.roadResolution);
+
+        Mesh mesh = tempMeshBuilder.CreateTempRoadMesh();
         meshRenderer.sharedMaterial = temporaryRoadMaterial;
         meshFilter.mesh = mesh;
     }

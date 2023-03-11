@@ -62,7 +62,7 @@
     <Compile Include="Assets\Scripts\Roads\RoadObjectSO.cs" />
     <Compile Include="Assets\Scripts\Meshes\MeshUtilities.cs" />
     <Compile Include="Assets\Scripts\GameManager.cs" />
-    <Compile Include="Assets\Scripts\Meshes\CalculateRoadTemporaryMesh.cs" />
+    <Compile Include="Assets\Scripts\Meshes\CalculateRoadTempMesh.cs" />
     <Compile Include="Assets\Scripts\InputManager.cs" />
     <Compile Include="Assets\Scripts\SimpleCameraController.cs" />
     <Compile Include="Assets\Scripts\Meshes\RoadMeshBuilder.cs" />
@@ -75,6 +75,7 @@
     <Compile Include="Assets\Scripts\TestVectorScript.cs" />
     <Compile Include="Assets\Scripts\Bezier.cs" />
     <Compile Include="Assets\Scripts\Roads\RoadObject.cs" />
+    <Compile Include="Assets\Scripts\Meshes\RoadTempMeshBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

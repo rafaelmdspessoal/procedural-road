@@ -1,11 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using rafael.utils;
+using MeshHandler.Utilities;
 
-namespace Road.Mesh.RoadData.Visual {
+namespace MeshHandler.Road.Temp.Visual {
 
-    public class CalculateRoadTemporaryMesh {
+    public class CalculateRoadTempMesh {
 
         private Vector3 startNodePosition;
         private Vector3 endNodePosition;
@@ -14,7 +12,7 @@ namespace Road.Mesh.RoadData.Visual {
         private readonly int resolution;
         private readonly int roadWidth;
 
-        public CalculateRoadTemporaryMesh(Vector3 startNodePosition, Vector3 endNodePosition, Vector3 controlPosition, int roadWidth, int resolution) {
+        public CalculateRoadTempMesh(Vector3 startNodePosition, Vector3 endNodePosition, Vector3 controlPosition, int roadWidth, int resolution) {
             this.startNodePosition = startNodePosition;
             this.endNodePosition = endNodePosition;
             this.controlPosition = controlPosition;
@@ -34,6 +32,7 @@ namespace Road.Mesh.RoadData.Visual {
 
             Vector3 startRight = RoadUtilities.GetRoadRightSideVertice(roadWidth, startNodePosition, controlPosition);
             Vector3 endRight = RoadUtilities.GetRoadRightSideVertice(roadWidth, endNodePosition, controlPosition);
+
             Vector3 startcontrolRight;
             Vector3 endControlRight;
 
@@ -61,8 +60,23 @@ namespace Road.Mesh.RoadData.Visual {
             endControlLeft = endPosition - n0 * roadWidth / 2;
             endControlRight = endPosition + n1 * roadWidth / 2;
 
-            float t;
             // Populate start Node
+            PopulateStartNodeMeshData(meshData, startPosition, startLeft, startControlLeft, startRight, startcontrolRight);
+
+            // Actual road
+            PopulateRoadMeshData(meshData, startLeft, endLeft, startRight, endRight, controlLeft, controlRight);
+
+            // Populate end node
+            PopulateEndNodeMeshData(meshData, endPosition, endLeft, endControlLeft, endRight, endControlRight);
+
+            MeshUtilities.PopulateMeshTriangles(meshData);
+            MeshUtilities.PopulateMeshUvs(meshData);
+
+            return meshData;
+        }
+
+        private void PopulateStartNodeMeshData(MeshData meshData, Vector3 startPosition, Vector3 startLeft, Vector3 startControlLeft, Vector3 startRight, Vector3 startcontrolRight) {
+            float t;
             for (int i = 0; i < resolution; i++) {
                 t = i / (float)(resolution - 1);
                 Vector3 leftRoadVertice = Bezier.QuadraticCurve(startPosition, startLeft, startControlLeft, t);
@@ -72,8 +86,10 @@ namespace Road.Mesh.RoadData.Visual {
                 meshData.AddVertice(startNodePosition);
                 meshData.AddVertice(rightRoadVertice);
             }
+        }
 
-            // Actual road
+        private void PopulateRoadMeshData(MeshData meshData, Vector3 startLeft, Vector3 endLeft, Vector3 startRight, Vector3 endRight, Vector3 controlLeft, Vector3 controlRight) {
+            float t;
             for (int i = 0; i < resolution; i++) {
                 t = i / (float)(resolution - 1);
                 Vector3 leftRoadVertice = Bezier.QuadraticCurve(startLeft, endRight, controlLeft, t);
@@ -84,18 +100,19 @@ namespace Road.Mesh.RoadData.Visual {
                 meshData.AddVertice(centerRoadVertice);
                 meshData.AddVertice(rightRoadVertice);
             }
+        }
 
-            // Populate end node
+        private void PopulateEndNodeMeshData(MeshData meshData, Vector3 endPosition, Vector3 endLeft, Vector3 endControlLeft, Vector3 endRight, Vector3 endControlRight) {
+            float t;
             for (int i = 0; i < resolution; i++) {
                 t = i / (float)(resolution - 1);
-                Vector3 leftRoadVertice= Bezier.QuadraticCurve(endRight, endPosition, endControlRight, t);
+                Vector3 leftRoadVertice = Bezier.QuadraticCurve(endRight, endPosition, endControlRight, t);
                 Vector3 rightRoadVertice = Bezier.QuadraticCurve(endLeft, endPosition, endControlLeft, t);
 
                 meshData.AddVertice(leftRoadVertice);
                 meshData.AddVertice(endNodePosition);
                 meshData.AddVertice(rightRoadVertice);
             }
-            return meshData;
         }
     }
 }

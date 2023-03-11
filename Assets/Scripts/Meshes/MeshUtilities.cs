@@ -274,5 +274,29 @@ namespace MeshHandler.Utilities {
 
             adjacentRoadNodeMeshPosition = Bezier.GetOffsettedPosition(nodePosition, otherNodePostion, adjacentRoadControlNodePosition, offsetDistance);
         }
+
+        /// <summary>
+        /// Loads the mesh data into a actual Mesh
+        /// </summary>
+        /// <param name="meshData"></param>
+        /// <returns></returns>
+        public static Mesh LoadMesh(MeshData meshData) {
+            Mesh mesh = LoadMeshData(meshData);
+            return mesh;
+        }
+
+        /// <summary>
+        /// Create Mesh properties from tiven mesh data
+        /// </summary>
+        /// <param name="meshData"></param>
+        /// <returns></returns>
+        public static Mesh LoadMeshData(MeshData meshData) {
+            Mesh mesh = new() {
+                vertices = meshData.vertices.ToArray(),
+                uv = meshData.uvs.ToArray(),
+                triangles = meshData.triangles.ToArray(),
+            };
+            return mesh;
+        }
     }
 }
