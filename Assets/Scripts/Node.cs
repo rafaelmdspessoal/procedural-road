@@ -17,28 +17,26 @@ public class Node : MonoBehaviour
     public float GetNodeSizeForRoad(RoadObject roadObject) {
         if (!HasIntersection()) return 0;
 
-        
         Dictionary<float, RoadObject> adjacentRoads = GetAdjacentRoadsTo(roadObject);
+        
+        float leftAngle = adjacentRoads.First().Key;
+        if (leftAngle > 180) leftAngle -= 180;
+        float rightAngle = 180;
 
-        float smallestAngle = 180f;
-        foreach (float roadAngle in adjacentRoads.Keys) {
-            RoadObject road = adjacentRoads.GetValueOrDefault(roadAngle);
-            if (road != roadObject) {
-                if (Mathf.Abs(roadAngle) < smallestAngle) {
-                    smallestAngle = Mathf.Abs(roadAngle);
-                }
-            }
+        if (adjacentRoads.Count > 1) {
+            rightAngle = adjacentRoads.Last().Key;
+            if (rightAngle > 180) rightAngle -= 180;
         }
-        float cosAngle = Mathf.Cos(smallestAngle*Mathf.Deg2Rad);
+
+        float smallestAngle = Mathf.Min(leftAngle, rightAngle);
+
+        float cosAngle = Mathf.Abs(Mathf.Cos(smallestAngle*Mathf.Deg2Rad));
         Mathf.Clamp01(cosAngle);
         float offset = (1.1f + cosAngle) * roadObject.RoadWidth;
         return offset;
     }
 
-    public bool HasIntersection()
-    {
-        return connectedRoads.Count > 1;
-    }
+    public bool HasIntersection() => connectedRoads.Count > 1;
 
     public void AddRoad(RoadObject segment)
     {
@@ -54,44 +52,40 @@ public class Node : MonoBehaviour
         if (connectedRoads.Contains(roadObject)) {
             connectedRoads.Remove(roadObject);
 
-            //if (connectedRoads.Count <= 0)
-            //    Destroy(gameObject);
+            if (connectedRoads.Count <= 0)
+                Destroy(gameObject);
         }
     }
 
-    public List<RoadObject> GetConnectedRoads()
-    {
-        return connectedRoads;
-    }
+    public List<RoadObject> ConnectedRoads() => connectedRoads;
 
-    public Vector3 Position
-    {
-        get
-        {
-            return transform.position;
-        }
-    }
-
+    public Vector3 Position => transform.position;
 
     public Dictionary<float, RoadObject> GetAdjacentRoadsTo(RoadObject roadObject) {
-        Dictionary<float, RoadObject> adjacentRoads = new Dictionary<float, RoadObject>();
+        Dictionary<float, RoadObject> connectedRoadsDict = new();
 
         if (HasIntersection() && roadObject != null) {
-            Vector3 roadObjectDirection = this.Position - roadObject.transform.position;
+            Vector3 roadObjectDirection = Position - roadObject.transform.position;
             Vector3 connectedRoadDirection;
 
             foreach (RoadObject road in connectedRoads) {
                 if (road != roadObject) {
-                    connectedRoadDirection = this.Position - road.transform.position;
+                    connectedRoadDirection = Position - road.ControlNodeObject.transform.position;
                     float angle = Vector3.SignedAngle(roadObjectDirection, connectedRoadDirection, transform.up);
-                    adjacentRoads.Add(angle, road);
+                    if (angle < 0) angle += 360;
+                    connectedRoadsDict.Add(angle, road);
                 }
             }
         }
 
-        var ordered = adjacentRoads.OrderBy(x => Mathf.Abs(x.Key)).Take(2).ToDictionary(x => x.Key, x => x.Value);
+        connectedRoadsDict = connectedRoadsDict.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
 
-        return ordered;
+        Dictionary<float, RoadObject> adjacentRoads = new();
+        adjacentRoads.Add(connectedRoadsDict.First().Key, connectedRoadsDict.First().Value);
+        if(connectedRoadsDict.Count > 1)
+            adjacentRoads.Add(connectedRoadsDict.Last().Key, connectedRoadsDict.Last().Value);
+
+        return adjacentRoads;
     }
 
 }
