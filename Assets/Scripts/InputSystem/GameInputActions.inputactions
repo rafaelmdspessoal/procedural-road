@@ -1,0 +1,138 @@
+{
+    "name": "GameInputActions",
+    "maps": [
+        {
+            "name": "Idle",
+            "id": "b96987ba-f206-488e-93c5-7d9e0ef9c05a",
+            "actions": [
+                {
+                    "name": "Select",
+                    "type": "Button",
+                    "id": "f2bf5d60-bb56-4ed7-b4af-99b902d1c259",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "fdc7598a-7435-4deb-9716-f067ade03329",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Select",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Destroying",
+            "id": "e7b777a5-8776-4887-a65f-ce6b1cbd0db4",
+            "actions": [
+                {
+                    "name": "Demolish",
+                    "type": "Button",
+                    "id": "f48b5d97-8223-4b13-a34a-a71b1ed2a150",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "cb2e952b-6d23-4e00-ab53-a385379337eb",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Demolish",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "BuildingRoad",
+            "id": "57e63f8c-f288-4fa3-978c-6fa9d82069da",
+            "actions": [
+                {
+                    "name": "PlaceNode",
+                    "type": "Button",
+                    "id": "d084e834-7fc1-448a-b83a-df4db07ee93e",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Cancel",
+                    "type": "Button",
+                    "id": "22086194-ee6e-4b3b-a9ff-b50484c167b8",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "7c096338-e8fa-478e-82ac-34d36b34b559",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PlaceNode",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3aad0486-c7fb-4138-8c79-fc6cb27f48a7",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Cancel",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "General",
+            "id": "c0d53f4a-960a-4419-8bb0-c6b9305d01c4",
+            "actions": [
+                {
+                    "name": "Escape",
+                    "type": "Button",
+                    "id": "39ff8655-62da-41f1-a091-8770c96b9298",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "66f33d60-56c7-4e44-859b-8dbfb301aaab",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Escape",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

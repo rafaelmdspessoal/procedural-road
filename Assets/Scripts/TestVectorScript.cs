@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using rafael.utils;
+using Rafael.Utils;
 using System.Linq;
 
 public class TestVectorScript : MonoBehaviour
@@ -28,10 +28,10 @@ public class TestVectorScript : MonoBehaviour
         endRight = RafaelUtils.CreateSphere(Vector3.zero, "end right", transform, 1);
 
         center.transform.position = Vector3.zero;
-        endMain.transform.position = new Vector3(0, 0, -1);
-        endLeft.transform.position = new Vector3(-1, 0, 1);
-        endMid.transform.position = new Vector3(0, 0, 1);
-        endRight.transform.position = new Vector3(1, 0, 0);
+        endMain.transform.position = new Vector3(0, 0, -10);
+        endLeft.transform.position = new Vector3(-10, 0, 10);
+        endMid.transform.position = new Vector3(0, 0, 10);
+        endRight.transform.position = new Vector3(10, 0, 0);
     }
 
     // Update is called once per frame
@@ -39,11 +39,11 @@ public class TestVectorScript : MonoBehaviour
     {
         Dictionary<float, string> angles = new Dictionary<float, string>();
 
-       centerPos = center.transform.position;
-       endMainPos = endMain.transform.position;
-       endLeftPos = endLeft.transform.position;
-       endMidPos = endMid.transform.position;
-       endRightPos = endRight.transform.position;
+        centerPos = center.transform.position;
+        endMainPos = endMain.transform.position;
+        endLeftPos = endLeft.transform.position;
+        endMidPos = endMid.transform.position;
+        endRightPos = endRight.transform.position;
 
         Vector3 mainRoadDir = GetNormalizedDirection(centerPos, endMainPos);
         Vector3 leftRoadDir = GetNormalizedDirection(centerPos, endLeftPos);
@@ -53,6 +53,10 @@ public class TestVectorScript : MonoBehaviour
         float leftAngle = Vector3.SignedAngle(mainRoadDir, leftRoadDir, Vector3.up);
         float midAngle = Vector3.SignedAngle(mainRoadDir, midRoadDir, Vector3.up);
         float rightAngle = Vector3.SignedAngle(mainRoadDir, rightRoadDir, Vector3.up);
+
+        if (leftAngle < 0) leftAngle += 360;
+        if (midAngle < 0) midAngle += 360;
+        if (rightAngle < 0) rightAngle += 360;
 
         angles.Add(rightAngle, "rightAngle");
         angles.Add(midAngle, "midAngle");
@@ -69,15 +73,19 @@ public class TestVectorScript : MonoBehaviour
 
     void PrintAngles(Dictionary<float, string> angles) {
 
-        var ordered = angles.OrderBy(x => Mathf.Abs(x.Key)).ToDictionary(x => x.Key, x => x.Value).Take(2);
+        angles = angles.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
         //print("###################");
         //print(angles.First().Value + " " + angles.First().Key);
         //print(angles.Last().Value + " " + angles.Last().Key);
 
+        Dictionary<float, string> adjacentAngles = new();
+        adjacentAngles.Add(angles.First().Key, angles.First().Value);
+        adjacentAngles.Add(angles.Last().Key, angles.Last().Value);
+
         print("###################");
-        print("len: " + ordered.Count());
-        print(ordered.First().Value + " " + ordered.First().Key);
-        print(ordered.Last().Value + " " + ordered.Last().Key);
+        print("len: " + adjacentAngles.Count());
+        print(adjacentAngles.First().Value + " " + adjacentAngles.First().Key);
+        print(adjacentAngles.Last().Value + " " + adjacentAngles.Last().Key);
     }
 
 

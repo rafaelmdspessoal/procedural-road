@@ -1,8 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
+using UnityEngine.InputSystem;
 using UnityEngine;
 
-namespace rafael.utils
+namespace Rafael.Utils
 {
     public static class RafaelUtils
     {
@@ -36,7 +35,16 @@ namespace rafael.utils
             }
         }
 
-        public static GameObject CreateSphere(Vector3 position, string name, Transform parent, float scale = .25f) {
+        public static bool TryRaycastObject(out RaycastHit hit) {
+            Vector3 mousePosition = Mouse.current.position.ReadValue();
+            Ray ray = Camera.main.ScreenPointToRay(mousePosition);
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+                return true;
+
+            return false;
+        }
+
+        public static GameObject CreateSphere(Vector3 position, string name, Transform parent = null, float scale = .25f) {
             GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             sphere.transform.localScale = scale * Vector3.one;
             sphere.transform.position = position;

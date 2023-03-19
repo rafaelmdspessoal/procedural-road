@@ -2,22 +2,17 @@ using UnityEngine;
 using MeshHandler.Road.NodeMeshData;
 using MeshHandler.Road.RoadMeshData;
 using MeshHandler.Utilities;
+using Road.Obj;
 
 namespace MeshHandler.Road.Builder {
-    public class RoadMeshBuilder : MonoBehaviour {
-
-        public static RoadMeshBuilder Instance { get; private set; }
-
-        private void Awake() {
-            Instance = this;
-        }
+    public class RoadMeshBuilder {
 
         /// <summary>
         /// Creates the Mesh for the given roadObject
         /// </summary>
         /// <param name="roadObject"></param>
         /// <returns></returns>
-        public Mesh CreateRoadMesh(RoadObject roadObject) {
+        public static Mesh CreateRoadMesh(RoadObject roadObject) {
             MeshData meshData = PopulateMeshData(roadObject);
             Mesh mesh = MeshUtilities.LoadMesh(meshData);
             return mesh;
@@ -31,7 +26,7 @@ namespace MeshHandler.Road.Builder {
         /// The Road that will receive this mesh
         /// </param>
         /// <returns></returns>
-        private MeshData PopulateMeshData(RoadObject roadObject) {
+        private static MeshData PopulateMeshData(RoadObject roadObject) {
             MeshData meshData = new();
             PopulateRoadMeshData roadMeshData = new(roadObject);
             PopulateNodeMeshData nodeMeshData = new(roadObject);

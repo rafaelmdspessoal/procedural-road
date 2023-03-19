@@ -2,6 +2,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using MeshHandler.Utilities;
+using Road.Utilities;
+using Road.Obj;
+using Road.NodeObj;
 
 namespace MeshHandler.Road.NodeMeshData {
     public class PopulateNodeMeshData {
@@ -275,36 +278,25 @@ namespace MeshHandler.Road.NodeMeshData {
         /// <param name="adjacentRoads"></param>
         /// <returns></returns>
         public MeshData PopulateStartNodeWithDoubleIntersection(MeshData meshData, Dictionary<float, RoadObject> adjacentRoads, Vector3 thisRoadCenter) {
-            if(adjacentRoads.Count > 3) {
-                throw new System.Exception("Intesection has more than 3 meeting roads");
+            if(adjacentRoads.Count != 2) {
+                throw new System.Exception("Intersection MUST have two roads, but has " + adjacentRoads.Count);
             }
-
-            Vector3 leftRoadCenter = Vector3.negativeInfinity;
-            Vector3 rightRoadCenter = Vector3.negativeInfinity;
             Vector3 intersectionCenter = startNodePosition + (startNodePosition - thisRoadCenter);
 
-            foreach (float adjecentRoadAngle in adjacentRoads.Keys) {
-                RoadObject adjecentRoad = adjacentRoads.GetValueOrDefault(adjecentRoadAngle);
-                if (adjecentRoadAngle > 0) {
-                    // road is to the left
-                    MeshUtilities.GetNodeMeshPositions(
-                        adjecentRoad,
-                        startNode,
-                        roadPosition,
-                        startNodePosition,
-                        out leftRoadCenter,
-                        out _);
-                } else {
-                    // road is to the right
-                    MeshUtilities.GetNodeMeshPositions(
-                        adjecentRoad,
-                        startNode,
-                        roadPosition,
-                        startNodePosition,
-                        out rightRoadCenter,
-                        out _);
-                }
-            }
+            MeshUtilities.GetNodeMeshPositions(
+                adjacentRoads.First().Value,
+                startNode,
+                roadPosition,
+                startNodePosition,
+                out Vector3 leftRoadCenter,
+                out _);
+            MeshUtilities.GetNodeMeshPositions(
+                adjacentRoads.Last().Value,
+                startNode,
+                roadPosition,
+                startNodePosition,
+                out Vector3 rightRoadCenter,
+                out _);
 
             Vector3 leftRoadRight = RoadUtilities.GetRoadLeftSideVertice(roadWidth, leftRoadCenter, startNodePosition);
             Vector3 thisRoadLeft = RoadUtilities.GetRoadRightSideVertice(roadWidth, thisRoadCenter, startNodePosition);
@@ -327,7 +319,7 @@ namespace MeshHandler.Road.NodeMeshData {
                 controlLeft = startNodePosition + ((n0Left + n1Left) * roadWidth) / Vector3.Dot((n0Left + n1Left), (n0Left + n1Left));
             } else {
                 // Road is traight, so calculations are easier
-                controlLeft = startNodePosition + n0Left * roadWidth / 2;
+                controlLeft = startNodePosition + n1Left * roadWidth / 2;
             }
 
             if (Vector3.Angle(n0Right, n1Right) != 0) {
@@ -370,32 +362,23 @@ namespace MeshHandler.Road.NodeMeshData {
             if (adjacentRoads.Count > 3) {
                 throw new System.Exception("Intesection has more than 3 meeting roads");
             }
-            Vector3 leftRoadCenter = Vector3.negativeInfinity;
-            Vector3 rightRoadCenter = Vector3.negativeInfinity;
+
             Vector3 intersectionCenter = endNodePosition + (endNodePosition - thisRoadCenter);
 
-            foreach (float adjecentRoadAngle in adjacentRoads.Keys) {
-                RoadObject adjecentRoad = adjacentRoads.GetValueOrDefault(adjecentRoadAngle);
-                if (adjecentRoadAngle > 0) {
-                    // road is to the left
-                    MeshUtilities.GetNodeMeshPositions(
-                        adjecentRoad,
-                        endNode,
-                        roadPosition,
-                        endNodePosition,
-                        out leftRoadCenter,
-                        out _);
-                } else {
-                    // road is to the right
-                    MeshUtilities.GetNodeMeshPositions(
-                        adjecentRoad,
-                        endNode,
-                        roadPosition,
-                        endNodePosition,
-                        out rightRoadCenter,
-                        out _);
-                }
-            }
+            MeshUtilities.GetNodeMeshPositions(
+                adjacentRoads.First().Value,
+                endNode,
+                roadPosition,
+                endNodePosition,
+                out Vector3 leftRoadCenter,
+                out _);
+            MeshUtilities.GetNodeMeshPositions(
+                adjacentRoads.Last().Value,
+                endNode,
+                roadPosition,
+                endNodePosition,
+                out Vector3 rightRoadCenter,
+                out _);
 
             Vector3 leftRoadRight = RoadUtilities.GetRoadLeftSideVertice(roadWidth, leftRoadCenter, endNodePosition);
             Vector3 thisRoadLeft = RoadUtilities.GetRoadRightSideVertice(roadWidth, thisRoadCenter, endNodePosition);
@@ -427,7 +410,7 @@ namespace MeshHandler.Road.NodeMeshData {
                 controlRight = endNodePosition + ((TRR + RRL) * roadWidth) / Vector3.Dot((TRR + RRL), (TRR + RRL));
             } else {
                 // Road is traight, so calculations are easier
-                controlRight = endNodePosition + TRL * roadWidth / 2;
+                controlRight = endNodePosition + TRR * roadWidth / 2;
             }
 
             MeshUtilities utilities = new(
