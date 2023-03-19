@@ -1,5 +1,6 @@
 using UnityEngine;
 using MeshHandler.Utilities;
+using Road.Utilities;
 
 namespace MeshHandler.Road.Temp.Visual {
 
@@ -27,14 +28,9 @@ namespace MeshHandler.Road.Temp.Visual {
 
             Vector3 startLeft = RoadUtilities.GetRoadLeftSideVertice(roadWidth, startNodePosition, controlPosition);
             Vector3 endLeft = RoadUtilities.GetRoadLeftSideVertice(roadWidth, endNodePosition, controlPosition);
-            Vector3 startControlLeft;
-            Vector3 endControlLeft;
 
             Vector3 startRight = RoadUtilities.GetRoadRightSideVertice(roadWidth, startNodePosition, controlPosition);
             Vector3 endRight = RoadUtilities.GetRoadRightSideVertice(roadWidth, endNodePosition, controlPosition);
-
-            Vector3 startcontrolRight;
-            Vector3 endControlRight;
 
             Vector3 controlLeft;
             Vector3 controlRight;
@@ -54,11 +50,11 @@ namespace MeshHandler.Road.Temp.Visual {
             }
 
             // Road is traight, so calculations are easier
-            startControlLeft = startPosition + n0 * roadWidth / 2;
-            startcontrolRight = startPosition - n1 * roadWidth / 2;
+            Vector3 startControlLeft = startPosition + n0 * roadWidth / 2;
+            Vector3 startcontrolRight = startPosition - n1 * roadWidth / 2;
 
-            endControlLeft = endPosition - n0 * roadWidth / 2;
-            endControlRight = endPosition + n1 * roadWidth / 2;
+            Vector3 endControlLeft = endPosition - n0 * roadWidth / 2;
+            Vector3 endControlRight = endPosition + n1 * roadWidth / 2;
 
             // Populate start Node
             PopulateStartNodeMeshData(meshData, startPosition, startLeft, startControlLeft, startRight, startcontrolRight);

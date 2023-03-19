@@ -27,11 +27,15 @@ public class InputManager : MonoBehaviour
 	private void Awake() {
 		Instance = this;
 		gameInputActions = new();
+
 		gameInputActions.Idle.Enable();
-		gameInputActions.General.Enable();
 		gameInputActions.Idle.Select.performed += Select_performed;
-		gameInputActions.Destroying.Demolish.performed += Demolish_performed;
+
+		gameInputActions.General.Enable();
         gameInputActions.General.Escape.performed += Building_Escape_performed;
+
+		gameInputActions.Destroying.Demolish.performed += Demolish_performed;
+
         gameInputActions.BuildingRoad.PlaceNode.performed += PlaceNode_performed;
         gameInputActions.BuildingRoad.Cancel.performed += Cancel_performed;
 	}
