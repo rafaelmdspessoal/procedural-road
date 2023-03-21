@@ -74,7 +74,7 @@
     <Compile Include="Assets\Scripts\Meshes\MeshData.cs" />
     <Compile Include="Assets\Scripts\Roads\RoadManager.cs" />
     <Compile Include="Assets\Scripts\UI\RoadUIController.cs" />
-    <Compile Include="Assets\Scripts\World.cs" />
+    <Compile Include="Assets\Scripts\Ground.cs" />
     <Compile Include="Assets\Scripts\TestVectorScript.cs" />
     <Compile Include="Assets\Scripts\Interfaces\IRemoveable.cs" />
     <Compile Include="Assets\Scripts\Bezier.cs" />
@@ -82,6 +82,7 @@
     <Compile Include="Assets\Scripts\Roads\HandleStraightRoad.cs" />
     <Compile Include="Assets\Scripts\Roads\RoadObject.cs" />
     <Compile Include="Assets\Scripts\Meshes\RoadTempMeshBuilder.cs" />
+    <Compile Include="Assets\Scripts\Roads\HandleCurvedRoad.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

@@ -1289,7 +1289,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1237725179}
-  - component: {fileID: 1237725180}
   m_Layer: 5
   m_Name: BuildingsPanel
   m_TagString: Untagged
@@ -1320,18 +1319,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 200}
   m_Pivot: {x: 0.5, y: 0}
---- !u!114 &1237725180
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1237725178}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d2c39ebe4046beb45a1ac9ce5ab6d2ef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1280158763
 GameObject:
   m_ObjectHideFlags: 0
@@ -1948,6 +1935,7 @@ MonoBehaviour:
   roadParentTransform: {fileID: 228958930}
   nodeParentTransform: {fileID: 1882003443}
   node: {fileID: 1739219237215934384, guid: 16585d08cdc67d847acb875a835dedf8, type: 3}
+  updateRoads: 0
 --- !u!114 &1524344565
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -4,6 +4,7 @@ using System;
 using MeshHandler.Road.Temp.Builder;
 using UI.Controller.Road;
 using Road.Manager;
+using Road.Utilities;
 
 namespace Road.Placement {
 
@@ -36,7 +37,6 @@ namespace Road.Placement {
         }
 
         [SerializeField] private Material temporaryRoadMaterial;
-        [SerializeField] private GameObject nodeGFX;
 
         private RoadUIController roadUIController;
         private InputManager inputManager;
@@ -50,6 +50,7 @@ namespace Road.Placement {
 
         private MeshFilter meshFilter;
         private MeshRenderer meshRenderer;
+        private GameObject nodeGFX;
 
         private void Awake() {
             Instance = this;
@@ -63,7 +64,8 @@ namespace Road.Placement {
             uIController = UIController.Instance;
             roadManager = RoadManager.Instance;
 
-            roadUIController.OnBuildingRoad += RoadUIController_OnBuildingRoad;
+            roadUIController.OnBuildingStraightRoad += RoadUIController_OnBuildingStraightRoad;
+            roadUIController.OnBuildingCurvedRoad += RoadUIController_OnBuildingCurvedRoad;
             inputManager.OnEscape += InputManager_OnEscape;
             inputManager.OnCancel += InputManager_OnCancel;
             uIController.OnRemovingObjects += UIController_OnRemovingObjects;
@@ -101,12 +103,24 @@ namespace Road.Placement {
             state = State.Idle;
         }
 
-        private void RoadUIController_OnBuildingRoad(RoadObjectSO roadObjectSO) {
+        private void RoadUIController_OnBuildingStraightRoad(RoadObjectSO roadObjectSO) {
             roadManager.ClearAffectedRoads();
             ResetDisplayRoad();
             state = State.StraightRoad;
             Debug.Log("Building Road: " + state);
             this.roadObjectSO = roadObjectSO;
+            if (nodeGFX == null) nodeGFX = RoadUtilities.CreateNodeGFX(roadObjectSO);
+            else nodeGFX.SetActive(true);
+        }
+
+        private void RoadUIController_OnBuildingCurvedRoad(RoadObjectSO roadObjectSO) {
+            roadManager.ClearAffectedRoads();
+            ResetDisplayRoad();
+            state = State.CurvedRoad;
+            Debug.Log("Building Road: " + state);
+            this.roadObjectSO = roadObjectSO;
+            if (nodeGFX == null) nodeGFX = RoadUtilities.CreateNodeGFX(roadObjectSO);
+            else nodeGFX.SetActive(true);
         }
 
         public bool IsBuilding() {
@@ -120,6 +134,10 @@ namespace Road.Placement {
         }
 
         public bool IsBuildingStraightRoad() => state == State.StraightRoad;
+        public bool IsBuildingCurvedRoad() => state == State.CurvedRoad;
+        public bool IsBuildingStartNode() => buildingState == BuildingState.StartNode;
+        public bool IsBuildingControlNode() => buildingState == BuildingState.ControlNode;
+        public bool IsBuildingEndNode() => buildingState == BuildingState.EndNode;
 
         public RoadObjectSO GetRoadObjectSO() => roadObjectSO;
 
@@ -131,6 +149,10 @@ namespace Road.Placement {
             Debug.Log("Building cancelled");
             roadManager.ClearAffectedRoads();
             ResetDisplayRoad();
+        }
+
+        public void SetNodeGFXPosition(Vector3 position) {
+            nodeGFX.transform.position = position;
         }
     }
 }

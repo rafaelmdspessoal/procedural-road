@@ -49,11 +49,10 @@ namespace MeshHandler.Road.Temp.Visual {
                 controlRight = controlPosition - n1 * roadWidth / 2;
             }
 
-            // Road is traight, so calculations are easier
             Vector3 startControlLeft = startPosition + n0 * roadWidth / 2;
-            Vector3 startcontrolRight = startPosition - n1 * roadWidth / 2;
+            Vector3 startcontrolRight = startPosition - n0 * roadWidth / 2;
 
-            Vector3 endControlLeft = endPosition - n0 * roadWidth / 2;
+            Vector3 endControlLeft = endPosition - n1 * roadWidth / 2;
             Vector3 endControlRight = endPosition + n1 * roadWidth / 2;
 
             // Populate start Node

@@ -2,10 +2,8 @@ using UnityEngine;
 using Rafael.Utils;
 using Road.Utilities;
 
-namespace Road.Placement.Straight {
-
-    public class HandleStraightRoad : MonoBehaviour {
-
+namespace Road.Placement.Curved {
+    public class HandleCurvedRoad : MonoBehaviour {
         private RoadPlacementManager roadPlacementManager;
         private InputManager inputManager;
 
@@ -20,8 +18,8 @@ namespace Road.Placement.Straight {
         }
 
         private void Update() {
-            if (!roadPlacementManager.IsBuildingStraightRoad() || !roadPlacementManager.IsBuilding()) return;
-            Debug.Log("Is Building Straight Road: " + roadPlacementManager.IsBuildingStraightRoad());
+            if (!roadPlacementManager.IsBuildingCurvedRoad() || !roadPlacementManager.IsBuilding()) return;
+            Debug.Log("Is Building Curved Road: " + roadPlacementManager.IsBuildingCurvedRoad());
 
             if (RafaelUtils.TryRaycastObject(out RaycastHit hit)) {
                 Vector3 hitPosition = RoadUtilities.GetHitPosition(hit.point, hit.transform.gameObject);
@@ -30,18 +28,33 @@ namespace Road.Placement.Straight {
 
                 if (roadPlacementManager.IsBuildingStartNode()) return;
 
-                controlPosition = (startPosition + hitPosition) / 2;
-                roadPlacementManager.DisplayTemporaryMesh(startPosition, hitPosition, controlPosition);
+                if (roadPlacementManager.IsBuildingControlNode()) {
+                    Vector3 tempControlPosition = (startPosition + hitPosition) / 2;
+                    controlPosition = hitPosition;
+                    roadPlacementManager.DisplayTemporaryMesh(startPosition, hitPosition, tempControlPosition);
+                } else {
+                    roadPlacementManager.DisplayTemporaryMesh(startPosition, hitPosition, controlPosition); 
+                }
             }
         }
 
 
         private void InputManager_OnNodePlaced(object sender, InputManager.OnObjectHitedEventArgs e) {
-            if (!roadPlacementManager.IsBuildingStraightRoad() || !roadPlacementManager.IsBuilding()) return;
+            if (!roadPlacementManager.IsBuildingCurvedRoad() || !roadPlacementManager.IsBuilding()) return;
 
             Debug.Log("Node Placed!");
             if (roadPlacementManager.IsBuildingStartNode()) {
                 startPosition = RoadUtilities.GetHitPosition(e.position, e.obj, true);
+                roadPlacementManager.UpdateBuildingState(RoadPlacementManager.BuildingState.ControlNode);
+                return;
+            }
+
+            if (roadPlacementManager.IsBuildingControlNode()) {
+                controlPosition = new Vector3(
+                    e.position.x,
+                    e.position.y + 0.1f,
+                    e.position.z
+                );
                 roadPlacementManager.UpdateBuildingState(RoadPlacementManager.BuildingState.EndNode);
                 return;
             }
@@ -54,6 +67,7 @@ namespace Road.Placement.Straight {
                     endNodePosition = endPosition,
                     roadObjectSO = roadPlacementManager.GetRoadObjectSO()
                 });
+                roadPlacementManager.UpdateBuildingState(RoadPlacementManager.BuildingState.ControlNode);
                 startPosition = endPosition;
                 return;
             }
