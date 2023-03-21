@@ -44,7 +44,7 @@ namespace Road.Obj {
         private void Update() {
             if (RoadManager.Instance.updateRoads) {
                 UpdateRoadMesh();
-                controlNodeObject.transform.position = (startNode.Position + endNode.Position) / 2;
+                //controlNodeObject.transform.position = (startNode.Position + endNode.Position) / 2;
             }
         }
 
