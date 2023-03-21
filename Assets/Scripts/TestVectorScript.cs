@@ -59,7 +59,6 @@ public class TestVectorScript : MonoBehaviour
         if (rightAngle < 0) rightAngle += 360;
 
         angles.Add(rightAngle, "rightAngle");
-        angles.Add(midAngle, "midAngle");
         angles.Add(leftAngle, "leftAngle");
 
         Debug.DrawLine(centerPos, endMainPos, Color.blue);
@@ -67,8 +66,9 @@ public class TestVectorScript : MonoBehaviour
         Debug.DrawLine(centerPos, endMidPos, Color.green);
         Debug.DrawLine(centerPos, endRightPos, Color.black);
 
-        PrintAngles(angles);
-
+        PrintNodeSize(angles);
+        //PrintAngles(angles);
+        angles.Add(midAngle, "midAngle");
     }
 
     void PrintAngles(Dictionary<float, string> angles) {
@@ -86,6 +86,34 @@ public class TestVectorScript : MonoBehaviour
         print("len: " + adjacentAngles.Count());
         print(adjacentAngles.First().Value + " " + adjacentAngles.First().Key);
         print(adjacentAngles.Last().Value + " " + adjacentAngles.Last().Key);
+    }
+
+    void PrintNodeSize(Dictionary<float, string> angles) {
+
+        angles = angles.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
+
+        float leftAngle = angles.First().Key;
+        float rightAngle = angles.Last().Key;
+
+        float smallestAngle = 180f;
+
+        if (leftAngle > 180) smallestAngle = rightAngle;
+        else if (rightAngle < 180) smallestAngle = leftAngle;
+        else {
+            rightAngle = 360 - rightAngle;
+            smallestAngle = Mathf.Min(leftAngle, rightAngle);
+        }
+        smallestAngle = Mathf.Clamp(smallestAngle, 0f, 90);
+        float cosAngle = Mathf.Abs(Mathf.Cos(smallestAngle * Mathf.Deg2Rad));
+        float offset = (0.55f + cosAngle) * 4f;
+
+        print(angles.First().Value + " " + angles.First().Key);
+        print("new rightAngle: " + rightAngle);
+        print("new smallestAngle: " + smallestAngle);
+        print("new leftAngle: " + leftAngle);
+        print(angles.Last().Value + " " + angles.Last().Key);
+        print("Offset: " + offset);
+        print("###################");
     }
 
 

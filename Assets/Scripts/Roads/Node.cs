@@ -16,19 +16,19 @@ namespace Road.NodeObj {
             Dictionary<float, RoadObject> adjacentRoads = GetAdjacentRoadsTo(roadObject);
 
             float leftAngle = adjacentRoads.First().Key;
-            if (leftAngle > 180) leftAngle -= 180;
-            float rightAngle = 180;
+            float rightAngle = adjacentRoads.Last().Key;
+            float smallestAngle;
 
-            if (adjacentRoads.Count > 1) {
-                rightAngle = adjacentRoads.Last().Key;
-                if (rightAngle > 180) rightAngle -= 180;
+            if (leftAngle > 180) smallestAngle = rightAngle;
+            else if (rightAngle < 180) smallestAngle = leftAngle;
+            else {
+                rightAngle = 360 - rightAngle;
+                smallestAngle = Mathf.Min(leftAngle, rightAngle);
             }
-
-            float smallestAngle = Mathf.Min(leftAngle, rightAngle);
-
+            smallestAngle = Mathf.Clamp(smallestAngle, 0f, 90);
             float cosAngle = Mathf.Abs(Mathf.Cos(smallestAngle * Mathf.Deg2Rad));
-            Mathf.Clamp01(cosAngle);
-            float offset = (1.1f + cosAngle) * roadObject.RoadWidth;
+            float offset = (0.55f + cosAngle) * 4f;
+
             return offset;
         }
 
