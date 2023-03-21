@@ -9,7 +9,7 @@ namespace UI.Controller.Road {
         private InputManager inputManager;
         private UIController uIController;
 
-        public Action<RoadObjectSO> OnBuildingRoad;
+        public Action<RoadObjectSO> OnBuildingStraightRoad, OnBuildingCurvedRoad;
 
         [SerializeField] private Button straightRoadButton;
         [SerializeField] private Button curveRoadButton;
@@ -33,13 +33,13 @@ namespace UI.Controller.Road {
             uIController.OnRemovingObjects += UIController_OnRemovingObjects;
 
             straightRoadButton.onClick.AddListener(() => {
-                OnBuildingRoad?.Invoke(roadObjectSO);
+                OnBuildingStraightRoad?.Invoke(roadObjectSO);
             });
             curveRoadButton.onClick.AddListener(() => {
-                OnBuildingRoad?.Invoke(roadObjectSO);
+                OnBuildingCurvedRoad?.Invoke(roadObjectSO);
             });
             freeRoadButton.onClick.AddListener(() => {
-                OnBuildingRoad?.Invoke(roadObjectSO);
+                OnBuildingStraightRoad?.Invoke(roadObjectSO);
             });
         }
 

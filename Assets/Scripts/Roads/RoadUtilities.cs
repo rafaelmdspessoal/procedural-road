@@ -1,5 +1,8 @@
-﻿using System.Collections;
+﻿using Road.Obj;
+using Road.NodeObj;
+using Road.Manager;
 using UnityEngine;
+using World;
 
 namespace Road.Utilities {
 
@@ -37,6 +40,23 @@ namespace Road.Utilities {
             controlNodeObject.transform.position = controlNodePosition;
             controlNodeObject.transform.name = "Control Node";
             return controlNodeObject;
+        }
+
+        public static Vector3 GetHitPosition(Vector3 hitPosition, GameObject hitObject, bool splitRoad = false) {
+            Vector3 targetPosition = hitPosition;
+            if (hitObject.TryGetComponent(out Node _)) {
+                return hitObject.transform.position;
+            } else if (hitObject.TryGetComponent(out RoadObject roadObject)) {
+                targetPosition = Bezier.GetClosestPointTo(roadObject, hitPosition);
+                if (splitRoad)
+                    RoadManager.Instance.AddRoadToSplit(targetPosition, roadObject);
+                return targetPosition;
+            }
+            return new Vector3(
+                targetPosition.x,
+                targetPosition.y + 0.1f,
+                targetPosition.z
+            );
         }
     }
 }

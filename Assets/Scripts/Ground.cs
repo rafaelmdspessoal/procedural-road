@@ -1,8 +1,8 @@
 using UnityEngine;
 
-namespace World.Obj {
+namespace World {
 
-    public class World : MonoBehaviour {
+    public class Ground : MonoBehaviour {
         private void Start() {
             InputManager.Instance.OnSelected += InputManager_OnSelected;
             InputManager.Instance.OnDemolished += InputManager_OnDemolished;
