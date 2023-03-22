@@ -9,18 +9,15 @@ using Road.Utilities;
 namespace Road.Manager {
 
     public class RoadManager : MonoBehaviour {
-
-        private RoadPlacementManager roadPlacementManager;
-
         public static RoadManager Instance { get; private set; }
 
+        private RoadPlacementManager roadPlacementManager;
+        public bool updateRoads = false;
         private readonly Dictionary<Vector3, Node> placedNodesDict = new();
 
         [SerializeField] private Transform roadParentTransform;
         [SerializeField] private Transform nodeParentTransform;
         [SerializeField] private GameObject node;
-        
-        public bool updateRoads = false;
 
         private void Awake() {
             Instance = this;

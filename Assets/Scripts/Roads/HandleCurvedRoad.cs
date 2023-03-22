@@ -7,10 +7,6 @@ namespace Road.Placement.Curved {
         private RoadPlacementManager roadPlacementManager;
         private InputManager inputManager;
 
-        private Vector3 controlPosition;
-        private Vector3 startPosition;
-        private Vector3 endPosition;
-
         private void Start() {
             roadPlacementManager = RoadPlacementManager.Instance;
             inputManager = InputManager.Instance;
@@ -29,11 +25,11 @@ namespace Road.Placement.Curved {
                 if (roadPlacementManager.IsBuildingStartNode()) return;
 
                 if (roadPlacementManager.IsBuildingControlNode()) {
-                    Vector3 tempControlPosition = (startPosition + hitPosition) / 2;
-                    controlPosition = hitPosition;
-                    roadPlacementManager.DisplayTemporaryMesh(startPosition, hitPosition, tempControlPosition);
+                    Vector3 tempControlPosition = (roadPlacementManager.StartPosition + hitPosition) / 2;
+                    roadPlacementManager.ControlPosition = hitPosition;
+                    roadPlacementManager.DisplayTemporaryMesh(roadPlacementManager.StartPosition, hitPosition, tempControlPosition);
                 } else {
-                    roadPlacementManager.DisplayTemporaryMesh(startPosition, hitPosition, controlPosition); 
+                    roadPlacementManager.DisplayTemporaryMesh(roadPlacementManager.StartPosition, hitPosition, roadPlacementManager.ControlPosition); 
                 }
             }
         }
@@ -44,13 +40,13 @@ namespace Road.Placement.Curved {
 
             Debug.Log("Node Placed!");
             if (roadPlacementManager.IsBuildingStartNode()) {
-                startPosition = RoadUtilities.GetHitPosition(e.position, e.obj, true);
+                roadPlacementManager.StartPosition = RoadUtilities.GetHitPosition(e.position, e.obj, true);
                 roadPlacementManager.UpdateBuildingState(RoadPlacementManager.BuildingState.ControlNode);
                 return;
             }
 
             if (roadPlacementManager.IsBuildingControlNode()) {
-                controlPosition = new Vector3(
+                roadPlacementManager.ControlPosition = new Vector3(
                     e.position.x,
                     e.position.y + 0.1f,
                     e.position.z
@@ -60,11 +56,10 @@ namespace Road.Placement.Curved {
             }
 
             if (roadPlacementManager.IsBuildingEndNode()) {
-                endPosition = RoadUtilities.GetHitPosition(e.position, e.obj, true);
-                roadPlacementManager.PlaceRoad(startPosition, controlPosition, endPosition);
+                roadPlacementManager.EndPosition = RoadUtilities.GetHitPosition(e.position, e.obj, true);
+                roadPlacementManager.PlaceRoad();
                 roadPlacementManager.SplitRoads();
                 roadPlacementManager.UpdateBuildingState(RoadPlacementManager.BuildingState.ControlNode);
-                startPosition = endPosition;
                 return;
             }
         }

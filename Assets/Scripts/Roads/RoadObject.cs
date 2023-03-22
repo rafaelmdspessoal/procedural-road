@@ -11,7 +11,6 @@ namespace Road.Obj {
     [RequireComponent(typeof(MeshCollider))]
     public class RoadObject : MonoBehaviour, IRemoveable {
 
-
         public EventHandler<OnRoadChangedEventArgs> OnRoadPlaced;
         public EventHandler<OnRoadChangedEventArgs> OnRoadBuilt;
         public EventHandler<OnRoadChangedEventArgs> OnRoadRemoved;
@@ -20,6 +19,7 @@ namespace Road.Obj {
         public class OnRoadChangedEventArgs : EventArgs { public RoadObject roadObject; }
         
         [SerializeField] private RoadObjectSO roadObjectSO;
+
         private MeshFilter meshFilter;
         private MeshRenderer meshRenderer;
         private MeshCollider meshCollider;

@@ -9,10 +9,6 @@ namespace Road.Placement.Straight {
         private RoadPlacementManager roadPlacementManager;
         private InputManager inputManager;
 
-        private Vector3 controlPosition;
-        private Vector3 startPosition;
-        private Vector3 endPosition;
-
         private void Start() {
             roadPlacementManager = RoadPlacementManager.Instance;
             inputManager = InputManager.Instance;
@@ -32,27 +28,25 @@ namespace Road.Placement.Straight {
 
                 // roadPlacementManager.GetPositionWithAngleSnap(hitPosition, )
 
-                controlPosition = (startPosition + hitPosition) / 2;
-                roadPlacementManager.DisplayTemporaryMesh(startPosition, hitPosition, controlPosition);
+                roadPlacementManager.ControlPosition = (roadPlacementManager.StartPosition + hitPosition) / 2;
+                roadPlacementManager.DisplayTemporaryMesh(roadPlacementManager.StartPosition, hitPosition, roadPlacementManager.ControlPosition);
             }
         }
-
 
         private void InputManager_OnNodePlaced(object sender, InputManager.OnObjectHitedEventArgs e) {
             if (!roadPlacementManager.IsBuildingStraightRoad() || !roadPlacementManager.IsBuilding()) return;
 
             Debug.Log("Node Placed!");
             if (roadPlacementManager.IsBuildingStartNode()) {
-                startPosition = RoadUtilities.GetHitPosition(e.position, e.obj, true);
+                roadPlacementManager.StartPosition = RoadUtilities.GetHitPosition(e.position, e.obj, true);
                 roadPlacementManager.UpdateBuildingState(RoadPlacementManager.BuildingState.EndNode);
                 return;
             }
 
             if (roadPlacementManager.IsBuildingEndNode()) {
-                endPosition = RoadUtilities.GetHitPosition(e.position, e.obj, true);
-                roadPlacementManager.PlaceRoad(startPosition, controlPosition, endPosition);
+                roadPlacementManager.EndPosition = RoadUtilities.GetHitPosition(e.position, e.obj, true);
+                roadPlacementManager.PlaceRoad();
                 roadPlacementManager.SplitRoads();
-                startPosition = endPosition;
                 return;
             }
         }

@@ -56,6 +56,10 @@ namespace Road.Placement {
         private MeshRenderer meshRenderer;
         private GameObject nodeGFX;
 
+        private Vector3 startPosition;
+        private Vector3 controlPosition;
+        private Vector3 endPosition;
+
 
         private void Awake() {
             Instance = this;
@@ -69,14 +73,16 @@ namespace Road.Placement {
             uIController = UIController.Instance;
             roadManager = RoadManager.Instance;
 
-            roadUIController.OnBuildingStraightRoad += RoadUIController_OnBuildingStraightRoad;
-            roadUIController.OnBuildingCurvedRoad += RoadUIController_OnBuildingCurvedRoad;
-            inputManager.OnEscape += InputManager_OnEscape;
-            inputManager.OnCancel += InputManager_OnCancel;
-            uIController.OnRemovingObjects += UIController_OnRemovingObjects;
-
             state = State.Idle;
             buildingState = BuildingState.StartNode;
+
+            roadUIController.OnBuildingStraightRoad += RoadUIController_OnBuildingStraightRoad;
+            roadUIController.OnBuildingCurvedRoad += RoadUIController_OnBuildingCurvedRoad;
+
+            uIController.OnRemovingObjects += UIController_OnRemovingObjects;
+
+            inputManager.OnEscape += InputManager_OnEscape;
+            inputManager.OnCancel += InputManager_OnCancel;
         }
 
         public void DisplayTemporaryMesh(Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition) {
@@ -129,18 +135,27 @@ namespace Road.Placement {
         }
 
         public bool IsBuilding() => state != State.Idle && state != State.RemovingRoad;
-        public BuildingState GetBuildingState() => buildingState;
         public void UpdateBuildingState(BuildingState state) => buildingState = state;
         public bool IsBuildingStraightRoad() => state == State.StraightRoad;
         public bool IsBuildingCurvedRoad() => state == State.CurvedRoad;
         public bool IsBuildingStartNode() => buildingState == BuildingState.StartNode;
         public bool IsBuildingControlNode() => buildingState == BuildingState.ControlNode;
         public bool IsBuildingEndNode() => buildingState == BuildingState.EndNode;
-        public RoadObjectSO GetRoadObjectSO() => roadObjectSO;
+        public void SetNodeGFXPosition(Vector3 position) => nodeGFX.transform.position = position;
+        public Vector3 StartPosition { get { return startPosition; } set { startPosition = value; } }
+        public Vector3 ControlPosition { get { return controlPosition; } set { controlPosition = value; } }
+        public Vector3 EndPosition { get { return endPosition; } set { endPosition = value; } }
 
         private void ResetDisplayRoad() {
             UpdateBuildingState(BuildingState.StartNode);
+            ResetRoadPositions();
             meshFilter.mesh = null;
+        }
+        private void ResetRoadPositions() {
+            startPosition = Vector3.negativeInfinity;
+            controlPosition = Vector3.negativeInfinity;
+            endPosition = Vector3.negativeInfinity;
+
         }
         private void InputManager_OnCancel() {
             Debug.Log("Building cancelled");
@@ -148,15 +163,14 @@ namespace Road.Placement {
             ResetDisplayRoad();
         }
 
-        public void SetNodeGFXPosition(Vector3 position) {
-            nodeGFX.transform.position = position;
-        }
-
-        public void PlaceRoad( Vector3 startPosition, Vector3 controlPosition, Vector3 endPosition) {
+        public void PlaceRoad() {
             Node startNode = roadManager.GetOrCreateNodeAt(startPosition);
             Node endNode = roadManager.GetOrCreateNodeAt(endPosition);
 
             CreateRoadObject(startNode, endNode, controlPosition, roadObjectSO);
+            Vector3 cachedEndPosition = endPosition;
+            ResetRoadPositions();
+            startPosition = cachedEndPosition;
         }
 
         private RoadObject CreateRoadObject(Node startNode, Node endNode, Vector3 controlNodePosition, RoadObjectSO roadObjectSO) {
