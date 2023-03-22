@@ -5,6 +5,9 @@ using MeshHandler.Road.Temp.Builder;
 using UI.Controller.Road;
 using Road.Manager;
 using Road.Utilities;
+using Road.Obj;
+using Road.NodeObj;
+using System.Collections.Generic;
 
 namespace Road.Placement {
 
@@ -27,16 +30,17 @@ namespace Road.Placement {
             EndNode,
         }
 
-        public EventHandler<OnNodesPlacedEventArgs> OnNodesPlaced;
+        public EventHandler<OnRoadPlacedEventArgs> OnRoadPlaced;
 
-        public class OnNodesPlacedEventArgs : EventArgs {
-            public Vector3 startNodePosition;
-            public Vector3 controlNodePosition;
-            public Vector3 endNodePosition;
-            public RoadObjectSO roadObjectSO;
+        public class OnRoadPlacedEventArgs : EventArgs {
+            public RoadObject roadObject;
         }
 
+
+        private readonly Dictionary<Vector3, RoadObject> roadsToSplit = new();
+
         [SerializeField] private Material temporaryRoadMaterial;
+        [SerializeField] private float angleSnap;
 
         private RoadUIController roadUIController;
         private InputManager inputManager;
@@ -51,6 +55,7 @@ namespace Road.Placement {
         private MeshFilter meshFilter;
         private MeshRenderer meshRenderer;
         private GameObject nodeGFX;
+
 
         private void Awake() {
             Instance = this;
@@ -88,7 +93,7 @@ namespace Road.Placement {
         }
 
         private void UIController_OnRemovingObjects() {
-            roadManager.ClearAffectedRoads();
+            ClearAffectedRoads();
             ResetDisplayRoad();
             if (nodeGFX != null) nodeGFX.SetActive(false);
             state = State.Idle;
@@ -97,14 +102,14 @@ namespace Road.Placement {
 
         private void InputManager_OnEscape() {
             Debug.Log("Escaped");
-            roadManager.ClearAffectedRoads();
+            ClearAffectedRoads();
             ResetDisplayRoad();
             if (nodeGFX != null) nodeGFX.SetActive(false);
             state = State.Idle;
         }
 
         private void RoadUIController_OnBuildingStraightRoad(RoadObjectSO roadObjectSO) {
-            roadManager.ClearAffectedRoads();
+            ClearAffectedRoads();
             ResetDisplayRoad();
             state = State.StraightRoad;
             Debug.Log("Building Road: " + state);
@@ -114,7 +119,7 @@ namespace Road.Placement {
         }
 
         private void RoadUIController_OnBuildingCurvedRoad(RoadObjectSO roadObjectSO) {
-            roadManager.ClearAffectedRoads();
+            ClearAffectedRoads();
             ResetDisplayRoad();
             state = State.CurvedRoad;
             Debug.Log("Building Road: " + state);
@@ -123,22 +128,14 @@ namespace Road.Placement {
             else nodeGFX.SetActive(true);
         }
 
-        public bool IsBuilding() {
-            return state != State.Idle && state != State.RemovingRoad;
-        }
-
+        public bool IsBuilding() => state != State.Idle && state != State.RemovingRoad;
         public BuildingState GetBuildingState() => buildingState;
-
-        public void UpdateBuildingState(BuildingState state) {
-            buildingState = state;
-        }
-
+        public void UpdateBuildingState(BuildingState state) => buildingState = state;
         public bool IsBuildingStraightRoad() => state == State.StraightRoad;
         public bool IsBuildingCurvedRoad() => state == State.CurvedRoad;
         public bool IsBuildingStartNode() => buildingState == BuildingState.StartNode;
         public bool IsBuildingControlNode() => buildingState == BuildingState.ControlNode;
         public bool IsBuildingEndNode() => buildingState == BuildingState.EndNode;
-
         public RoadObjectSO GetRoadObjectSO() => roadObjectSO;
 
         private void ResetDisplayRoad() {
@@ -147,12 +144,65 @@ namespace Road.Placement {
         }
         private void InputManager_OnCancel() {
             Debug.Log("Building cancelled");
-            roadManager.ClearAffectedRoads();
+            ClearAffectedRoads();
             ResetDisplayRoad();
         }
 
         public void SetNodeGFXPosition(Vector3 position) {
             nodeGFX.transform.position = position;
+        }
+
+        public void PlaceRoad( Vector3 startPosition, Vector3 controlPosition, Vector3 endPosition) {
+            Node startNode = roadManager.GetOrCreateNodeAt(startPosition);
+            Node endNode = roadManager.GetOrCreateNodeAt(endPosition);
+
+            CreateRoadObject(startNode, endNode, controlPosition, roadObjectSO);
+        }
+
+        private RoadObject CreateRoadObject(Node startNode, Node endNode, Vector3 controlNodePosition, RoadObjectSO roadObjectSO) {
+            Vector3 roadPosition = (startNode.gameObject.transform.position + endNode.gameObject.transform.position) / 2;
+            GameObject roadGameObject = Instantiate(
+                roadObjectSO.roadObjectPrefab, 
+                roadPosition, 
+                Quaternion.identity, 
+                roadManager.GetRoadParent());
+            RoadObject roadObject = roadGameObject.GetComponent<RoadObject>();
+            GameObject controlNodeObject = RoadUtilities.CreateControlNode(roadObject.GetRoadObjectSO, controlNodePosition);
+
+            roadObject.PlaceRoad(startNode, endNode, controlNodeObject);
+            OnRoadPlaced?.Invoke(this, new OnRoadPlacedEventArgs { roadObject = roadObject });
+            return roadObject;
+        }
+
+        public void SplitRoads() {
+            Debug.Log("Roads to split: " + roadsToSplit.Count);
+            foreach (Vector3 positionToSplit in roadsToSplit.Keys) {
+                RoadObject roadToSplit = roadsToSplit[positionToSplit];
+                Node startNode = roadToSplit.StartNode;
+                Node centerNode = roadManager.GetNodeAt(positionToSplit);
+                Node endNode = roadToSplit.EndNode;
+
+                Bezier.GetTangentAt(
+                    roadToSplit,
+                    centerNode.Position,
+                    out Vector3 newStartControlPointPosition,
+                    out Vector3 newEndControlPointPosition);
+
+                roadToSplit.Remove(true);
+                CreateRoadObject(startNode, centerNode, newStartControlPointPosition, roadToSplit.GetRoadObjectSO);
+                CreateRoadObject(centerNode, endNode, newEndControlPointPosition, roadToSplit.GetRoadObjectSO);
+            }
+            ClearAffectedRoads();
+        }
+
+        private void ClearAffectedRoads() {
+            roadsToSplit.Clear();
+        }
+
+        public void AddRoadToSplit(Vector3 position, RoadObject roadObject) {
+            if (!roadsToSplit.ContainsKey(position)) {
+                roadsToSplit.Add(position, roadObject);
+            }
         }
     }
 }

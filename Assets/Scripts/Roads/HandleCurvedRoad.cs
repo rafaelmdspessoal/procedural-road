@@ -61,12 +61,8 @@ namespace Road.Placement.Curved {
 
             if (roadPlacementManager.IsBuildingEndNode()) {
                 endPosition = RoadUtilities.GetHitPosition(e.position, e.obj, true);
-                roadPlacementManager.OnNodesPlaced?.Invoke(this, new RoadPlacementManager.OnNodesPlacedEventArgs {
-                    startNodePosition = startPosition,
-                    controlNodePosition = controlPosition,
-                    endNodePosition = endPosition,
-                    roadObjectSO = roadPlacementManager.GetRoadObjectSO()
-                });
+                roadPlacementManager.PlaceRoad(startPosition, controlPosition, endPosition);
+                roadPlacementManager.SplitRoads();
                 roadPlacementManager.UpdateBuildingState(RoadPlacementManager.BuildingState.ControlNode);
                 startPosition = endPosition;
                 return;

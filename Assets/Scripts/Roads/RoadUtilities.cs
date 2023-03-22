@@ -1,8 +1,7 @@
 ﻿using Road.Obj;
 using Road.NodeObj;
-using Road.Manager;
 using UnityEngine;
-using World;
+using Road.Placement;
 
 namespace Road.Utilities {
 
@@ -49,7 +48,7 @@ namespace Road.Utilities {
             } else if (hitObject.TryGetComponent(out RoadObject roadObject)) {
                 targetPosition = Bezier.GetClosestPointTo(roadObject, hitPosition);
                 if (splitRoad)
-                    RoadManager.Instance.AddRoadToSplit(targetPosition, roadObject);
+                    RoadPlacementManager.Instance.AddRoadToSplit(targetPosition, roadObject);
                 return targetPosition;
             }
             return new Vector3(

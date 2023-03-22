@@ -30,6 +30,8 @@ namespace Road.Placement.Straight {
 
                 if (roadPlacementManager.IsBuildingStartNode()) return;
 
+                // roadPlacementManager.GetPositionWithAngleSnap(hitPosition, )
+
                 controlPosition = (startPosition + hitPosition) / 2;
                 roadPlacementManager.DisplayTemporaryMesh(startPosition, hitPosition, controlPosition);
             }
@@ -48,12 +50,8 @@ namespace Road.Placement.Straight {
 
             if (roadPlacementManager.IsBuildingEndNode()) {
                 endPosition = RoadUtilities.GetHitPosition(e.position, e.obj, true);
-                roadPlacementManager.OnNodesPlaced?.Invoke(this, new RoadPlacementManager.OnNodesPlacedEventArgs {
-                    startNodePosition = startPosition,
-                    controlNodePosition = controlPosition,
-                    endNodePosition = endPosition,
-                    roadObjectSO = roadPlacementManager.GetRoadObjectSO()
-                });
+                roadPlacementManager.PlaceRoad(startPosition, controlPosition, endPosition);
+                roadPlacementManager.SplitRoads();
                 startPosition = endPosition;
                 return;
             }
