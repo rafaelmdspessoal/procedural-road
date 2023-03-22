@@ -70,6 +70,7 @@
     <Compile Include="Assets\Scripts\Roads\RoadPlacementManager.cs" />
     <Compile Include="Assets\Scripts\Meshes\PopulateRoadMeshData.cs" />
     <Compile Include="Assets\Scripts\Roads\Node.cs" />
+    <Compile Include="Assets\Scripts\Roads\HandleCurvedRoad.cs" />
     <Compile Include="Assets\Scripts\Roads\RoadUtilities.cs" />
     <Compile Include="Assets\Scripts\Meshes\MeshData.cs" />
     <Compile Include="Assets\Scripts\Roads\RoadManager.cs" />
@@ -82,7 +83,6 @@
     <Compile Include="Assets\Scripts\Roads\HandleStraightRoad.cs" />
     <Compile Include="Assets\Scripts\Roads\RoadObject.cs" />
     <Compile Include="Assets\Scripts\Meshes\RoadTempMeshBuilder.cs" />
-    <Compile Include="Assets\Scripts\Roads\HandleCurvedRoad.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
