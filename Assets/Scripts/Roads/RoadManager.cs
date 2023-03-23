@@ -62,7 +62,7 @@ namespace Road.Manager {
 
         public Node GetNodeAt(Vector3 position) => placedNodesDict.GetValueOrDefault(position);
         private bool HasNode(Node node) => placedNodesDict.ContainsValue(node);
-        private bool HasNode(Vector3 position) => placedNodesDict.ContainsKey(position);
+        public bool HasNode(Vector3 position) => placedNodesDict.ContainsKey(position);
         public Transform GetRoadParent() => roadParentTransform;
         public Node GetOrCreateNodeAt(Vector3 position) {
             if (HasNode(position)) {

@@ -20,16 +20,18 @@ namespace Road.Placement.Curved {
             if (RafaelUtils.TryRaycastObject(out RaycastHit hit)) {
                 Vector3 hitPosition = RoadUtilities.GetHitPosition(hit.point, hit.transform.gameObject);
 
-                roadPlacementManager.SetNodeGFXPosition(hitPosition);
-
-                if (roadPlacementManager.IsBuildingStartNode()) return;
-
-                if (roadPlacementManager.IsBuildingControlNode()) {
+                if (roadPlacementManager.IsBuildingStartNode())
+                    roadPlacementManager.SetNodeGFXPosition(hitPosition);
+                else if (roadPlacementManager.IsBuildingControlNode()) {
+                    if (roadPlacementManager.AngleSnap) {
+                        hitPosition = RoadUtilities.GetHitPositionWithSnapping(hitPosition, roadPlacementManager.StartNode, 15);
+                        roadPlacementManager.SetNodeGFXPosition(hitPosition);
+                    }
                     Vector3 tempControlPosition = (roadPlacementManager.StartPosition + hitPosition) / 2;
                     roadPlacementManager.ControlPosition = hitPosition;
                     roadPlacementManager.DisplayTemporaryMesh(roadPlacementManager.StartPosition, hitPosition, tempControlPosition);
                 } else {
-                    roadPlacementManager.DisplayTemporaryMesh(roadPlacementManager.StartPosition, hitPosition, roadPlacementManager.ControlPosition); 
+                    roadPlacementManager.DisplayTemporaryMesh(roadPlacementManager.StartPosition, hitPosition, roadPlacementManager.ControlPosition);
                 }
             }
         }
@@ -46,11 +48,15 @@ namespace Road.Placement.Curved {
             }
 
             if (roadPlacementManager.IsBuildingControlNode()) {
-                roadPlacementManager.ControlPosition = new Vector3(
+                Vector3 controlPosition = new(
                     e.position.x,
                     e.position.y + 0.1f,
                     e.position.z
                 );
+                if (roadPlacementManager.AngleSnap)
+                    controlPosition = RoadUtilities.GetHitPositionWithSnapping(controlPosition, roadPlacementManager.StartNode, 15);
+
+                roadPlacementManager.ControlPosition = controlPosition;
                 roadPlacementManager.UpdateBuildingState(RoadPlacementManager.BuildingState.EndNode);
                 return;
             }

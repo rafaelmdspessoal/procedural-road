@@ -57,5 +57,19 @@ namespace Road.Utilities {
                 targetPosition.z
             );
         }
+
+        public static Vector3 GetHitPositionWithSnapping(Vector3 hitPosition, Node hitNode, float angleSnap) {
+            Vector3 currentDirection = hitPosition - hitNode.Position;
+            Vector3 targetPosition = hitPosition;
+            foreach (RoadObject roadObject in hitNode.ConnectedRoads()) {
+                Vector3 roadDirection = hitNode.Position - roadObject.ControlNodeObject.transform.position;
+                float angle = Vector3.Angle(currentDirection, roadDirection);
+                if (angle > angleSnap) continue;
+
+                Vector3 projection = currentDirection.magnitude * Mathf.Cos(angle * Mathf.Deg2Rad) * roadDirection.normalized;
+                targetPosition = projection + hitNode.transform.position;
+            }
+            return targetPosition;
+        }
     }
 }

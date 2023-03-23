@@ -36,11 +36,11 @@ namespace Road.Placement {
             public RoadObject roadObject;
         }
 
-
         private readonly Dictionary<Vector3, RoadObject> roadsToSplit = new();
 
         [SerializeField] private Material temporaryRoadMaterial;
-        [SerializeField] private float angleSnap;
+        [SerializeField] private float angleToSnap;
+        [SerializeField] private bool angleSnap = true;
 
         private RoadUIController roadUIController;
         private InputManager inputManager;
@@ -56,9 +56,10 @@ namespace Road.Placement {
         private MeshRenderer meshRenderer;
         private GameObject nodeGFX;
 
-        private Vector3 startPosition;
         private Vector3 controlPosition;
-        private Vector3 endPosition;
+
+        private Node startNode;
+        private Node endNode;
 
 
         private void Awake() {
@@ -142,9 +143,14 @@ namespace Road.Placement {
         public bool IsBuildingControlNode() => buildingState == BuildingState.ControlNode;
         public bool IsBuildingEndNode() => buildingState == BuildingState.EndNode;
         public void SetNodeGFXPosition(Vector3 position) => nodeGFX.transform.position = position;
-        public Vector3 StartPosition { get { return startPosition; } set { startPosition = value; } }
+        public Node StartNode => startNode;
+        public Vector3 StartPosition { 
+            get { return startNode.Position; } 
+            set { startNode = roadManager.GetOrCreateNodeAt(value); } 
+        }
         public Vector3 ControlPosition { get { return controlPosition; } set { controlPosition = value; } }
-        public Vector3 EndPosition { get { return endPosition; } set { endPosition = value; } }
+        public Vector3 EndPosition { set { endNode = roadManager.GetOrCreateNodeAt(value); } }
+        public bool AngleSnap => angleSnap;
 
         private void ResetDisplayRoad() {
             UpdateBuildingState(BuildingState.StartNode);
@@ -152,10 +158,16 @@ namespace Road.Placement {
             meshFilter.mesh = null;
         }
         private void ResetRoadPositions() {
-            startPosition = Vector3.negativeInfinity;
             controlPosition = Vector3.negativeInfinity;
-            endPosition = Vector3.negativeInfinity;
 
+            if (startNode != null && startNode.ConnectedRoads().Count <= 0) {
+                Destroy(startNode.gameObject);
+                startNode = null;
+            }
+            if (endNode != null && endNode.ConnectedRoads().Count <= 0) {
+                Destroy(endNode.gameObject);
+                endNode = null;
+            }
         }
         private void InputManager_OnCancel() {
             Debug.Log("Building cancelled");
@@ -164,13 +176,10 @@ namespace Road.Placement {
         }
 
         public void PlaceRoad() {
-            Node startNode = roadManager.GetOrCreateNodeAt(startPosition);
-            Node endNode = roadManager.GetOrCreateNodeAt(endPosition);
-
             CreateRoadObject(startNode, endNode, controlPosition, roadObjectSO);
-            Vector3 cachedEndPosition = endPosition;
+            Node cachedEndNode = endNode;
             ResetRoadPositions();
-            startPosition = cachedEndPosition;
+            startNode = cachedEndNode;
         }
 
         private RoadObject CreateRoadObject(Node startNode, Node endNode, Vector3 controlNodePosition, RoadObjectSO roadObjectSO) {

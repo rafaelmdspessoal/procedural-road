@@ -22,14 +22,16 @@ namespace Road.Placement.Straight {
             if (RafaelUtils.TryRaycastObject(out RaycastHit hit)) {
                 Vector3 hitPosition = RoadUtilities.GetHitPosition(hit.point, hit.transform.gameObject);
 
-                roadPlacementManager.SetNodeGFXPosition(hitPosition);
-
-                if (roadPlacementManager.IsBuildingStartNode()) return;
-
-                // roadPlacementManager.GetPositionWithAngleSnap(hitPosition, )
-
-                roadPlacementManager.ControlPosition = (roadPlacementManager.StartPosition + hitPosition) / 2;
-                roadPlacementManager.DisplayTemporaryMesh(roadPlacementManager.StartPosition, hitPosition, roadPlacementManager.ControlPosition);
+                if (roadPlacementManager.IsBuildingStartNode())
+                    roadPlacementManager.SetNodeGFXPosition(hitPosition);
+                else {
+                    if (roadPlacementManager.AngleSnap) {
+                        hitPosition = RoadUtilities.GetHitPositionWithSnapping(hitPosition, roadPlacementManager.StartNode, 15);
+                        roadPlacementManager.SetNodeGFXPosition(hitPosition);
+                    }
+                    roadPlacementManager.ControlPosition = (roadPlacementManager.StartPosition + hitPosition) / 2;
+                    roadPlacementManager.DisplayTemporaryMesh(roadPlacementManager.StartPosition, hitPosition, roadPlacementManager.ControlPosition);
+                }
             }
         }
 
@@ -44,7 +46,11 @@ namespace Road.Placement.Straight {
             }
 
             if (roadPlacementManager.IsBuildingEndNode()) {
-                roadPlacementManager.EndPosition = RoadUtilities.GetHitPosition(e.position, e.obj, true);
+                Vector3 endPosition = RoadUtilities.GetHitPosition(e.position, e.obj, true);
+                if (roadPlacementManager.AngleSnap) 
+                    endPosition = RoadUtilities.GetHitPositionWithSnapping(endPosition, roadPlacementManager.StartNode, 15);
+
+                roadPlacementManager.EndPosition = endPosition;
                 roadPlacementManager.PlaceRoad();
                 roadPlacementManager.SplitRoads();
                 return;
