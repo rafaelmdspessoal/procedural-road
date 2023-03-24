@@ -8,6 +8,7 @@ using Road.Utilities;
 using Road.Obj;
 using Road.NodeObj;
 using System.Collections.Generic;
+using World;
 
 namespace Road.Placement {
 
@@ -226,6 +227,12 @@ namespace Road.Placement {
             if (!roadsToSplit.ContainsKey(position)) {
                 roadsToSplit.Add(position, roadObject);
             }
+        }
+
+        public bool CanSnap(GameObject hitObject) {
+            if (hitObject.TryGetComponent(out Ground _) || hitObject.TryGetComponent(out RoadObject _))
+                return true;
+            return false;
         }
     }
 }
