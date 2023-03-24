@@ -118,11 +118,9 @@ namespace Road.Obj {
         }
 
         public int RoadWidth => roadObjectSO.roadWidth;
-
         public int RoadResolution => roadObjectSO.roadResolution;
-
         public RoadObjectSO GetRoadObjectSO => roadObjectSO;
-
+        public Vector3 ControlPosition => controlNodeObject.transform.position;
         public List<RoadObject> GetAllConnectedRoads() {
             List<RoadObject> startNodeConnections = startNode.ConnectedRoads();
             List<RoadObject> endNodeConnections = endNode.ConnectedRoads();

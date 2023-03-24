@@ -1,6 +1,7 @@
 using UnityEngine;
 using Rafael.Utils;
 using Road.Utilities;
+using World;
 
 namespace Road.Placement.Straight {
 
@@ -17,7 +18,6 @@ namespace Road.Placement.Straight {
 
         private void Update() {
             if (!roadPlacementManager.IsBuildingStraightRoad() || !roadPlacementManager.IsBuilding()) return;
-            Debug.Log("Is Building Straight Road: " + roadPlacementManager.IsBuildingStraightRoad());
 
             if (RafaelUtils.TryRaycastObject(out RaycastHit hit)) {
                 Vector3 hitPosition = RoadUtilities.GetHitPosition(hit.point, hit.transform.gameObject);
@@ -25,10 +25,11 @@ namespace Road.Placement.Straight {
                 if (roadPlacementManager.IsBuildingStartNode())
                     roadPlacementManager.SetNodeGFXPosition(hitPosition);
                 else {
-                    if (roadPlacementManager.AngleSnap) {
+                    if (roadPlacementManager.AngleSnap && hit.transform.gameObject.TryGetComponent(out Ground _)) {
+                        // Only tries to snap if we hit ground
                         hitPosition = RoadUtilities.GetHitPositionWithSnapping(hitPosition, roadPlacementManager.StartNode, 15);
-                        roadPlacementManager.SetNodeGFXPosition(hitPosition);
                     }
+                    roadPlacementManager.SetNodeGFXPosition(hitPosition);
                     roadPlacementManager.ControlPosition = (roadPlacementManager.StartPosition + hitPosition) / 2;
                     roadPlacementManager.DisplayTemporaryMesh(roadPlacementManager.StartPosition, hitPosition, roadPlacementManager.ControlPosition);
                 }
@@ -47,9 +48,11 @@ namespace Road.Placement.Straight {
 
             if (roadPlacementManager.IsBuildingEndNode()) {
                 Vector3 endPosition = RoadUtilities.GetHitPosition(e.position, e.obj, true);
-                if (roadPlacementManager.AngleSnap) 
+                if (roadPlacementManager.AngleSnap && e.obj.TryGetComponent(out Ground _)) {
+                    // Only tries to snap if we hit ground
                     endPosition = RoadUtilities.GetHitPositionWithSnapping(endPosition, roadPlacementManager.StartNode, 15);
-
+                }
+                
                 roadPlacementManager.EndPosition = endPosition;
                 roadPlacementManager.PlaceRoad();
                 roadPlacementManager.SplitRoads();

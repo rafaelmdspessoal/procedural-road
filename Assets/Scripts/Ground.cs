@@ -9,11 +9,11 @@ namespace World {
         }
 
         private void InputManager_OnSelected(object sender, InputManager.OnObjectHitedEventArgs e) {
-            Debug.Log("Selected: " + e.obj.transform.name + " at: " + e.position);
+            // Debug.Log("Selected: " + e.obj.transform.name + " at: " + e.position);
         }
 
         private void InputManager_OnDemolished(object sender, InputManager.OnObjectHitedEventArgs e) {
-            Debug.Log("Destroyed: " + e.obj.transform.name + " at: " + e.position);
+            // Debug.Log("Destroyed: " + e.obj.transform.name + " at: " + e.position);
         }
     }
 }
