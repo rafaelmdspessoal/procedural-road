@@ -24,7 +24,7 @@ namespace Road.Placement.Curved {
                 if (roadPlacementManager.IsBuildingStartNode()) {
                     hitPosition = RoadUtilities.GetHitPosition(hitPosition, hitObj);
                 } else if (roadPlacementManager.IsBuildingControlNode()) {
-                    if (roadPlacementManager.AngleSnap && hitObj.TryGetComponent(out Ground _)) {
+                    if (roadPlacementManager.IsSnappingAngle && hitObj.TryGetComponent(out Ground _)) {
                         // Only tries to snap if we hit ground
                         hitPosition = RoadUtilities.GetHitPositionWithSnapping(hitPosition, roadPlacementManager.StartNode, 15);
                     }
@@ -33,7 +33,7 @@ namespace Road.Placement.Curved {
                     roadPlacementManager.ControlPosition = hitPosition;
                     roadPlacementManager.DisplayTemporaryMesh(roadPlacementManager.StartPosition, hitPosition, tempControlPosition);
                 } else {
-                    if (roadPlacementManager.AngleSnap && roadPlacementManager.CanSnap(hitObj)) {
+                    if (roadPlacementManager.IsSnappingAngle && roadPlacementManager.CanSnap(hitObj)) {
                         // if we hit ground or a road
                         hitPosition = RoadUtilities.GetHitPositionWithSnapping(hitPosition, roadPlacementManager.StartPosition, roadPlacementManager.ControlPosition, 15);
                     }
@@ -61,7 +61,7 @@ namespace Road.Placement.Curved {
                     e.position.y + 0.1f,
                     e.position.z
                 );
-                if (roadPlacementManager.AngleSnap && obj.TryGetComponent(out Ground _)) {
+                if (roadPlacementManager.IsSnappingAngle && obj.TryGetComponent(out Ground _)) {
                     // Only tries to snap if we hit ground
                     controlPosition = RoadUtilities.GetHitPositionWithSnapping(controlPosition, roadPlacementManager.StartNode, 15);
                 }
@@ -72,7 +72,7 @@ namespace Road.Placement.Curved {
 
             if (roadPlacementManager.IsBuildingEndNode()) {
                 Vector3 endPosition = e.position;
-                if (roadPlacementManager.AngleSnap && roadPlacementManager.CanSnap(obj)) {
+                if (roadPlacementManager.IsSnappingAngle && roadPlacementManager.CanSnap(obj)) {
                     // if we hit ground or a road
                     endPosition = RoadUtilities.GetHitPositionWithSnapping(endPosition, roadPlacementManager.StartPosition, roadPlacementManager.ControlPosition, 15);
                 }

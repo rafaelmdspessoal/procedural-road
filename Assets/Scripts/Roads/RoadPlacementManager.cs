@@ -31,8 +31,15 @@ namespace Road.Placement {
             EndNode,
         }
 
-        public EventHandler<OnRoadPlacedEventArgs> OnRoadPlaced;
+        private enum AngleSnap {
+            Zero,
+            Five,
+            Ten,
+            Fifteen,
+        }
 
+        public Action<int> OnAngleSnapChanged;
+        public EventHandler<OnRoadPlacedEventArgs> OnRoadPlaced;
         public class OnRoadPlacedEventArgs : EventArgs {
             public RoadObject roadObject;
         }
@@ -40,8 +47,6 @@ namespace Road.Placement {
         private readonly Dictionary<Vector3, RoadObject> roadsToSplit = new();
 
         [SerializeField] private Material temporaryRoadMaterial;
-        [SerializeField] private float angleToSnap;
-        [SerializeField] private bool angleSnap = true;
 
         private RoadUIController roadUIController;
         private InputManager inputManager;
@@ -52,12 +57,14 @@ namespace Road.Placement {
 
         private State state;
         private BuildingState buildingState;
+        private AngleSnap snappingAngle;
 
         private MeshFilter meshFilter;
         private MeshRenderer meshRenderer;
         private GameObject nodeGFX;
 
         private Vector3 controlPosition;
+        private int angleToSnap;
 
         private Node startNode;
         private Node endNode;
@@ -77,14 +84,61 @@ namespace Road.Placement {
 
             state = State.Idle;
             buildingState = BuildingState.StartNode;
+            snappingAngle = AngleSnap.Zero;
+            angleToSnap = 0;
 
             roadUIController.OnBuildingStraightRoad += RoadUIController_OnBuildingStraightRoad;
             roadUIController.OnBuildingCurvedRoad += RoadUIController_OnBuildingCurvedRoad;
+            roadUIController.OnBuildingFreeRoad += RoadUIController_OnBuildingFreeRoad;
+
+            roadUIController.OnGridSnapping += RoadUIController_OnGridSnapping;
+            roadUIController.OnAngleSnapping += RoadUIController_OnAngleSnapping;
+            roadUIController.OnRoadUp += RoadUIController_OnRoadUp;
+            roadUIController.OnRoadDown += RoadUIController_OnRoadDown;
 
             uIController.OnRemovingObjects += UIController_OnRemovingObjects;
 
             inputManager.OnEscape += InputManager_OnEscape;
             inputManager.OnCancel += InputManager_OnCancel;
+        }
+
+
+        private void RoadUIController_OnRoadDown() {
+            throw new NotImplementedException();
+        }
+
+        private void RoadUIController_OnRoadUp() {
+            throw new NotImplementedException();
+        }
+
+        private void RoadUIController_OnAngleSnapping() {
+            switch (snappingAngle) {
+                default:
+                    snappingAngle = AngleSnap.Zero;
+                    angleToSnap = 0;
+                    break;
+                case AngleSnap.Zero:
+                    snappingAngle = AngleSnap.Five;
+                    angleToSnap = 5;
+                    break;
+                case AngleSnap.Five:
+                    snappingAngle = AngleSnap.Ten;
+                    angleToSnap = 10;
+                    break;
+                case AngleSnap.Ten:
+                    snappingAngle = AngleSnap.Fifteen;
+                    angleToSnap = 15;
+                    break;
+                case AngleSnap.Fifteen:
+                    snappingAngle = AngleSnap.Zero;
+                    angleToSnap = 0;
+                    break;
+            }
+            OnAngleSnapChanged?.Invoke(angleToSnap);
+        }
+
+        private void RoadUIController_OnGridSnapping() {
+            throw new NotImplementedException();
         }
 
         public void DisplayTemporaryMesh(Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition) {
@@ -136,6 +190,10 @@ namespace Road.Placement {
             else nodeGFX.SetActive(true);
         }
 
+        private void RoadUIController_OnBuildingFreeRoad(RoadObjectSO obj) {
+            throw new NotImplementedException();
+        }
+
         public bool IsBuilding() => state != State.Idle && state != State.RemovingRoad;
         public void UpdateBuildingState(BuildingState state) => buildingState = state;
         public bool IsBuildingStraightRoad() => state == State.StraightRoad;
@@ -151,7 +209,8 @@ namespace Road.Placement {
         }
         public Vector3 ControlPosition { get { return controlPosition; } set { controlPosition = value; } }
         public Vector3 EndPosition { set { endNode = roadManager.GetOrCreateNodeAt(value); } }
-        public bool AngleSnap => angleSnap;
+        public bool IsSnappingAngle => snappingAngle != AngleSnap.Zero;
+        public int AngleToSnap => angleToSnap;
 
         private void ResetDisplayRoad() {
             UpdateBuildingState(BuildingState.StartNode);
