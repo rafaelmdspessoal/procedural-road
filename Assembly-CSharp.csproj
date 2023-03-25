@@ -83,6 +83,7 @@
     <Compile Include="Assets\Scripts\Roads\HandleStraightRoad.cs" />
     <Compile Include="Assets\Scripts\Roads\RoadObject.cs" />
     <Compile Include="Assets\Scripts\Meshes\RoadTempMeshBuilder.cs" />
+    <Compile Include="Assets\Scripts\Roads\HandleFreeRoad.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

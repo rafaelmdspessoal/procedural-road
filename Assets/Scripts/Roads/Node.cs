@@ -54,7 +54,7 @@ namespace Road.NodeObj {
         public List<RoadObject> ConnectedRoads() => connectedRoads;
 
         public Vector3 Position => transform.position;
-
+        public Vector3 Direction => Position - connectedRoads.First().ControlPosition;
         public Dictionary<float, RoadObject> GetAdjacentRoadsTo(RoadObject roadObject) {
             Dictionary<float, RoadObject> connectedRoadsDict = new();
 
