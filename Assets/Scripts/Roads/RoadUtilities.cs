@@ -94,5 +94,13 @@ namespace Road.Utilities {
             Quaternion q = Quaternion.AngleAxis(deltaAngle, axis);
             return q * v3;
         }
+
+        public static Vector3 GetProjectedPosition(Vector3 positionToProject, Vector3 directionToProject, Vector3 intersectionPosition) {
+            Vector3 currentDirection = positionToProject - intersectionPosition;
+            float angle = Vector3.Angle(currentDirection, directionToProject);
+
+            Vector3 projectedPosition = currentDirection.magnitude * Mathf.Cos(angle * Mathf.Deg2Rad) * directionToProject.normalized;
+            return projectedPosition + intersectionPosition;
+        }
     }
 }

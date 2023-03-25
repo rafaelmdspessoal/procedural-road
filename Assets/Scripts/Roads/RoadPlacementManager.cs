@@ -22,6 +22,7 @@ namespace Road.Placement {
             Idle,
             StraightRoad,
             CurvedRoad,
+            FreeRoad,
             RemovingRoad,
         }
 
@@ -101,7 +102,6 @@ namespace Road.Placement {
             inputManager.OnEscape += InputManager_OnEscape;
             inputManager.OnCancel += InputManager_OnCancel;
         }
-
 
         private void RoadUIController_OnRoadDown() {
             throw new NotImplementedException();
@@ -190,8 +190,14 @@ namespace Road.Placement {
             else nodeGFX.SetActive(true);
         }
 
-        private void RoadUIController_OnBuildingFreeRoad(RoadObjectSO obj) {
-            throw new NotImplementedException();
+        private void RoadUIController_OnBuildingFreeRoad(RoadObjectSO roadObjectSO) {
+            ClearAffectedRoads();
+            ResetDisplayRoad();
+            state = State.FreeRoad;
+            Debug.Log("Building Road: " + state);
+            this.roadObjectSO = roadObjectSO;
+            if (nodeGFX == null) nodeGFX = RoadUtilities.CreateNodeGFX(roadObjectSO);
+            else nodeGFX.SetActive(true);
         }
 
         public bool IsBuilding() => state != State.Idle && state != State.RemovingRoad;
@@ -199,6 +205,7 @@ namespace Road.Placement {
         public bool IsBuildingStraightRoad() => state == State.StraightRoad;
         public bool IsBuildingCurvedRoad() => state == State.CurvedRoad;
         public bool IsBuildingStartNode() => buildingState == BuildingState.StartNode;
+        public bool IsBuildingFreeStartNode() => state == State.FreeRoad;
         public bool IsBuildingControlNode() => buildingState == BuildingState.ControlNode;
         public bool IsBuildingEndNode() => buildingState == BuildingState.EndNode;
         public void SetNodeGFXPosition(Vector3 position) => nodeGFX.transform.position = position;
