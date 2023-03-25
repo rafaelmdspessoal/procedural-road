@@ -1,8 +1,7 @@
 ﻿using Road.Obj;
 using Road.NodeObj;
-using Road.Manager;
 using UnityEngine;
-using World;
+using Road.Placement;
 
 namespace Road.Utilities {
 
@@ -44,19 +43,56 @@ namespace Road.Utilities {
 
         public static Vector3 GetHitPosition(Vector3 hitPosition, GameObject hitObject, bool splitRoad = false) {
             Vector3 targetPosition = hitPosition;
-            if (hitObject.TryGetComponent(out Node _)) {
+            if (hitObject.TryGetComponent(out Node _)) 
                 return hitObject.transform.position;
-            } else if (hitObject.TryGetComponent(out RoadObject roadObject)) {
+
+            if (hitObject.TryGetComponent(out RoadObject roadObject)) {
                 targetPosition = Bezier.GetClosestPointTo(roadObject, hitPosition);
                 if (splitRoad)
-                    RoadManager.Instance.AddRoadToSplit(targetPosition, roadObject);
+                    RoadPlacementManager.Instance.AddRoadToSplit(targetPosition, roadObject);
                 return targetPosition;
             }
-            return new Vector3(
-                targetPosition.x,
-                targetPosition.y + 0.1f,
-                targetPosition.z
-            );
+
+            return new Vector3(targetPosition.x, targetPosition.y + 0.1f, targetPosition.z);
+        }
+
+        public static Vector3 GetHitPositionWithSnapping(Vector3 hitPosition, Node startNode, int angleSnap) {
+            Vector3 currentDirection = hitPosition - startNode.Position;
+            Vector3 targetPosition;
+            Vector3 baseDirection = Vector3.forward;
+            Vector3 projection = SnapTo(currentDirection, baseDirection, angleSnap);
+            foreach (RoadObject roadObject in startNode.ConnectedRoads()) {
+                baseDirection = (startNode.Position - roadObject.ControlPosition).normalized;
+                projection =  SnapTo(currentDirection, baseDirection, angleSnap);
+            }
+
+            targetPosition = projection + startNode.Position;
+            return targetPosition;
+        }
+
+        public static Vector3 GetHitPositionWithSnapping(Vector3 hitPosition, Vector3 startPosition, Vector3 controlPosition, int angleSnap) {
+            Vector3 currentDirection = hitPosition - controlPosition;
+            Vector3 targetPosition;
+            Vector3 baseDirection = (controlPosition - startPosition).normalized;
+            Vector3 projection = SnapTo(currentDirection, baseDirection, angleSnap);
+
+            targetPosition = projection + controlPosition;
+            return targetPosition;
+        }
+
+        private static Vector3 SnapTo(Vector3 v3, Vector3 target, float snapAngle) {
+            float angle = Vector3.Angle(v3, target);
+            if (angle < snapAngle / 2.0f)          // Cannot do cross product 
+                return target * v3.magnitude;  //   with angles 0 & 180
+            if (angle > 180.0f - snapAngle / 2.0f)
+                return -1 * v3.magnitude * target;
+
+            float t = Mathf.Round(angle / snapAngle);
+            float deltaAngle = (t * snapAngle) - angle;
+
+            Vector3 axis = Vector3.Cross(target, v3);
+            Quaternion q = Quaternion.AngleAxis(deltaAngle, axis);
+            return q * v3;
         }
     }
 }

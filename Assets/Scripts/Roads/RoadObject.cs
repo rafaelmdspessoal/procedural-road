@@ -11,6 +11,7 @@ namespace Road.Obj {
     [RequireComponent(typeof(MeshCollider))]
     public class RoadObject : MonoBehaviour, IRemoveable {
 
+        public EventHandler<OnRoadChangedEventArgs> OnRoadPlaced;
         public EventHandler<OnRoadChangedEventArgs> OnRoadBuilt;
         public EventHandler<OnRoadChangedEventArgs> OnRoadRemoved;
         public EventHandler<OnRoadChangedEventArgs> OnRoadUpdated;
@@ -18,6 +19,7 @@ namespace Road.Obj {
         public class OnRoadChangedEventArgs : EventArgs { public RoadObject roadObject; }
         
         [SerializeField] private RoadObjectSO roadObjectSO;
+
         private MeshFilter meshFilter;
         private MeshRenderer meshRenderer;
         private MeshCollider meshCollider;
@@ -48,7 +50,7 @@ namespace Road.Obj {
             }
         }
 
-        public void BuildRoad(Node startNode, Node endNode, GameObject controlNodeObject) {
+        public void PlaceRoad(Node startNode, Node endNode, GameObject controlNodeObject) {
             this.startNode = startNode;
             this.endNode = endNode;
             this.controlNodeObject = controlNodeObject;
@@ -58,9 +60,13 @@ namespace Road.Obj {
             this.startNode.transform.localScale = RoadWidth * Vector3Int.one;
             this.endNode.transform.localScale = RoadWidth * Vector3Int.one;
 
-            controlNodeObject.transform.parent = this.transform;
-            Debug.Log("Road Built!");
-            OnRoadBuilt?.Invoke(this, new OnRoadChangedEventArgs { roadObject = this });
+            controlNodeObject.transform.parent = transform;
+            Debug.Log("Road Placed!");
+            SetRoadMesh();
+            OnRoadPlaced?.Invoke(this, new OnRoadChangedEventArgs { roadObject = this });
+            foreach (RoadObject roadObj in GetAllConnectedRoads()) {
+                roadObj.UpdateRoadMesh();
+            }
         }
 
         public void SetRoadMesh() {
@@ -112,11 +118,9 @@ namespace Road.Obj {
         }
 
         public int RoadWidth => roadObjectSO.roadWidth;
-
         public int RoadResolution => roadObjectSO.roadResolution;
-
         public RoadObjectSO GetRoadObjectSO => roadObjectSO;
-
+        public Vector3 ControlPosition => controlNodeObject.transform.position;
         public List<RoadObject> GetAllConnectedRoads() {
             List<RoadObject> startNodeConnections = startNode.ConnectedRoads();
             List<RoadObject> endNodeConnections = endNode.ConnectedRoads();
