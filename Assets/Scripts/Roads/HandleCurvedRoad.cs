@@ -15,37 +15,44 @@ namespace Road.Placement.Curved {
         }
 
         private void Update() {
-            if (!roadPlacementManager.IsBuildingCurvedRoad() || !roadPlacementManager.IsBuilding()) return;
+            if (roadPlacementManager.IsBuildingCurvedRoad) {
+                if (RafaelUtils.TryRaycastObject(out RaycastHit hit)) {
+                    GameObject hitObj = hit.transform.gameObject;
+                    Vector3 hitPosition = hit.point;
 
-            if (RafaelUtils.TryRaycastObject(out RaycastHit hit)) {
-                GameObject hitObj = hit.transform.gameObject;
-                Vector3 hitPosition = hit.point;
+                    if (roadPlacementManager.IsBuildingStartNode()) {
+                        hitPosition = RoadUtilities.GetHitPosition(hitPosition, hitObj);
+                    } else if (roadPlacementManager.IsBuildingControlNode()) {
+                        Vector3 startPosition = roadPlacementManager.StartPosition;
+                        if (roadPlacementManager.IsSnappingAngle && hitObj.TryGetComponent(out Ground _)) {
+                            // Only tries to snap if we hit ground
+                            hitPosition = RoadUtilities.GetHitPositionWithSnapping(hitPosition, roadPlacementManager.StartNode, 15);
+                        }
+                        hitPosition = RoadUtilities.GetHitPosition(hitPosition, hitObj);
+                        Vector3 tempControlPosition = (startPosition + hitPosition) / 2;
+                        roadPlacementManager.ControlPosition = hitPosition;
 
-                if (roadPlacementManager.IsBuildingStartNode()) {
-                    hitPosition = RoadUtilities.GetHitPosition(hitPosition, hitObj);
-                } else if (roadPlacementManager.IsBuildingControlNode()) {
-                    if (roadPlacementManager.IsSnappingAngle && hitObj.TryGetComponent(out Ground _)) {
-                        // Only tries to snap if we hit ground
-                        hitPosition = RoadUtilities.GetHitPositionWithSnapping(hitPosition, roadPlacementManager.StartNode, 15);
+                        // Don't pass hit object because we don't want to validate angle for a control node
+                        roadPlacementManager.CheckRoadAngleInRange(startPosition - tempControlPosition);
+                        roadPlacementManager.DisplayTemporaryMesh(startPosition, hitPosition, tempControlPosition);
+                    } else {
+                        Vector3 startPosition = roadPlacementManager.StartPosition;
+                        Vector3 controlPosition = roadPlacementManager.ControlPosition;
+                        if (roadPlacementManager.IsSnappingAngle && roadPlacementManager.CanSnap(hitObj)) {
+                            // if we hit ground or a road
+                            hitPosition = RoadUtilities.GetHitPositionWithSnapping(hitPosition, startPosition, controlPosition, 15);
+                        }
+                        hitPosition = RoadUtilities.GetHitPosition(hitPosition, hitObj);
+                        roadPlacementManager.CheckRoadAngleInRange(controlPosition - hitPosition, hitObj, hitPosition);
+                        roadPlacementManager.DisplayTemporaryMesh(startPosition, hitPosition, controlPosition);
                     }
-                    hitPosition = RoadUtilities.GetHitPosition(hitPosition, hitObj);
-                    Vector3 tempControlPosition = (roadPlacementManager.StartPosition + hitPosition) / 2;
-                    roadPlacementManager.ControlPosition = hitPosition;
-                    roadPlacementManager.DisplayTemporaryMesh(roadPlacementManager.StartPosition, hitPosition, tempControlPosition);
-                } else {
-                    if (roadPlacementManager.IsSnappingAngle && roadPlacementManager.CanSnap(hitObj)) {
-                        // if we hit ground or a road
-                        hitPosition = RoadUtilities.GetHitPositionWithSnapping(hitPosition, roadPlacementManager.StartPosition, roadPlacementManager.ControlPosition, 15);
-                    }
-                    hitPosition = RoadUtilities.GetHitPosition(hitPosition, hitObj);
-                    roadPlacementManager.DisplayTemporaryMesh(roadPlacementManager.StartPosition, hitPosition, roadPlacementManager.ControlPosition);
+                    roadPlacementManager.SetNodeGFXPosition(hitPosition);
                 }
-                roadPlacementManager.SetNodeGFXPosition(hitPosition);
             }
         }
 
         private void InputManager_OnNodePlaced(object sender, InputManager.OnObjectHitedEventArgs e) {
-            if (!roadPlacementManager.IsBuildingCurvedRoad() || !roadPlacementManager.IsBuilding()) return;
+            if (!roadPlacementManager.CanBuildCurvedRoad) return;
 
             GameObject obj = e.obj;
             Debug.Log("Node Placed!");

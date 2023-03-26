@@ -2577,10 +2577,11 @@ GameObject:
   - component: {fileID: 1524344556}
   - component: {fileID: 1524344558}
   - component: {fileID: 1524344559}
-  - component: {fileID: 1524344563}
   - component: {fileID: 1524344564}
   - component: {fileID: 1524344565}
+  - component: {fileID: 1524344563}
   - component: {fileID: 1524344566}
+  - component: {fileID: 1524344567}
   m_Layer: 0
   m_Name: RoadManager
   m_TagString: Untagged
@@ -2696,6 +2697,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   temporaryRoadMaterial: {fileID: 2100000, guid: 0f5068376c299d948b4f19a9b997998a, type: 2}
+  cantBuildRoadMaterial: {fileID: 2100000, guid: 69bffef08a90db44d9c1bff4c9cfcb6f, type: 2}
 --- !u!114 &1524344566
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2706,6 +2708,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 662d9e699616d6c4daa20a9a3fabc7f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1524344567
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1524344554}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb7582fd420b03840be3b5d36738d1f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &1535615085

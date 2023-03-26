@@ -9,6 +9,7 @@ using Road.Obj;
 using Road.NodeObj;
 using System.Collections.Generic;
 using World;
+using System.Linq;
 
 namespace Road.Placement {
 
@@ -48,6 +49,7 @@ namespace Road.Placement {
         private readonly Dictionary<Vector3, RoadObject> roadsToSplit = new();
 
         [SerializeField] private Material temporaryRoadMaterial;
+        [SerializeField] private Material cantBuildRoadMaterial;
 
         private RoadUIController roadUIController;
         private InputManager inputManager;
@@ -66,6 +68,8 @@ namespace Road.Placement {
 
         private Vector3 controlPosition;
         private int angleToSnap;
+        private int minAllowedAngle;
+        private bool canBuildRoad;
 
         private Node startNode;
         private Node endNode;
@@ -87,6 +91,8 @@ namespace Road.Placement {
             buildingState = BuildingState.StartNode;
             snappingAngle = AngleSnap.Zero;
             angleToSnap = 0;
+            minAllowedAngle = 30;
+            canBuildRoad = true;
 
             roadUIController.OnBuildingStraightRoad += RoadUIController_OnBuildingStraightRoad;
             roadUIController.OnBuildingCurvedRoad += RoadUIController_OnBuildingCurvedRoad;
@@ -150,8 +156,86 @@ namespace Road.Placement {
                 roadObjectSO.roadWidth);
 
             Mesh mesh = tempMeshBuilder.CreateTempRoadMesh();
-            meshRenderer.sharedMaterial = temporaryRoadMaterial;
+
+            if (canBuildRoad == false)
+                meshRenderer.sharedMaterial = cantBuildRoadMaterial;
+            else 
+                meshRenderer.sharedMaterial = temporaryRoadMaterial;           
+
             meshFilter.mesh = mesh;
+        }
+
+        /// <summary>
+        /// Handles first node placement
+        /// </summary>
+        /// <param name="roadDirection">The direction of reference to check the angle</param>
+        /// <returns></returns>
+        public bool CheckRoadAngleInRange(Vector3 roadDirection) {
+            canBuildRoad = true;
+            if (startNode == null && roadsToSplit.Count <= 0) {
+                return canBuildRoad;
+            }
+
+            if (roadsToSplit.Count > 0) {
+                RoadObject roadObj = roadsToSplit.First().Value;
+                Vector3 hitPosition = roadsToSplit.First().Key;
+
+                Vector3 nextRoadDirection = Bezier.GetTangentAt(roadObj, hitPosition, out _, out _);
+                float angle = Vector3.Angle(nextRoadDirection, roadDirection);
+                if (angle < minAllowedAngle || angle > 180 - minAllowedAngle) {
+                    print("hitRoadAt: " + angle);
+                    canBuildRoad = false;
+                    return canBuildRoad;
+                }
+            }
+
+            foreach (RoadObject roadObject in startNode.ConnectedRoads) {
+                Vector3 prevRoadDirection = startNode.Position - roadObject.ControlPosition;
+                float angle = Vector3.Angle(prevRoadDirection, roadDirection);
+                if (angle < minAllowedAngle)
+                    return canBuildRoad = false;
+            }
+
+            return canBuildRoad;
+        }
+
+        /// <summary>
+        /// Handle cases for secon node placement
+        /// </summary>
+        /// <param name="roadDirection">The direction of the secment being placed</param>
+        /// <param name="hitObj">The object we hit (grond, node or road)</param>
+        /// <returns></returns>
+        public bool CheckRoadAngleInRange(Vector3 roadDirection, GameObject hitObj, Vector3 hitPosition) {
+            canBuildRoad = true;
+
+            if (hitObj.TryGetComponent(out Node node)) {
+                foreach (RoadObject roadObject in node.ConnectedRoads) {
+                    // TODO If the ROad is curved the direction will depend on which half of
+                    // the road we hit. This must be accounteable.
+                    Vector3 nextRoadDirection = roadObject.ControlPosition - node.Position;
+                    float angle = Vector3.Angle(nextRoadDirection, roadDirection);
+                    if (angle < minAllowedAngle) {
+                        print("hitNodeAt: " + angle);
+                        canBuildRoad = false;
+                        return canBuildRoad;
+                    }
+                }
+            }                
+
+            if (hitObj.TryGetComponent(out RoadObject roadObj)) {
+                // We are endind our road on top of another
+                // In case of the road is curved we must get the tangent at hitPosition to
+                // calculate the correct angle.
+                Vector3 nextRoadDirection = Bezier.GetTangentAt(roadObj, hitPosition, out _, out _);
+                float angle = Vector3.Angle(nextRoadDirection, roadDirection);
+                if (angle < minAllowedAngle || angle > 180 - minAllowedAngle) {
+                    print("hitRoadAt: " + angle);
+                    canBuildRoad = false;
+                    return canBuildRoad;
+                }
+            }
+
+            return canBuildRoad;
         }
 
         private void UIController_OnRemovingObjects() {
@@ -202,10 +286,10 @@ namespace Road.Placement {
 
         public bool IsBuilding() => state != State.Idle && state != State.RemovingRoad;
         public void UpdateBuildingState(BuildingState state) => buildingState = state;
-        public bool IsBuildingStraightRoad() => state == State.StraightRoad;
-        public bool IsBuildingCurvedRoad() => state == State.CurvedRoad;
+        public bool IsBuildingStraightRoad => state == State.StraightRoad;
+        public bool IsBuildingCurvedRoad => state == State.CurvedRoad;
+        public bool IsBuildingFreeRoad => state == State.FreeRoad;
         public bool IsBuildingStartNode() => buildingState == BuildingState.StartNode;
-        public bool IsBuildingFreeStartNode() => state == State.FreeRoad;
         public bool IsBuildingControlNode() => buildingState == BuildingState.ControlNode;
         public bool IsBuildingEndNode() => buildingState == BuildingState.EndNode;
         public void SetNodeGFXPosition(Vector3 position) => nodeGFX.transform.position = position;
@@ -213,6 +297,18 @@ namespace Road.Placement {
         public Vector3 StartPosition { 
             get { return startNode.Position; } 
             set { startNode = roadManager.GetOrCreateNodeAt(value); } 
+        }
+        public bool CanBuildStraightRoad {
+            get { return (canBuildRoad && IsBuilding() && IsBuildingStraightRoad); }
+            set { canBuildRoad = value; }
+        }
+        public bool CanBuildCurvedRoad {
+            get { return (canBuildRoad && IsBuilding() && IsBuildingCurvedRoad); }
+            set { canBuildRoad = value; }
+        }
+        public bool CanBuildFreeRoad {
+            get { return (canBuildRoad && IsBuilding() && IsBuildingFreeRoad); }
+            set { canBuildRoad = value; }
         }
         public Vector3 ControlPosition { get { return controlPosition; } set { controlPosition = value; } }
         public Vector3 EndPosition { set { endNode = roadManager.GetOrCreateNodeAt(value); } }
@@ -222,16 +318,17 @@ namespace Road.Placement {
         private void ResetDisplayRoad() {
             UpdateBuildingState(BuildingState.StartNode);
             ResetRoadPositions();
+            canBuildRoad = true;
             meshFilter.mesh = null;
         }
         private void ResetRoadPositions() {
             controlPosition = Vector3.negativeInfinity;
 
-            if (startNode != null && startNode.ConnectedRoads().Count <= 0) {
+            if (startNode != null && !startNode.HasConnectedRoads) {
                 Destroy(startNode.gameObject);
                 startNode = null;
             }
-            if (endNode != null && endNode.ConnectedRoads().Count <= 0) {
+            if (endNode != null && !endNode.HasConnectedRoads) {
                 Destroy(endNode.gameObject);
                 endNode = null;
             }
