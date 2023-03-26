@@ -17,34 +17,42 @@ namespace Road.Placement.Straight {
         }
 
         private void Update() {
-            if (!roadPlacementManager.IsBuildingStraightRoad() || !roadPlacementManager.IsBuilding()) return;
-            int angleToSnap = roadPlacementManager.AngleToSnap;
-            if (RafaelUtils.TryRaycastObject(out RaycastHit hit)) {
-                GameObject hitObj = hit.transform.gameObject;
-                Vector3 hitPosition = RoadUtilities.GetHitPosition(hit.point, hitObj);
+            if (roadPlacementManager.IsBuildingStraightRoad) {
+                int angleToSnap = roadPlacementManager.AngleToSnap;
+                if (RafaelUtils.TryRaycastObject(out RaycastHit hit)) {
+                    GameObject hitObj = hit.transform.gameObject;
+                    Vector3 hitPosition = RoadUtilities.GetHitPosition(hit.point, hitObj);
 
-                if (roadPlacementManager.IsBuildingStartNode())
-                    roadPlacementManager.SetNodeGFXPosition(hitPosition);
-                else {
-                    if (roadPlacementManager.IsSnappingAngle && roadPlacementManager.CanSnap(hitObj)) {
-                        // if we hit ground or a road
-                        hitPosition = RoadUtilities.GetHitPositionWithSnapping(
-                            hitPosition, 
-                            roadPlacementManager.StartNode, 
-                            angleToSnap
-                            );
+                    if (roadPlacementManager.IsBuildingStartNode())
+                        roadPlacementManager.SetNodeGFXPosition(hitPosition);
+                    else {
+                        Vector3 startPosition = roadPlacementManager.StartPosition;
+                        if (roadPlacementManager.IsSnappingAngle && roadPlacementManager.CanSnap(hitObj)) {
+                            // if we hit ground or a road
+                            hitPosition = RoadUtilities.GetHitPositionWithSnapping(
+                                hitPosition,
+                                roadPlacementManager.StartNode,
+                                angleToSnap
+                                );
+                        }
+                        hitPosition = RoadUtilities.GetHitPosition(hitPosition, hitObj);
+                        Vector3 controlPosition = (startPosition + hitPosition) / 2;
+
+                        roadPlacementManager.SetNodeGFXPosition(hitPosition);
+                        roadPlacementManager.ControlPosition = controlPosition;
+
+                        // If road start check passes, also check for end
+                        if (roadPlacementManager.CheckRoadAngleInRange(controlPosition - hitPosition))
+                            roadPlacementManager.CheckRoadAngleInRange(controlPosition - hitPosition, hitObj, hitPosition);
+
+                        roadPlacementManager.DisplayTemporaryMesh(startPosition, hitPosition, controlPosition);
                     }
-                    hitPosition = RoadUtilities.GetHitPosition(hitPosition, hitObj);
-
-                    roadPlacementManager.SetNodeGFXPosition(hitPosition);
-                    roadPlacementManager.ControlPosition = (roadPlacementManager.StartPosition + hitPosition) / 2;
-                    roadPlacementManager.DisplayTemporaryMesh(roadPlacementManager.StartPosition, hitPosition, roadPlacementManager.ControlPosition);
                 }
             }
         }
 
         private void InputManager_OnNodePlaced(object sender, InputManager.OnObjectHitedEventArgs e) {
-            if (!roadPlacementManager.IsBuildingStraightRoad() || !roadPlacementManager.IsBuilding()) return;
+            if (!roadPlacementManager.CanBuildStraightRoad) return;
             int angleToSnap = roadPlacementManager.AngleToSnap;
 
             GameObject obj = e.obj;

@@ -51,8 +51,8 @@ namespace Road.NodeObj {
             }
         }
 
-        public List<RoadObject> ConnectedRoads() => connectedRoads;
-
+        public List<RoadObject> ConnectedRoads => connectedRoads;
+        public bool HasConnectedRoads => connectedRoads.Count > 0;
         public Vector3 Position => transform.position;
         public Vector3 Direction => Position - connectedRoads.First().ControlPosition;
         public Dictionary<float, RoadObject> GetAdjacentRoadsTo(RoadObject roadObject) {

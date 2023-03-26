@@ -122,8 +122,8 @@ namespace Road.Obj {
         public RoadObjectSO GetRoadObjectSO => roadObjectSO;
         public Vector3 ControlPosition => controlNodeObject.transform.position;
         public List<RoadObject> GetAllConnectedRoads() {
-            List<RoadObject> startNodeConnections = startNode.ConnectedRoads();
-            List<RoadObject> endNodeConnections = endNode.ConnectedRoads();
+            List<RoadObject> startNodeConnections = startNode.ConnectedRoads;
+            List<RoadObject> endNodeConnections = endNode.ConnectedRoads;
 
             List<RoadObject> allConnectedRoads = new();
             allConnectedRoads.AddRange(startNodeConnections);
@@ -132,6 +132,16 @@ namespace Road.Obj {
             allConnectedRoads.Remove(this);
 
             return allConnectedRoads;
+        }
+
+        private Node GetClosesNodeTo(Vector3 position) {
+            if (
+                Vector3.SqrMagnitude(position - StartNode.Position) <
+                Vector3.SqrMagnitude(position - EndNode.Position)
+                )
+                return StartNode;
+
+            return EndNode;
         }
     }
 }
