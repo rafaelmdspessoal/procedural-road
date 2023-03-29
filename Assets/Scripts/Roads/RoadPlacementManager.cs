@@ -283,7 +283,17 @@ namespace Road.Placement {
             if (nodeGFX == null) nodeGFX = RoadUtilities.CreateNodeGFX(roadObjectSO);
             else nodeGFX.SetActive(true);
         }
+        public Vector3 GetPositionForMinRoadLengh(Vector3 position) {
+            if (startNode != null) {
+                Vector3 roadDir = position - startNode.Position;
+                float minRoadLengh = 2 * roadObjectSO.GetMaxNodeSize();
 
+                if (roadDir.magnitude < minRoadLengh)
+                    position += roadDir.normalized * minRoadLengh - roadDir;
+            }
+
+            return position;
+        }
         public bool IsBuilding() => state != State.Idle && state != State.RemovingRoad;
         public void UpdateBuildingState(BuildingState state) => buildingState = state;
         public bool IsBuildingStraightRoad => state == State.StraightRoad;
@@ -318,6 +328,7 @@ namespace Road.Placement {
         private void ResetDisplayRoad() {
             UpdateBuildingState(BuildingState.StartNode);
             ResetRoadPositions();
+            startNode = null;
             canBuildRoad = true;
             meshFilter.mesh = null;
         }

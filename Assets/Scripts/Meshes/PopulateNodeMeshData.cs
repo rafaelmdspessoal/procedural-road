@@ -36,7 +36,7 @@ namespace MeshHandler.Road.NodeMeshData {
             endNodePosition = endNode.Position - roadPosition;
             controlPosition = roadObject.ControlNodeObject.transform.position - roadPosition;
             roadWidth = roadObject.RoadWidth;
-            resolution = roadObject.RoadResolution * 3;
+            resolution = roadObject.RoadResolution;
         }
 
         public MeshData PopulateStartNodeMesh(MeshData meshData) {

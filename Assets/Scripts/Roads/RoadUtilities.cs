@@ -53,6 +53,7 @@ namespace Road.Utilities {
                 return targetPosition;
             }
 
+            // If hit ground raise by 0.1f
             return new Vector3(targetPosition.x, targetPosition.y + 0.1f, targetPosition.z);
         }
 
