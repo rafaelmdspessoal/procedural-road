@@ -100,11 +100,6 @@ namespace Road.Obj {
         public void Remove(bool keepNodes) {
             StartNode.RemoveRoad(this, keepNodes);
             EndNode.RemoveRoad(this, keepNodes);
-        }
-
-        public void Remove() {
-            StartNode.RemoveRoad(this, false);
-            EndNode.RemoveRoad(this, false);
 
             OnRoadRemoved?.Invoke(this, new OnRoadChangedEventArgs { roadObject = this });
             OnRoadRemoved = null;

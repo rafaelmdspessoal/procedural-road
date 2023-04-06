@@ -4,5 +4,5 @@ using UnityEngine;
 
 public interface IRemoveable 
 {
-    public void Remove();
+    public void Remove(bool keepNodes);
 }
