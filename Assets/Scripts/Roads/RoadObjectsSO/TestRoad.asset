@@ -17,3 +17,4 @@ MonoBehaviour:
   roadWidth: 4
   roadResolution: 10
   roadTextureTiling: 7
+  minIntersectionAngle: 30

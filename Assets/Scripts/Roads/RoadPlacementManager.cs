@@ -286,7 +286,8 @@ namespace Road.Placement {
         public Vector3 GetPositionForMinRoadLengh(Vector3 position) {
             if (startNode != null) {
                 Vector3 roadDir = position - startNode.Position;
-                float minRoadLengh = 2 * roadObjectSO.GetMaxNodeSize();
+                float maxRoadSize = roadObjectSO.GetMaxNodeSize();
+                float minRoadLengh = 2 * maxRoadSize;
 
                 if (roadDir.magnitude < minRoadLengh)
                     position += roadDir.normalized * minRoadLengh - roadDir;
