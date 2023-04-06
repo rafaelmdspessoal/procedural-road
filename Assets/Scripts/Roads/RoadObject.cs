@@ -45,8 +45,8 @@ namespace Road.Obj {
 
         private void Update() {
             if (RoadManager.Instance.updateRoads) {
+                controlNodeObject.transform.position = (startNode.Position + endNode.Position) / 2;
                 UpdateRoadMesh();
-                //controlNodeObject.transform.position = (startNode.Position + endNode.Position) / 2;
             }
         }
 
@@ -107,16 +107,6 @@ namespace Road.Obj {
             Destroy(gameObject);
         }
 
-        public void Remove() {
-            StartNode.RemoveRoad(this, false);
-            EndNode.RemoveRoad(this, false);
-
-            OnRoadRemoved?.Invoke(this, new OnRoadChangedEventArgs { roadObject = this });
-            OnRoadRemoved = null;
-
-            Destroy(gameObject);
-        }
-
         public int RoadWidth => roadObjectSO.roadWidth;
         public int RoadResolution => roadObjectSO.roadResolution;
         public RoadObjectSO GetRoadObjectSO => roadObjectSO;
@@ -132,16 +122,6 @@ namespace Road.Obj {
             allConnectedRoads.Remove(this);
 
             return allConnectedRoads;
-        }
-
-        private Node GetClosesNodeTo(Vector3 position) {
-            if (
-                Vector3.SqrMagnitude(position - StartNode.Position) <
-                Vector3.SqrMagnitude(position - EndNode.Position)
-                )
-                return StartNode;
-
-            return EndNode;
         }
     }
 }

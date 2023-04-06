@@ -36,7 +36,7 @@ public class GameManager : MonoBehaviour
         if (IsDemolishing()) {
             if (e.obj.TryGetComponent(out IRemoveable removeableObject)) {
                 Debug.Log("object to remove: " + e.obj);
-                removeableObject.Remove();
+                removeableObject.Remove(false);
             }
         }
     }

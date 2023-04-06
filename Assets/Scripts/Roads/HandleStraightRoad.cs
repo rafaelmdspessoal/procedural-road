@@ -36,6 +36,7 @@ namespace Road.Placement.Straight {
                                 );
                         }
                         hitPosition = RoadUtilities.GetHitPosition(hitPosition, hitObj);
+                        hitPosition = roadPlacementManager.GetPositionForMinRoadLengh(hitPosition);
                         Vector3 controlPosition = (startPosition + hitPosition) / 2;
 
                         roadPlacementManager.SetNodeGFXPosition(hitPosition);
@@ -70,7 +71,7 @@ namespace Road.Placement.Straight {
                     endPosition = RoadUtilities.GetHitPositionWithSnapping(endPosition, roadPlacementManager.StartNode, angleToSnap);
                 }
                 endPosition = RoadUtilities.GetHitPosition(endPosition, obj, true);
-
+                endPosition = roadPlacementManager.GetPositionForMinRoadLengh(endPosition);
                 roadPlacementManager.EndPosition = endPosition;
                 roadPlacementManager.PlaceRoad();
                 roadPlacementManager.SplitRoads();

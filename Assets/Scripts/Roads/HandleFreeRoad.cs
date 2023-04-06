@@ -28,6 +28,7 @@ namespace Road.Placement.Free {
                     else {
                         Vector3 startPosition = roadPlacementManager.StartPosition;
                         hitPosition = RoadUtilities.GetHitPosition(hitPosition, hitObj);
+                        hitPosition = roadPlacementManager.GetPositionForMinRoadLengh(hitPosition);
                         if (roadPlacementManager.StartNode.HasConnectedRoads) {
                             controlPosition = RoadUtilities.GetProjectedPosition(
                                 hitPosition,
@@ -84,6 +85,7 @@ namespace Road.Placement.Free {
                 }
                 endPosition = RoadUtilities.GetHitPosition(endPosition, obj, true);
 
+                endPosition = roadPlacementManager.GetPositionForMinRoadLengh(endPosition);
                 roadPlacementManager.EndPosition = endPosition;
                 roadPlacementManager.PlaceRoad();
                 roadPlacementManager.SplitRoads();

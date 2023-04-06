@@ -1,4 +1,5 @@
 using Road.Obj;
+using Road.Manager;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -14,21 +15,30 @@ namespace Road.NodeObj {
             if (!HasIntersection()) return 0;
 
             Dictionary<float, RoadObject> adjacentRoads = GetAdjacentRoadsTo(roadObject);
+            float offset;
+            float cosAngle;
+            int width = roadObject.RoadWidth / 2;
+            if (adjacentRoads.Count == 1) {                
+                float angle = adjacentRoads.First().Key;
+                if (angle > 180) angle = Mathf.Abs(angle - 360);
+                angle = Mathf.Clamp(angle, 0, 90);
+                angle *= Mathf.Deg2Rad;
+                cosAngle = Mathf.Cos(angle - Mathf.PI / 2);
+                offset = (1 + Mathf.Cos(angle)) * (width + 0.15f) / cosAngle;
+                return offset;
+            }
 
             float leftAngle = adjacentRoads.First().Key;
             float rightAngle = adjacentRoads.Last().Key;
             float smallestAngle;
 
-            if (leftAngle > 180) smallestAngle = rightAngle;
-            else if (rightAngle < 180) smallestAngle = leftAngle;
-            else {
-                rightAngle = 360 - rightAngle;
-                smallestAngle = Mathf.Min(leftAngle, rightAngle);
-            }
-            smallestAngle = Mathf.Clamp(smallestAngle, 0f, 90);
-            float cosAngle = Mathf.Abs(Mathf.Cos(smallestAngle * Mathf.Deg2Rad));
-            float offset = (0.55f + cosAngle) * 4f;
-
+            if (rightAngle > 180) rightAngle = Mathf.Abs(rightAngle - 360);
+            smallestAngle = Mathf.Min(leftAngle, rightAngle);
+            smallestAngle = Mathf.Clamp(smallestAngle, 0, 90);
+            smallestAngle *= Mathf.Deg2Rad;
+            cosAngle = Mathf.Cos(smallestAngle - Mathf.PI / 2);
+            offset = (1 + Mathf.Cos(smallestAngle)) * (width + 0.15f) / cosAngle;
+          
             return offset;
         }
 
