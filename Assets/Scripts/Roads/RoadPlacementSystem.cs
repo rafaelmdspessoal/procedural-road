@@ -1,33 +1,26 @@
 using UI.Controller;
 using UnityEngine;
 using System;
-using MeshHandler.Road.Temp.Builder;
-using UI.Controller.Road;
-using Road.Manager;
-using Road.Utilities;
-using Road.Obj;
-using Road.NodeObj;
+using Nodes;
 using System.Collections.Generic;
 using World;
 using System.Linq;
+using UI.Roads.Controller;
+using Roads.Manager;
+using Roads.Utilities;
+using Roads.Preview.MeshHandler;
+using Roads.Preview;
+using Rafael.Utils;
+using UnityEngine.UIElements;
+using static UnityEngine.Rendering.DebugUI;
 
-namespace Road.Placement {
+namespace Roads.Placement {
 
-    [RequireComponent(typeof(MeshFilter))]
-    [RequireComponent(typeof(MeshRenderer))]
-    public class RoadPlacementManager : MonoBehaviour {
+    public class RoadPlacementSystem : MonoBehaviour {
 
-        public static RoadPlacementManager Instance { get; private set; }
+        public static RoadPlacementSystem Instance { get; private set; }
 
-        private enum State {
-            Idle,
-            StraightRoad,
-            CurvedRoad,
-            FreeRoad,
-            RemovingRoad,
-        }
-
-        public enum BuildingState {
+        public enum NodeBuilding {
             StartNode,
             ControlNode,
             EndNode,
@@ -48,22 +41,17 @@ namespace Road.Placement {
 
         private readonly Dictionary<Vector3, RoadObject> roadsToSplit = new();
 
-        [SerializeField] private Material temporaryRoadMaterial;
-        [SerializeField] private Material cantBuildRoadMaterial;
-
         private RoadUIController roadUIController;
         private InputManager inputManager;
         private UIController uIController;
         private RoadManager roadManager;
+        private RoadPreviewSystem roadPreviewSystem;
 
         private RoadObjectSO roadObjectSO;
 
-        private State state;
-        private BuildingState buildingState;
+        private NodeBuilding nodeBuildingState;
         private AngleSnap snappingAngle;
 
-        private MeshFilter meshFilter;
-        private MeshRenderer meshRenderer;
         private GameObject nodeGFX;
 
         private Vector3 controlPosition;
@@ -77,22 +65,21 @@ namespace Road.Placement {
 
         private void Awake() {
             Instance = this;
-            meshFilter = GetComponent<MeshFilter>();
-            meshRenderer = GetComponent<MeshRenderer>();
         }
 
         private void Start() {
             roadUIController = RoadUIController.Instance;
+            roadPreviewSystem = RoadPreviewSystem.Instance;
             inputManager = InputManager.Instance;
             uIController = UIController.Instance;
             roadManager = RoadManager.Instance;
 
-            state = State.Idle;
-            buildingState = BuildingState.StartNode;
+            nodeBuildingState = NodeBuilding.StartNode;
             snappingAngle = AngleSnap.Zero;
             angleToSnap = 0;
             minAllowedAngle = 30;
             canBuildRoad = true;
+            controlPosition = Vector3.negativeInfinity;
 
             roadUIController.OnBuildingStraightRoad += RoadUIController_OnBuildingStraightRoad;
             roadUIController.OnBuildingCurvedRoad += RoadUIController_OnBuildingCurvedRoad;
@@ -107,6 +94,59 @@ namespace Road.Placement {
 
             inputManager.OnEscape += InputManager_OnEscape;
             inputManager.OnCancel += InputManager_OnCancel;
+            inputManager.OnNodePlaced += InputManager_OnNodePlaced;
+        }
+
+        private void Update()
+        {
+            Vector3 hitPosition;
+            GameObject hitObj;
+            if (RafaelUtils.TryRaycastObject(out RaycastHit hit))
+            {
+                hitObj = hit.transform.gameObject;
+                hitPosition = RoadUtilities.GetHitPosition(hit.point, hitObj);
+                nodeGFX.transform.position = hitPosition;
+            }
+            roadPreviewSystem.DisplayTemporaryMesh(StartPosition, ControlPosition, EndPosition, roadObjectSO.roadWidth, roadObjectSO.roadResolution, true);
+        }
+        private void InputManager_OnNodePlaced(object sender, InputManager.OnObjectHitedEventArgs e)
+        {
+            Vector3 hitPosition = RoadUtilities.GetHitPosition(e.position, e.obj, true);
+            Debug.Log("Node Placed!");
+            if (IsBuildingStartNode())
+            {
+                StartPosition = hitPosition;
+                nodeBuildingState = NodeBuilding.ControlNode;
+                return;
+            }
+
+
+            if (IsBuildingControlNode())
+            {
+                if (controlPosition != Vector3.negativeInfinity)
+                    nodeBuildingState = NodeBuilding.EndNode;
+
+                if (IsSnappingAngle && e.obj.TryGetComponent(out Ground _))
+                {
+                    // Only tries to snap if we hit ground
+                    hitPosition = RoadUtilities.GetHitPositionWithSnapping(hitPosition, startNode, 15);
+                }
+
+                ControlPosition = GetPositionForMinRoadLengh(hitPosition);
+                nodeBuildingState = NodeBuilding.EndNode;
+                return;
+            }
+
+
+            if (IsBuildingEndNode())
+            {
+                hitPosition = RoadUtilities.GetHitPosition(hitPosition, e.obj, true);
+                GetPositionForMinRoadLengh(hitPosition);
+                EndPosition = hitPosition;
+                PlaceRoad();
+                SplitRoads();
+                return;
+            }
         }
 
         private void RoadUIController_OnRoadDown() {
@@ -145,24 +185,6 @@ namespace Road.Placement {
 
         private void RoadUIController_OnGridSnapping() {
             throw new NotImplementedException();
-        }
-
-        public void DisplayTemporaryMesh(Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition) {
-            RoadTempMeshBuilder tempMeshBuilder = new(
-                startPosition,
-                endPosition,
-                controlPosition,
-                roadObjectSO.roadResolution,
-                roadObjectSO.roadWidth);
-
-            Mesh mesh = tempMeshBuilder.CreateTempRoadMesh();
-
-            if (canBuildRoad == false)
-                meshRenderer.sharedMaterial = cantBuildRoadMaterial;
-            else 
-                meshRenderer.sharedMaterial = temporaryRoadMaterial;           
-
-            meshFilter.mesh = mesh;
         }
 
         /// <summary>
@@ -242,8 +264,6 @@ namespace Road.Placement {
             ClearAffectedRoads();
             ResetDisplayRoad();
             if (nodeGFX != null) nodeGFX.SetActive(false);
-            state = State.Idle;
-            Debug.Log("Road Placement State: " + state);
         }
 
         private void InputManager_OnEscape() {
@@ -251,14 +271,11 @@ namespace Road.Placement {
             ClearAffectedRoads();
             ResetDisplayRoad();
             if (nodeGFX != null) nodeGFX.SetActive(false);
-            state = State.Idle;
         }
 
         private void RoadUIController_OnBuildingStraightRoad(RoadObjectSO roadObjectSO) {
             ClearAffectedRoads();
             ResetDisplayRoad();
-            state = State.StraightRoad;
-            Debug.Log("Building Road: " + state);
             this.roadObjectSO = roadObjectSO;
             if (nodeGFX == null) nodeGFX = RoadUtilities.CreateNodeGFX(roadObjectSO);
             else nodeGFX.SetActive(true);
@@ -267,8 +284,6 @@ namespace Road.Placement {
         private void RoadUIController_OnBuildingCurvedRoad(RoadObjectSO roadObjectSO) {
             ClearAffectedRoads();
             ResetDisplayRoad();
-            state = State.CurvedRoad;
-            Debug.Log("Building Road: " + state);
             this.roadObjectSO = roadObjectSO;
             if (nodeGFX == null) nodeGFX = RoadUtilities.CreateNodeGFX(roadObjectSO);
             else nodeGFX.SetActive(true);
@@ -277,8 +292,6 @@ namespace Road.Placement {
         private void RoadUIController_OnBuildingFreeRoad(RoadObjectSO roadObjectSO) {
             ClearAffectedRoads();
             ResetDisplayRoad();
-            state = State.FreeRoad;
-            Debug.Log("Building Road: " + state);
             this.roadObjectSO = roadObjectSO;
             if (nodeGFX == null) nodeGFX = RoadUtilities.CreateNodeGFX(roadObjectSO);
             else nodeGFX.SetActive(true);
@@ -286,8 +299,7 @@ namespace Road.Placement {
         public Vector3 GetPositionForMinRoadLengh(Vector3 position) {
             if (startNode != null) {
                 Vector3 roadDir = position - startNode.Position;
-                float maxRoadSize = roadObjectSO.GetMaxNodeSize();
-                float minRoadLengh = 2 * maxRoadSize;
+                float minRoadLengh = roadObjectSO.roadWidth * 1.5f;
 
                 if (roadDir.magnitude < minRoadLengh)
                     position += roadDir.normalized * minRoadLengh - roadDir;
@@ -295,43 +307,32 @@ namespace Road.Placement {
 
             return position;
         }
-        public bool IsBuilding() => state != State.Idle && state != State.RemovingRoad;
-        public void UpdateBuildingState(BuildingState state) => buildingState = state;
-        public bool IsBuildingStraightRoad => state == State.StraightRoad;
-        public bool IsBuildingCurvedRoad => state == State.CurvedRoad;
-        public bool IsBuildingFreeRoad => state == State.FreeRoad;
-        public bool IsBuildingStartNode() => buildingState == BuildingState.StartNode;
-        public bool IsBuildingControlNode() => buildingState == BuildingState.ControlNode;
-        public bool IsBuildingEndNode() => buildingState == BuildingState.EndNode;
-        public void SetNodeGFXPosition(Vector3 position) => nodeGFX.transform.position = position;
-        public Node StartNode => startNode;
+        public bool IsBuildingStartNode() => nodeBuildingState == NodeBuilding.StartNode;
+        public bool IsBuildingControlNode() => nodeBuildingState == NodeBuilding.ControlNode;
+        public bool IsBuildingEndNode() => nodeBuildingState == NodeBuilding.EndNode;
+        
+       
         public Vector3 StartPosition { 
             get { return startNode.Position; } 
             set { startNode = roadManager.GetOrCreateNodeAt(value); } 
         }
-        public bool CanBuildStraightRoad {
-            get { return (canBuildRoad && IsBuilding() && IsBuildingStraightRoad); }
-            set { canBuildRoad = value; }
+        public Vector3 EndPosition
+        {
+            get { return endNode.Position; }
+            set { endNode = roadManager.GetOrCreateNodeAt(value); }
         }
-        public bool CanBuildCurvedRoad {
-            get { return (canBuildRoad && IsBuilding() && IsBuildingCurvedRoad); }
-            set { canBuildRoad = value; }
+        public Vector3 ControlPosition
+        {
+            get { return controlPosition; }
+            set { controlPosition = value; }
         }
-        public bool CanBuildFreeRoad {
-            get { return (canBuildRoad && IsBuilding() && IsBuildingFreeRoad); }
-            set { canBuildRoad = value; }
-        }
-        public Vector3 ControlPosition { get { return controlPosition; } set { controlPosition = value; } }
-        public Vector3 EndPosition { set { endNode = roadManager.GetOrCreateNodeAt(value); } }
         public bool IsSnappingAngle => snappingAngle != AngleSnap.Zero;
         public int AngleToSnap => angleToSnap;
 
         private void ResetDisplayRoad() {
-            UpdateBuildingState(BuildingState.StartNode);
             ResetRoadPositions();
             startNode = null;
             canBuildRoad = true;
-            meshFilter.mesh = null;
         }
         private void ResetRoadPositions() {
             controlPosition = Vector3.negativeInfinity;
@@ -366,10 +367,9 @@ namespace Road.Placement {
                 Quaternion.identity, 
                 roadManager.GetRoadParent());
             RoadObject roadObject = roadGameObject.GetComponent<RoadObject>();
-            GameObject controlNodeObject = RoadUtilities.CreateControlNode(roadObject.GetRoadObjectSO, controlNodePosition);
+            GameObject controlNodeObject = RoadUtilities.CreateControlNode(roadObjectSO, controlNodePosition);
 
             roadObject.PlaceRoad(startNode, endNode, controlNodeObject);
-            OnRoadPlaced?.Invoke(this, new OnRoadPlacedEventArgs { roadObject = roadObject });
             return roadObject;
         }
 

@@ -1,11 +1,11 @@
 using System;
 using UnityEngine;
-using MeshHandler.Road.Builder;
 using System.Collections.Generic;
-using Road.NodeObj;
-using Road.Manager;
+using Nodes;
+using Roads.Manager;
+using Roads.MeshHandler;
 
-namespace Road.Obj {
+namespace Roads {
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
     [RequireComponent(typeof(MeshCollider))]
@@ -57,12 +57,11 @@ namespace Road.Obj {
             this.startNode.AddRoad(this);
             this.endNode.AddRoad(this);
 
-            this.startNode.transform.localScale = RoadWidth * Vector3Int.one;
-            this.endNode.transform.localScale = RoadWidth * Vector3Int.one;
-
             controlNodeObject.transform.parent = transform;
             Debug.Log("Road Placed!");
             SetRoadMesh();
+            startNode.SetMesh();
+            endNode.SetMesh();
             OnRoadPlaced?.Invoke(this, new OnRoadChangedEventArgs { roadObject = this });
             foreach (RoadObject roadObj in GetAllConnectedRoads()) {
                 roadObj.UpdateRoadMesh();
@@ -81,20 +80,14 @@ namespace Road.Obj {
             int textureRepead = Mathf.RoundToInt(roadObjectSO.roadTextureTiling * roadLengh * .05f);
             meshRenderer.material.mainTextureScale = new Vector2(.5f, textureRepead);
             meshRenderer.material.mainTextureOffset = new Vector2(0, 0);
+
         }
 
-        public void UpdateRoadMesh() {
-            Mesh mesh = RoadMeshBuilder.CreateRoadMesh(this);
-            meshFilter.mesh = mesh;
-            meshCollider.sharedMesh = mesh;
-            // Material tiling will depend on the road lengh, so let's have
-            // different instances
-            meshRenderer.material = new Material(roadObjectSO.roadMaterial);
-
-            float roadLengh = Bezier.GetLengh(startNode.transform.position, endNode.transform.position);
-            int textureRepead = Mathf.RoundToInt(roadObjectSO.roadTextureTiling * roadLengh * .05f);
-            meshRenderer.material.mainTextureScale = new Vector2(.5f, textureRepead);
-            meshRenderer.material.mainTextureOffset = new Vector2(0, 0);
+        public void UpdateRoadMesh()
+        {
+            SetRoadMesh();
+            startNode.SetMesh();
+            endNode.SetMesh();
         }
 
         public void Remove(bool keepNodes) {

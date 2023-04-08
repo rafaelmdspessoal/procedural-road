@@ -2,15 +2,16 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using Road.Placement;
+using Roads.Placement;
+using UI.Controller;
 
-namespace UI.Controller.Road {
+namespace UI.Roads.Controller{
     public class RoadUIController : MonoBehaviour {
         public static RoadUIController Instance { get; private set; }
 
         private InputManager inputManager;
         private UIController uIController;
-        private RoadPlacementManager roadPlacementManager;
+        private RoadPlacementSystem roadPlacementManager;
 
         public Action<RoadObjectSO> OnBuildingStraightRoad, OnBuildingCurvedRoad, OnBuildingFreeRoad;
         public Action OnGridSnapping, OnAngleSnapping, OnRoadUp, OnRoadDown;
@@ -38,7 +39,7 @@ namespace UI.Controller.Road {
         private void Start() {
             inputManager = InputManager.Instance;
             uIController = UIController.Instance;
-            roadPlacementManager = RoadPlacementManager.Instance;
+            roadPlacementManager = RoadPlacementSystem.Instance;
 
             inputManager.OnEscape += InputManager_OnEscape;
             uIController.OnBuildingRoads += UIController_OnBuildingRoads;

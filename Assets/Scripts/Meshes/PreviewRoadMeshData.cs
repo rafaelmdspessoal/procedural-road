@@ -1,10 +1,11 @@
 using UnityEngine;
-using MeshHandler.Utilities;
-using Road.Utilities;
+using Roads.Utilities;
+using Roads.MeshHandler;
 
-namespace MeshHandler.Road.Temp.Visual {
+namespace Roads.Preview.MeshHandler
+{
 
-    public class PopulateTempRoadMeshData {
+    public class PreviewRoadMeshData {
 
         private Vector3 startNodePosition;
         private Vector3 endNodePosition;
@@ -13,12 +14,12 @@ namespace MeshHandler.Road.Temp.Visual {
         private readonly int resolution;
         private readonly int roadWidth;
 
-        public PopulateTempRoadMeshData(Vector3 startNodePosition, Vector3 endNodePosition, Vector3 controlPosition, int roadWidth, int resolution) {
+        public PreviewRoadMeshData(Vector3 startNodePosition, Vector3 endNodePosition, Vector3 controlPosition, int roadWidth, int resolution) {
             this.startNodePosition = startNodePosition;
             this.endNodePosition = endNodePosition;
             this.controlPosition = controlPosition;
             this.roadWidth = roadWidth;
-            this.resolution = resolution * 3;
+            this.resolution = resolution;
         }
 
         public MeshData PopulateTempRoadMeshVertices(MeshData meshData) {

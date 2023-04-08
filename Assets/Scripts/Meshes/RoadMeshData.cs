@@ -1,11 +1,9 @@
 using UnityEngine;
-using MeshHandler.Utilities;
-using Road.Utilities;
-using Road.Obj;
-using Road.NodeObj;
+using Roads.Utilities;
+using Nodes;
 
-namespace MeshHandler.Road.RoadMeshData {
-    public class PopulateRoadMeshData {
+namespace Roads.MeshHandler.Data {
+    public class RoadMeshData {
 
         private readonly RoadObject roadObject;
         private readonly Node startNode;
@@ -23,7 +21,7 @@ namespace MeshHandler.Road.RoadMeshData {
         /// Generates the geometry for the given Road Object
         /// </summary>
         /// <param name="roadObject"></param>
-        public PopulateRoadMeshData(RoadObject roadObject) {
+        public RoadMeshData(RoadObject roadObject) {
             this.roadObject = roadObject;
 
             startNode = roadObject.StartNode;
@@ -78,7 +76,8 @@ namespace MeshHandler.Road.RoadMeshData {
                 controlRight = controlPosition - n1 * roadWidth / 2;
             }
 
-            MeshUtilities utilities = new(
+            meshData = MeshUtilities.PopulateRoadMeshVertices(
+                meshData, 
                 resolution,
                 startLeft,
                 endLeft,
@@ -89,8 +88,6 @@ namespace MeshHandler.Road.RoadMeshData {
                 startRight,
                 endRight,
                 controlRight);
-
-            meshData = utilities.PopulateRoadMeshVertices(meshData);
 
             return meshData;
         }

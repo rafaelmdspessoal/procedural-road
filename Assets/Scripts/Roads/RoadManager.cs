@@ -1,16 +1,15 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Road.Placement;
-using Road.Obj;
-using Road.NodeObj;
+using Nodes;
+using Roads.Placement;
 
-namespace Road.Manager {
+namespace Roads.Manager {
 
     public class RoadManager : MonoBehaviour {
         public static RoadManager Instance { get; private set; }
 
-        private RoadPlacementManager roadPlacementManager;
+        private RoadPlacementSystem roadPlacementManager;
         public bool updateRoads = false;
         private readonly Dictionary<Vector3, Node> placedNodesDict = new();
 
@@ -23,11 +22,11 @@ namespace Road.Manager {
         }
 
         private void Start() {
-            roadPlacementManager = RoadPlacementManager.Instance;
+            roadPlacementManager = RoadPlacementSystem.Instance;
             roadPlacementManager.OnRoadPlaced += RoadPlacementManager_OnRoadPlaced;
         }
 
-        private void RoadPlacementManager_OnRoadPlaced(object sender, RoadPlacementManager.OnRoadPlacedEventArgs e) {
+        private void RoadPlacementManager_OnRoadPlaced(object sender, RoadPlacementSystem.OnRoadPlacedEventArgs e) {
             RoadObject roadObject = e.roadObject;
             roadObject.OnRoadRemoved += RoadObject_OnRoadRemoved;
             roadObject.OnRoadUpdated += RoadObject_OnRoadUpdated;

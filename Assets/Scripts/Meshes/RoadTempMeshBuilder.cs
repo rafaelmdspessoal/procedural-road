@@ -1,26 +1,22 @@
 using UnityEngine;
-using MeshHandler.Road.Temp.Visual;
-using MeshHandler.Utilities;
+using Roads.MeshHandler;
 
-namespace MeshHandler.Road.Temp.Builder {
-
+namespace Roads.Preview.MeshHandler 
+{
     public class RoadTempMeshBuilder {
-        private readonly PopulateTempRoadMeshData displayRoadMeshData;
 
-        public RoadTempMeshBuilder(Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition, int roadWidth, int resolution) {
-            displayRoadMeshData = new(startPosition, endPosition, controlPosition, resolution, roadWidth);
-        }
-
-        public Mesh CreateTempRoadMesh() {
-            MeshData meshData = PopulateDisplayRoadMeshData();
+        public static Mesh CreateTempRoadMesh(
+            Vector3 startPosition,
+            Vector3 endPosition,
+            Vector3 controlPosition,
+            int roadWidth,
+            int resolution) 
+        {
+            MeshData meshData = new();
+            PreviewRoadMeshData displayRoadMeshData = new(startPosition, endPosition, controlPosition, resolution, roadWidth);
+            meshData = displayRoadMeshData.PopulateTempRoadMeshVertices(meshData);
             Mesh mesh = MeshUtilities.LoadMesh(meshData);
             return mesh;
-        }
-
-        private MeshData PopulateDisplayRoadMeshData() {
-            MeshData meshData = new();
-            meshData = displayRoadMeshData.PopulateTempRoadMeshVertices(meshData);
-            return meshData;
         }
     }
 }
