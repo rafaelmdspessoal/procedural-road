@@ -1,6 +1,7 @@
 using UnityEngine;
 using Roads.Utilities;
 using Nodes;
+using UnityEditor;
 
 namespace Roads.MeshHandler.Data {
     public class RoadMeshData {
@@ -39,25 +40,16 @@ namespace Roads.MeshHandler.Data {
         /// </summary>
         /// <param name="meshData"></param>
         /// <returns></returns>
-        public MeshData PopulateRoadMeshVertices(MeshData meshData) {
+        public MeshData PopulateRoadMeshVertices(MeshData meshData) 
+        {
+            Vector3 startCenterNode = roadObject.startMeshCenterPosition;
+            Vector3 endCenterNode = roadObject.endMeshCenterPosition;
 
-            Vector3 startCenterNode = startNodePosition;
-            Vector3 endCenterNode = endNodePosition;
+            Vector3 startLeft = roadObject.startMeshLeftPosition;
+            Vector3 startRight = roadObject.startMeshRightPosition;
 
-            if (startNode.HasIntersection()) {
-                float roadOffsetDistance = startNode.GetNodeSizeForRoad(roadObject);
-                startCenterNode = Bezier.GetOffsettedPosition(startNodePosition, endNodePosition, controlPosition, roadOffsetDistance);
-            }
-            if (endNode.HasIntersection()) {
-                float roadOffsetDistance = endNode.GetNodeSizeForRoad(roadObject);
-                endCenterNode = Bezier.GetOffsettedPosition(endNodePosition, startNodePosition, controlPosition, roadOffsetDistance);
-            }
-
-            Vector3 startLeft = RoadUtilities.GetRoadLeftSideVertice(roadWidth, startCenterNode, controlPosition);
-            Vector3 endLeft = RoadUtilities.GetRoadLeftSideVertice(roadWidth, endCenterNode, controlPosition);
-
-            Vector3 startRight = RoadUtilities.GetRoadRightSideVertice(roadWidth, startCenterNode, controlPosition);
-            Vector3 endRight = RoadUtilities.GetRoadRightSideVertice(roadWidth, endCenterNode, controlPosition);
+            Vector3 endLeft = roadObject.endMeshLeftPosition;
+            Vector3 endRight = roadObject.endMeshRightPosition;
 
             Vector3 controlLeft;
             Vector3 controlRight;

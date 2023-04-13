@@ -93,7 +93,7 @@ namespace Nodes {
             Dictionary<float, RoadObject> connectedRoadsDict = new();
 
             if (HasIntersection() && roadObject != null) {
-                Vector3 roadObjectDirection = Position - roadObject.transform.position;
+                Vector3 roadObjectDirection = Position - roadObject.ControlPosition;
 
                 foreach (RoadObject road in connectedRoads) {
                     if (road != roadObject) {

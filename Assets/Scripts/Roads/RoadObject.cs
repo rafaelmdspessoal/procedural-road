@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using Nodes;
 using Roads.Manager;
 using Roads.MeshHandler;
+using Rafael.Utils;
+using Roads.Utilities;
 
 namespace Roads {
     [RequireComponent(typeof(MeshFilter))]
@@ -27,6 +29,35 @@ namespace Roads {
         private Node endNode;
         private GameObject controlNodeObject;
 
+        private GameObject startMeshCenterGO;
+        private GameObject startMeshLeftGO;
+        private GameObject startMeshRightGO;
+
+
+        private GameObject endMeshCenterGO;
+        private GameObject endMeshLeftGO;
+        private GameObject endMeshRightGO;
+        public Vector3 startMeshCenterPosition { 
+            get { return startMeshCenterGO.transform.position - transform.position; } 
+        }
+        public Vector3 startMeshLeftPosition { 
+            get { return startMeshLeftGO.transform.position - transform.position; } 
+        }
+        public Vector3 startMeshRightPosition { 
+            get { return startMeshRightGO.transform.position - transform.position; } 
+        }
+        public Vector3 endMeshCenterPosition { 
+            get { return endMeshCenterGO.transform.position - transform.position; } 
+        }
+        public Vector3 endMeshLeftPosition { 
+            get { return endMeshLeftGO.transform.position - transform.position; } 
+        }
+        public Vector3 endMeshRightPosition { 
+            get { return endMeshRightGO.transform.position - transform.position; } 
+        }
+        public Vector3 controlPosition { 
+            get { return controlNodeObject.transform.position - transform.position; } 
+        }
         public Node StartNode { get { return startNode; } }
         public Node EndNode { get { return endNode; } }
         public GameObject ControlNodeObject { get { return controlNodeObject; } }
@@ -45,12 +76,13 @@ namespace Roads {
 
         private void Update() {
             if (RoadManager.Instance.updateRoads) {
-                controlNodeObject.transform.position = (startNode.Position + endNode.Position) / 2;
-                UpdateRoadMesh();
+                //controlNodeObject.transform.position = (startNode.Position + endNode.Position) / 2;
+                UpdateMesh();
             }
         }
 
-        public void PlaceRoad(Node startNode, Node endNode, GameObject controlNodeObject) {
+        public void PlaceRoad(Node startNode, Node endNode, GameObject controlNodeObject)
+        {
             this.startNode = startNode;
             this.endNode = endNode;
             this.controlNodeObject = controlNodeObject;
@@ -59,13 +91,100 @@ namespace Roads {
 
             controlNodeObject.transform.parent = transform;
             Debug.Log("Road Placed!");
+
+            PlaceRoadEdjes();
+            UpdateMeshEdjes();
+            OnRoadPlaced?.Invoke(this, new OnRoadChangedEventArgs { roadObject = this });
+        }
+
+        private void PlaceRoadEdjes()
+        {
+            startMeshCenterGO = RafaelUtils.CreateSphere(
+                Vector3.zero,
+                "startCenterMeshPosition",
+                this.transform);
+
+            startMeshLeftGO = RafaelUtils.CreateSphere(
+                Vector3.zero,
+                "startLeftMeshPosition",
+                this.transform);
+            startMeshRightGO = RafaelUtils.CreateSphere(
+                Vector3.zero,
+                "startRightMeshPosition",
+                this.transform);
+
+            endMeshCenterGO = RafaelUtils.CreateSphere(
+                Vector3.zero,
+                "endCenterMeshPosition",
+                this.transform);
+
+            endMeshLeftGO = RafaelUtils.CreateSphere(
+                Vector3.zero,
+                "endLeftMeshPosition",
+                this.transform);
+
+            endMeshRightGO = RafaelUtils.CreateSphere(
+                Vector3.zero,
+                "endRightMeshPosition",
+                this.transform);
+        }
+
+        private void UpdateMeshEdjes()
+        {
+            Vector3 startCenterMeshPosition = startNode.Position;
+            Vector3 endCenterMeshPosition = endNode.Position;
+
+            if (startNode.HasIntersection())
+            {
+                float roadOffsetDistance = startNode.GetNodeSizeForRoad(this);
+                startCenterMeshPosition = Bezier.GetOffsettedPosition(
+                    startNode.Position,
+                    endNode.Position,
+                    controlNodeObject.transform.position,
+                    roadOffsetDistance);
+            }
+            if (endNode.HasIntersection())
+            {
+                float roadOffsetDistance = endNode.GetNodeSizeForRoad(this);
+                endCenterMeshPosition = Bezier.GetOffsettedPosition(
+                    endNode.Position,
+                    startNode.Position,
+                    controlNodeObject.transform.position,
+                    roadOffsetDistance);
+            }
+            Vector3 startLeftMeshPosition = RoadUtilities.GetRoadLeftSideVertice(
+                roadObjectSO.roadWidth,
+                startCenterMeshPosition,
+                controlNodeObject.transform.position);
+            Vector3 startRightMeshPosition = RoadUtilities.GetRoadRightSideVertice(
+               roadObjectSO.roadWidth,
+               startCenterMeshPosition,
+               controlNodeObject.transform.position);
+
+            Vector3 endLeftMeshPosition = RoadUtilities.GetRoadLeftSideVertice(
+               roadObjectSO.roadWidth,
+               endCenterMeshPosition,
+               controlNodeObject.transform.position);
+            Vector3 endRightMeshPosition = RoadUtilities.GetRoadRightSideVertice(
+               roadObjectSO.roadWidth,
+               endCenterMeshPosition,
+               controlNodeObject.transform.position);
+
+            startMeshCenterGO.transform.position = startCenterMeshPosition;
+            startMeshLeftGO.transform.position = startLeftMeshPosition;
+            startMeshRightGO.transform.position = startRightMeshPosition;
+
+            endMeshCenterGO.transform.position = endCenterMeshPosition;
+            endMeshLeftGO.transform.position = endLeftMeshPosition;
+            endMeshRightGO.transform.position = endRightMeshPosition;
+        }
+
+        public void SetMesh()
+        {
+            UpdateMeshEdjes();
             SetRoadMesh();
             startNode.SetMesh();
             endNode.SetMesh();
-            OnRoadPlaced?.Invoke(this, new OnRoadChangedEventArgs { roadObject = this });
-            foreach (RoadObject roadObj in GetAllConnectedRoads()) {
-                roadObj.UpdateRoadMesh();
-            }
         }
 
         public void SetRoadMesh() {
@@ -83,8 +202,9 @@ namespace Roads {
 
         }
 
-        public void UpdateRoadMesh()
+        public void UpdateMesh()
         {
+            UpdateMeshEdjes();
             SetRoadMesh();
             startNode.SetMesh();
             endNode.SetMesh();
@@ -96,6 +216,11 @@ namespace Roads {
 
             OnRoadRemoved?.Invoke(this, new OnRoadChangedEventArgs { roadObject = this });
             OnRoadRemoved = null;
+
+            foreach (RoadObject roadToUpdate in GetAllConnectedRoads())
+            {
+                roadToUpdate.UpdateMesh();
+            }
 
             Destroy(gameObject);
         }

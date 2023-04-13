@@ -49,7 +49,7 @@ namespace Roads.Manager {
         private void RoadObject_OnRoadRemoved(object sender, RoadObject.OnRoadChangedEventArgs e) {
             List<RoadObject> connectedRoads = e.roadObject.GetAllConnectedRoads();
             foreach (RoadObject roadObj in connectedRoads) {
-                roadObj.UpdateRoadMesh();
+                roadObj.UpdateMesh();
             }
         }
 

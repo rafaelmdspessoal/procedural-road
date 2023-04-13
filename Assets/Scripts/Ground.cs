@@ -5,7 +5,7 @@ namespace World {
     public class Ground : MonoBehaviour {
         private void Start() {
             InputManager.Instance.OnSelected += InputManager_OnSelected;
-            InputManager.Instance.OnDemolished += InputManager_OnDemolished;
+            InputManager.Instance.OnObjectRemoved += InputManager_OnDemolished;
         }
 
         private void InputManager_OnSelected(object sender, InputManager.OnObjectHitedEventArgs e) {

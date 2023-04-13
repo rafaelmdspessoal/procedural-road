@@ -1,7 +1,5 @@
-using Roads.Placement;
 using Roads.Preview.MeshHandler;
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 
@@ -28,8 +26,8 @@ namespace Roads.Preview
 
         public void DisplayTemporaryMesh(
             Vector3 startPosition,
-            Vector3 endPosition,
             Vector3 controlPosition,
+            Vector3 endPosition,
             int roadWidth,
             int roadResolution,
             bool canBuildRoad)
@@ -49,5 +47,9 @@ namespace Roads.Preview
             meshFilter.mesh = mesh;
         }
 
+        public void StopPreview()
+        {
+            meshFilter.mesh = null;
+        }
     }
 }
