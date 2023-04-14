@@ -88,12 +88,12 @@ namespace Nodes {
         public List<RoadObject> ConnectedRoads => connectedRoads;
         public bool HasConnectedRoads => connectedRoads.Count > 0;
         public Vector3 Position => transform.position;
-        public Vector3 Direction => Position - connectedRoads.First().ControlPosition;
+        public Vector3 Direction => Position - connectedRoads.First().ControlNodePosition;
         public Dictionary<float, RoadObject> GetAdjacentRoadsTo(RoadObject roadObject) {
             Dictionary<float, RoadObject> connectedRoadsDict = new();
 
             if (HasIntersection() && roadObject != null) {
-                Vector3 roadObjectDirection = Position - roadObject.ControlPosition;
+                Vector3 roadObjectDirection = Position - roadObject.ControlNodePosition;
 
                 foreach (RoadObject road in connectedRoads) {
                     if (road != roadObject) {

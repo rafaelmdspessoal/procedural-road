@@ -7,16 +7,9 @@ namespace Roads.MeshHandler.Data {
     public class RoadMeshData {
 
         private readonly RoadObject roadObject;
-        private readonly Node startNode;
-        private readonly Node endNode;
 
         private readonly int resolution;
         private readonly int roadWidth;
-
-        Vector3 roadPosition;
-        Vector3 startNodePosition;
-        Vector3 endNodePosition;
-        Vector3 controlPosition;
 
         /// <summary>
         /// Generates the geometry for the given Road Object
@@ -25,12 +18,6 @@ namespace Roads.MeshHandler.Data {
         public RoadMeshData(RoadObject roadObject) {
             this.roadObject = roadObject;
 
-            startNode = roadObject.StartNode;
-            endNode = roadObject.EndNode;
-            roadPosition = roadObject.transform.position;
-            startNodePosition = startNode.Position - roadPosition;
-            endNodePosition = endNode.Position - roadPosition;
-            controlPosition = roadObject.ControlNodeObject.transform.position - roadPosition;
             roadWidth = roadObject.RoadWidth;
             resolution = roadObject.RoadResolution;
         }
@@ -42,14 +29,16 @@ namespace Roads.MeshHandler.Data {
         /// <returns></returns>
         public MeshData PopulateRoadMeshVertices(MeshData meshData) 
         {
-            Vector3 startCenterNode = roadObject.startMeshCenterPosition;
-            Vector3 endCenterNode = roadObject.endMeshCenterPosition;
+            Vector3 startCenterNode = roadObject.StartMeshCenterPosition();
+            Vector3 endCenterNode = roadObject.EndMeshCenterPosition();
 
-            Vector3 startLeft = roadObject.startMeshLeftPosition;
-            Vector3 startRight = roadObject.startMeshRightPosition;
+            Vector3 startLeft = roadObject.StartMeshLeftPosition();
+            Vector3 startRight = roadObject.StartMeshRightPosition();
 
-            Vector3 endLeft = roadObject.endMeshLeftPosition;
-            Vector3 endRight = roadObject.endMeshRightPosition;
+            Vector3 endLeft = roadObject.EndMeshLeftPosition();
+            Vector3 endRight = roadObject.EndMeshRightPosition();
+
+            Vector3 controlPosition = roadObject.ControlPosition();
 
             Vector3 controlLeft;
             Vector3 controlRight;

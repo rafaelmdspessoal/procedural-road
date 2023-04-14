@@ -37,27 +37,57 @@ namespace Roads {
         private GameObject endMeshCenterGO;
         private GameObject endMeshLeftGO;
         private GameObject endMeshRightGO;
-        public Vector3 startMeshCenterPosition { 
-            get { return startMeshCenterGO.transform.position - transform.position; } 
+
+        public Vector3 StartMeshCenterPosition() { 
+           return startMeshCenterGO.transform.position - transform.position; 
         }
-        public Vector3 startMeshLeftPosition { 
-            get { return startMeshLeftGO.transform.position - transform.position; } 
+        public Vector3 StartMeshLeftPosition() { 
+            return startMeshLeftGO.transform.position - transform.position; 
         }
-        public Vector3 startMeshRightPosition { 
-            get { return startMeshRightGO.transform.position - transform.position; } 
+        public Vector3 StartMeshRightPosition() { 
+            return startMeshRightGO.transform.position - transform.position; 
         }
-        public Vector3 endMeshCenterPosition { 
-            get { return endMeshCenterGO.transform.position - transform.position; } 
+        public Vector3 EndMeshCenterPosition() { 
+            return endMeshCenterGO.transform.position - transform.position; 
         }
-        public Vector3 endMeshLeftPosition { 
-            get { return endMeshLeftGO.transform.position - transform.position; } 
+        public Vector3 EndMeshLeftPosition() { 
+            return endMeshLeftGO.transform.position - transform.position; 
         }
-        public Vector3 endMeshRightPosition { 
-            get { return endMeshRightGO.transform.position - transform.position; } 
+        public Vector3 EndMeshRightPosition() { 
+            return endMeshRightGO.transform.position - transform.position; 
         }
-        public Vector3 controlPosition { 
-            get { return controlNodeObject.transform.position - transform.position; } 
+        public Vector3 ControlPosition() { 
+            return controlNodeObject.transform.position - transform.position; 
         }
+
+        public Vector3 StartMeshCenterPosition(Node node){
+            return startMeshCenterGO.transform.position - node.Position; 
+        }
+        public Vector3 StartMeshLeftPosition(Node node)
+        {
+            return startMeshLeftGO.transform.position - node.Position;
+        }
+        public Vector3 StartMeshRightPosition(Node node)
+        {
+            return startMeshRightGO.transform.position - node.Position;
+        }
+        public Vector3 EndMeshCenterPosition(Node node)
+        {
+            return endMeshCenterGO.transform.position - node.Position;
+        }
+        public Vector3 EndMeshLeftPosition(Node node)
+        {
+            return endMeshLeftGO.transform.position - node.Position;
+        }
+        public Vector3 EndMeshRightPosition(Node node)
+        {
+            return endMeshRightGO.transform.position - node.Position;
+        }
+        public Vector3 ControlPosition(Node node)
+        {
+             return controlNodeObject.transform.position - node.Position;
+        }
+
         public Node StartNode { get { return startNode; } }
         public Node EndNode { get { return endNode; } }
         public GameObject ControlNodeObject { get { return controlNodeObject; } }
@@ -228,7 +258,7 @@ namespace Roads {
         public int RoadWidth => roadObjectSO.roadWidth;
         public int RoadResolution => roadObjectSO.roadResolution;
         public RoadObjectSO GetRoadObjectSO => roadObjectSO;
-        public Vector3 ControlPosition => controlNodeObject.transform.position;
+        public Vector3 ControlNodePosition => controlNodeObject.transform.position;
         public List<RoadObject> GetAllConnectedRoads() {
             List<RoadObject> startNodeConnections = startNode.ConnectedRoads;
             List<RoadObject> endNodeConnections = endNode.ConnectedRoads;

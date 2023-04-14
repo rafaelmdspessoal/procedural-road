@@ -13,10 +13,7 @@ namespace Nodes.MeshHandler.Data {
         private int resolution;
         private int roadWidth;
 
-        private Vector3 roadPosition;
         private Vector3 startNodePosition = Vector3.zero;
-        private Vector3 endNodePosition;
-        private Vector3 controlPosition;
 
         public NodeMeshData(Node node) 
         {
@@ -25,27 +22,21 @@ namespace Nodes.MeshHandler.Data {
 
         public MeshData PopulateMesh(MeshData meshData, RoadObject connectedRoad)
         {
-            roadPosition = connectedRoad.transform.position;
-            controlPosition = connectedRoad.ControlNodeObject.transform.position - node.Position;
-            endNodePosition = connectedRoad.OtherNodeTo(node).Position - node.Position;
-
             roadWidth = connectedRoad.RoadWidth;
             resolution = connectedRoad.RoadResolution;
 
             if (!node.HasIntersection())
             {
-                return PopulateNodeWithoutIntersection(meshData);
+                return PopulateNodeWithoutIntersection(meshData, connectedRoad);
             }
 
-            float roadOffsetDistance = node.GetNodeSizeForRoad(connectedRoad);
-            Vector3 startCenterNode = Bezier.GetOffsettedPosition(startNodePosition, endNodePosition, controlPosition, roadOffsetDistance);
             Dictionary<float, RoadObject> adjacentRoads = node.GetAdjacentRoadsTo(connectedRoad);
             if (adjacentRoads.Count == 1)
             {
-                return PopulateNodeWithSingleIntersection(meshData, adjacentRoads.First().Value, startCenterNode);
+                return PopulateNodeWithSingleIntersection(meshData, connectedRoad, adjacentRoads.First().Value);
             }
 
-            return PopulateNodeWithDoubleIntersection(meshData, adjacentRoads, startCenterNode);
+            return PopulateNodeWithDoubleIntersection(meshData, connectedRoad, adjacentRoads);
         }
 
         /// <summary>
@@ -56,10 +47,22 @@ namespace Nodes.MeshHandler.Data {
         /// </summary>
         /// <param name="meshData"></param>
         /// <returns></returns>
-        public MeshData PopulateNodeWithoutIntersection(MeshData meshData) {
-            Vector3 startPosition = startNodePosition + (startNodePosition - controlPosition).normalized * roadWidth / 2;
-            Vector3 endLeft = RoadUtilities.GetRoadLeftSideVertice(roadWidth, startNodePosition, controlPosition);
-            Vector3 endRight = RoadUtilities.GetRoadRightSideVertice(roadWidth, startNodePosition, controlPosition);
+        public MeshData PopulateNodeWithoutIntersection(MeshData meshData, RoadObject connectedRoad)
+        {
+            Vector3 endLeft;
+            Vector3 endRight;
+            Vector3 startPosition = -connectedRoad.ControlPosition(node).normalized * roadWidth / 2;
+
+            if (connectedRoad.StartNode == node)
+            {
+                endLeft = connectedRoad.StartMeshLeftPosition(node);
+                endRight = connectedRoad.StartMeshRightPosition(node);
+            }
+            else
+            {
+                endLeft = connectedRoad.EndMeshLeftPosition(node);
+                endRight = connectedRoad.EndMeshRightPosition(node);
+            }
 
             Vector3 left = (endLeft - startNodePosition).normalized;
             Vector3 controlLeft = startPosition + left * roadWidth / 2;
@@ -86,21 +89,45 @@ namespace Nodes.MeshHandler.Data {
         /// <param name="meshData"></param>
         /// <param name="adjacentRoad"></param>
         /// <returns></returns>
-        public MeshData PopulateNodeWithSingleIntersection(MeshData meshData, RoadObject adjecentRoad, Vector3 thisRoadCenter) {
+        public MeshData PopulateNodeWithSingleIntersection(
+            MeshData meshData, 
+            RoadObject connectedRoad, 
+            RoadObject adjecentRoad) 
+        {
+            Vector3 thisRoadCenter;
+            Vector3 otherRoadCenter;
 
-            MeshUtilities.GetNodeMeshPositions(
-                adjecentRoad,
-                node,
-                roadPosition,
-                startNodePosition,
-                out Vector3 otherRoadCenter,
-                out _);
+            Vector3 thisRoadRight;
+            Vector3 thisRoadLeft;
 
-            Vector3 otherRoadLeft = RoadUtilities.GetRoadLeftSideVertice(roadWidth, otherRoadCenter, startNodePosition);
-            Vector3 thisRoadRight = RoadUtilities.GetRoadRightSideVertice(roadWidth, thisRoadCenter, startNodePosition);
+            Vector3 otherRoadRight;
+            Vector3 otherRoadLeft;
 
-            Vector3 otherRoadRight = RoadUtilities.GetRoadRightSideVertice(roadWidth, otherRoadCenter, startNodePosition);
-            Vector3 thisRoadLeft = RoadUtilities.GetRoadLeftSideVertice(roadWidth, thisRoadCenter, startNodePosition);
+            if (connectedRoad.StartNode == node)
+            {
+                thisRoadCenter = connectedRoad.StartMeshCenterPosition(node);
+                thisRoadRight = connectedRoad.StartMeshLeftPosition(node);
+                thisRoadLeft = connectedRoad.StartMeshRightPosition(node); 
+            }
+            else
+            {
+                thisRoadCenter = connectedRoad.EndMeshCenterPosition(node);
+                thisRoadRight = connectedRoad.EndMeshLeftPosition(node);
+                thisRoadLeft = connectedRoad.EndMeshRightPosition(node); 
+            }
+
+            if (adjecentRoad.StartNode == node)
+            {
+                otherRoadCenter = adjecentRoad.StartMeshCenterPosition(node);
+                otherRoadRight = adjecentRoad.StartMeshLeftPosition(node);
+                otherRoadLeft = adjecentRoad.StartMeshRightPosition(node); 
+            }
+            else
+            {
+                otherRoadCenter = adjecentRoad.EndMeshCenterPosition(node);
+                otherRoadRight = adjecentRoad.EndMeshLeftPosition(node);
+                otherRoadLeft = adjecentRoad.EndMeshRightPosition(node); 
+            }
 
             Vector3 n0 = (otherRoadLeft - otherRoadCenter).normalized;
             Vector3 n1 = (thisRoadRight - thisRoadCenter).normalized;
@@ -145,32 +172,65 @@ namespace Nodes.MeshHandler.Data {
         /// <param name="meshData"></param>
         /// <param name="adjacentRoads"></param>
         /// <returns></returns>
-        public MeshData PopulateNodeWithDoubleIntersection(MeshData meshData, Dictionary<float, RoadObject> adjacentRoads, Vector3 thisRoadCenter) {
-            if(adjacentRoads.Count != 2) {
+        public MeshData PopulateNodeWithDoubleIntersection(
+            MeshData meshData, 
+            RoadObject connectedRoad, 
+            Dictionary<float, RoadObject> adjacentRoads)
+        {
+            if (adjacentRoads.Count != 2)
+            {
                 throw new System.Exception("Intersection MUST have two roads, but has " + adjacentRoads.Count);
             }
+
+            RoadObject leftRoad = adjacentRoads.First().Value;
+            RoadObject rightRoad = adjacentRoads.Last().Value;
+
+            Vector3 thisRoadCenter;
+            Vector3 leftRoadCenter;
+            Vector3 rightRoadCenter;
+
+            Vector3 thisRoadRight;
+            Vector3 thisRoadLeft;
+
+            Vector3 leftRoadRight;            
+            Vector3 rightRoadLeft;
+
+            if (connectedRoad.StartNode == node)
+            {
+                thisRoadCenter = connectedRoad.StartMeshCenterPosition(node);
+                thisRoadRight = connectedRoad.StartMeshRightPosition(node);
+                thisRoadLeft = connectedRoad.StartMeshLeftPosition(node);
+            }
+            else
+            {
+                thisRoadCenter = connectedRoad.EndMeshCenterPosition(node);
+                thisRoadRight = connectedRoad.EndMeshRightPosition(node);
+                thisRoadLeft = connectedRoad.EndMeshLeftPosition(node);
+            }
+
+            if (leftRoad.StartNode == node)
+            {
+                leftRoadCenter = leftRoad.StartMeshCenterPosition(node);
+                leftRoadRight = leftRoad.StartMeshRightPosition(node);
+            }
+            else
+            {
+                leftRoadCenter = leftRoad.EndMeshCenterPosition(node);
+                leftRoadRight = leftRoad.EndMeshRightPosition(node);
+            }
+
+            if (rightRoad.StartNode == node)
+            {
+                rightRoadCenter = rightRoad.StartMeshCenterPosition(node);
+                rightRoadLeft = rightRoad.StartMeshLeftPosition(node);
+            }
+            else
+            {
+                rightRoadCenter = rightRoad.EndMeshCenterPosition(node);
+                rightRoadLeft = rightRoad.EndMeshLeftPosition(node);
+            }
+
             Vector3 intersectionCenter = startNodePosition + (startNodePosition - thisRoadCenter);
-
-            MeshUtilities.GetNodeMeshPositions(
-                adjacentRoads.First().Value,
-                node,
-                roadPosition,
-                startNodePosition,
-                out Vector3 leftRoadCenter,
-                out _);
-            MeshUtilities.GetNodeMeshPositions(
-                adjacentRoads.Last().Value,
-                node,
-                roadPosition,
-                startNodePosition,
-                out Vector3 rightRoadCenter,
-                out _);
-
-            Vector3 leftRoadRight = RoadUtilities.GetRoadLeftSideVertice(roadWidth, leftRoadCenter, startNodePosition);
-            Vector3 thisRoadLeft = RoadUtilities.GetRoadRightSideVertice(roadWidth, thisRoadCenter, startNodePosition);
-
-            Vector3 rightRoadLeft = RoadUtilities.GetRoadRightSideVertice(roadWidth, rightRoadCenter, startNodePosition);
-            Vector3 thisRoadRight = RoadUtilities.GetRoadLeftSideVertice(roadWidth, thisRoadCenter, startNodePosition);
 
             Vector3 n0Left = (leftRoadRight - leftRoadCenter).normalized;
             Vector3 n1Left = (thisRoadLeft - thisRoadCenter).normalized;

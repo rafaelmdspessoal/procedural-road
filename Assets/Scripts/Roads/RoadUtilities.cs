@@ -62,7 +62,7 @@ namespace Roads.Utilities {
             Vector3 baseDirection = Vector3.forward;
             Vector3 projection = SnapTo(currentDirection, baseDirection, angleSnap);
             foreach (RoadObject roadObject in startNode.ConnectedRoads) {
-                baseDirection = (startNode.Position - roadObject.ControlPosition).normalized;
+                baseDirection = (startNode.Position - roadObject.ControlNodePosition).normalized;
                 projection =  SnapTo(currentDirection, baseDirection, angleSnap);
             }
 

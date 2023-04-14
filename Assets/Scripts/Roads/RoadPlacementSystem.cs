@@ -207,7 +207,7 @@ namespace Roads.Placement {
             }
 
             foreach (RoadObject roadObject in startNode.ConnectedRoads) {
-                Vector3 prevRoadDirection = startNode.Position - roadObject.ControlPosition;
+                Vector3 prevRoadDirection = startNode.Position - roadObject.ControlNodePosition;
                 float angle = Vector3.Angle(prevRoadDirection, roadDirection);
                 if (angle < minAllowedAngle)
                     return canBuildRoad = false;
@@ -229,7 +229,7 @@ namespace Roads.Placement {
                 foreach (RoadObject roadObject in node.ConnectedRoads) {
                     // TODO If the ROad is curved the direction will depend on which half of
                     // the road we hit. This must be accounteable.
-                    Vector3 nextRoadDirection = roadObject.ControlPosition - node.Position;
+                    Vector3 nextRoadDirection = roadObject.ControlNodePosition - node.Position;
                     float angle = Vector3.Angle(nextRoadDirection, roadDirection);
                     if (angle < minAllowedAngle) {
                         canBuildRoad = false;
@@ -245,7 +245,6 @@ namespace Roads.Placement {
                 Vector3 nextRoadDirection = Bezier.GetTangentAt(roadObj, hitPosition, out _, out _);
                 float angle = Vector3.Angle(nextRoadDirection, roadDirection);
                 if (angle < minAllowedAngle || angle > 180 - minAllowedAngle) {
-                    print("hitRoadAt: " + angle);
                     canBuildRoad = false;
                     return canBuildRoad;
                 }
