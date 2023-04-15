@@ -120,7 +120,6 @@ namespace Roads {
             this.endNode.AddRoad(this);
 
             controlNodeObject.transform.parent = transform;
-            Debug.Log("Road Placed!");
 
             PlaceRoadEdjes();
             UpdateMeshEdjes();
@@ -245,7 +244,11 @@ namespace Roads {
             EndNode.RemoveRoad(this, keepNodes);
 
             OnRoadRemoved?.Invoke(this, new OnRoadChangedEventArgs { roadObject = this });
+
             OnRoadRemoved = null;
+            OnRoadPlaced = null;
+            OnRoadBuilt = null;
+            OnRoadUpdated = null;
 
             foreach (RoadObject roadToUpdate in GetAllConnectedRoads())
             {

@@ -36,7 +36,6 @@ public class GameManager : MonoBehaviour
     private void InputManager_OnObjectRemoved(object sender, InputManager.OnObjectHitedEventArgs e) {
         if (IsDemolishing()) {
             if (e.obj.TryGetComponent(out IRemoveable removeableObject)) {
-                Debug.Log("object to remove: " + e.obj);
                 removeableObject.Remove(false);
             }
         }
