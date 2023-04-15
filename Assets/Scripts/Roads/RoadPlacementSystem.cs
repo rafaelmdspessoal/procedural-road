@@ -10,6 +10,7 @@ using Roads.Manager;
 using Roads.Utilities;
 using Rafael.Utils;
 using Road.Placement.States;
+using UnityEngine.UIElements;
 
 namespace Roads.Placement {
 
@@ -181,6 +182,19 @@ namespace Roads.Placement {
             throw new NotImplementedException();
         }
 
+        private bool CheckNodeSize(float angle, int width, Vector3 startPosition, Vector3 endPosition)
+        {
+            angle *= Mathf.Deg2Rad;
+
+            float offset = (1 + Mathf.Cos(angle)) * (width + 1.2f) / Mathf.Sin(angle);
+            float lengh = Bezier.GetLengh(startPosition, endPosition) / 2;
+
+            if (lengh <= offset)
+                return false;
+
+            return true;
+        }
+
         /// <summary>
         /// Handles first node placement
         /// </summary>
@@ -193,7 +207,25 @@ namespace Roads.Placement {
             float angle;
             float firstAngle; 
             float secondAngle;
-            int width;
+            bool angleInRange = true;
+
+            foreach (RoadObject roadObject in startNode.ConnectedRoads)
+            {
+                Vector3 prevRoadDirection = startNode.Position - roadObject.ControlNodePosition;
+                angle = Vector3.Angle(prevRoadDirection, roadDirection);
+                angle = Mathf.Clamp(angle, 0, 90);
+
+                if (angle < minAllowedAngle)
+                    return false;
+
+                angleInRange = CheckNodeSize(
+                    angle,
+                    roadObject.RoadWidth / 2,
+                    roadObject.StartNode.Position,
+                    roadObject.EndNode.Position);
+
+                if (!angleInRange) return angleInRange;
+            }
 
             if (roadsToSplit.Count > 0) {
                 RoadObject roadObject = roadsToSplit.First().Value;
@@ -208,53 +240,37 @@ namespace Roads.Placement {
                 if (firstAngle < minAllowedAngle || secondAngle < minAllowedAngle) 
                     return false;
 
-                width = roadObject.RoadWidth / 2;
+                int width = roadObject.RoadWidth / 2;
 
-                firstAngle *= Mathf.Deg2Rad;
-                secondAngle *= Mathf.Deg2Rad;
+                angleInRange = CheckNodeSize(
+                    firstAngle,
+                    width,
+                    roadObject.StartNode.Position,
+                    hitPosition);
 
-                float firstOffset = (1 + Mathf.Cos(firstAngle)) * (width + 1.2f) / Mathf.Sin(firstAngle);
-                float firstLengh = Bezier.GetLengh(roadObject.StartNode.Position, hitPosition) / 2;
+                if (!angleInRange) return angleInRange;
 
-                float secondOffset = (1 + Mathf.Cos(secondAngle)) * (width + 1.2f) / Mathf.Sin(secondAngle);
-                float secondLengh = Bezier.GetLengh(roadObject.EndNode.Position, hitPosition) / 2;
+                angleInRange = CheckNodeSize(
+                   secondAngle,
+                   width,
+                   roadObject.EndNode.Position,
+                   hitPosition);
 
-                if (firstLengh <= firstOffset)
-                    return false;
-
-                if (secondLengh <= secondOffset)
-                    return false;
+                if (!angleInRange) return angleInRange;
             }
 
-            foreach (RoadObject roadObject in startNode.ConnectedRoads) {
-                Vector3 prevRoadDirection = startNode.Position - roadObject.ControlNodePosition;
-                angle = Vector3.Angle(prevRoadDirection, roadDirection);
-                angle = Mathf.Clamp(angle, 0, 90);
-
-                if (angle < minAllowedAngle)
-                    return false;
-
-                width = roadObject.RoadWidth / 2;
-                angle *= Mathf.Deg2Rad;
-
-                float offset = (1 + Mathf.Cos(angle)) * (width + 1.2f) / Mathf.Sin(angle);
-                float lengh = Bezier.GetLengh(roadObject.StartNode.Position, roadObject.EndNode.Position) / 2;
-
-                if (lengh <= offset)
-                    return false;
-            }
-
-            return true;
+            return angleInRange;
         }
 
         /// <summary>
-        /// Handle cases for secon node placement
+        /// Handle cases for second node placement
         /// </summary>
         /// <param name="roadDirection">The direction of the secment being placed</param>
         /// <param name="hitObj">The object we hit (grond, node or road)</param>
         /// <returns></returns>
         public bool CheckRoadAngleInRange(Vector3 roadDirection, GameObject hitObj, Vector3 hitPosition) {
-
+            bool angleInRange = true
+                ;
             if (hitObj.TryGetComponent(out Node node)) {
                 foreach (RoadObject roadObj in node.ConnectedRoads) {
                     // TODO If the ROad is curved the direction will depend on which half of
@@ -264,14 +280,13 @@ namespace Roads.Placement {
                     if (angle < minAllowedAngle) 
                         return false;
 
-                    int width = roadObj.RoadWidth / 2;
-                    angle *= Mathf.Deg2Rad;
+                    angleInRange = CheckNodeSize(
+                        angle,
+                        roadObj.RoadWidth / 2, 
+                        roadObj.StartNode.Position, 
+                        roadObj.EndNode.Position);
 
-                    float offset = (1 + Mathf.Cos(angle)) * (width + 1.2f) / Mathf.Sin(angle);
-                    float lengh = Bezier.GetLengh(roadObj.StartNode.Position, roadObj.EndNode.Position) / 2;
-
-                    if (lengh <= offset)
-                        return false;
+                    if (!angleInRange) return angleInRange;
                 }
             }                
 
@@ -291,23 +306,24 @@ namespace Roads.Placement {
 
                 int width = roadObject.RoadWidth / 2;
 
-                 firstAngle *= Mathf.Deg2Rad;
-                 secondAngle *= Mathf.Deg2Rad;
+                angleInRange = CheckNodeSize(
+                    firstAngle,
+                    width,
+                    roadObject.StartNode.Position,
+                    hitPosition);
 
-                float firstOffset = (1 + Mathf.Cos(firstAngle)) * (width + 1.2f) / Mathf.Sin(firstAngle);
-                float firstLengh = Bezier.GetLengh(roadObject.StartNode.Position, hitPosition) / 2;
+                if (!angleInRange) return angleInRange;
 
-                float secondOffset = (1 + Mathf.Cos(secondAngle)) * (width + 1.2f) / Mathf.Sin(secondAngle);
-                float secondLengh = Bezier.GetLengh(roadObject.EndNode.Position, hitPosition) / 2;
+                angleInRange = CheckNodeSize(
+                   secondAngle,
+                   width,
+                   roadObject.EndNode.Position,
+                   hitPosition);
 
-                if (firstLengh <= firstOffset)
-                    return false;
-
-                if (secondLengh <= secondOffset)
-                    return false;
+                if (!angleInRange) return angleInRange;
             }
 
-            return true;
+            return angleInRange;
         }
 
         private void UIController_OnRemovingObjects() {
