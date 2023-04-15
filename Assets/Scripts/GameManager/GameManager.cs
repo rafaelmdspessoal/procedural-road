@@ -29,13 +29,13 @@ public class GameManager : MonoBehaviour
         uIController.OnRemovingObjects += UIController_OnRemovingObjects;
 
         inputManager.OnEscape += InputManager_OnEscape;
-        inputManager.OnDemolished += InputManager_OnDemolished;
+        inputManager.OnObjectRemoved += InputManager_OnObjectRemoved;
     }
 
-    private void InputManager_OnDemolished(object sender, InputManager.OnObjectHitedEventArgs e) {
+    // NOTE: This should be moved to a more appropriate place
+    private void InputManager_OnObjectRemoved(object sender, InputManager.OnObjectHitedEventArgs e) {
         if (IsDemolishing()) {
             if (e.obj.TryGetComponent(out IRemoveable removeableObject)) {
-                Debug.Log("object to remove: " + e.obj);
                 removeableObject.Remove(false);
             }
         }

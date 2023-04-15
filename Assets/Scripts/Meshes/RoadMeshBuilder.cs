@@ -1,10 +1,7 @@
 using UnityEngine;
-using MeshHandler.Road.NodeMeshData;
-using MeshHandler.Road.RoadMeshData;
-using MeshHandler.Utilities;
-using Road.Obj;
+using Roads.MeshHandler.Data;
 
-namespace MeshHandler.Road.Builder {
+namespace Roads.MeshHandler {
     public class RoadMeshBuilder {
 
         /// <summary>
@@ -13,32 +10,15 @@ namespace MeshHandler.Road.Builder {
         /// <param name="roadObject"></param>
         /// <returns></returns>
         public static Mesh CreateRoadMesh(RoadObject roadObject) {
-            MeshData meshData = PopulateMeshData(roadObject);
-            Mesh mesh = MeshUtilities.LoadMesh(meshData);
-            return mesh;
-        }
-
-        /// <summary>
-        /// Populates the meshData of the given roadObject using
-        /// our logic
-        /// </summary>
-        /// <param name="roadObject">
-        /// The Road that will receive this mesh
-        /// </param>
-        /// <returns></returns>
-        private static MeshData PopulateMeshData(RoadObject roadObject) {
             MeshData meshData = new();
-            PopulateRoadMeshData roadMeshData = new(roadObject);
-            PopulateNodeMeshData nodeMeshData = new(roadObject);
-
-            nodeMeshData.PopulateStartNodeMesh(meshData);
+            RoadMeshData roadMeshData = new(roadObject);
             roadMeshData.PopulateRoadMeshVertices(meshData);
-            nodeMeshData.PopulateEndNodeMesh(meshData);
 
             MeshUtilities.PopulateMeshTriangles(meshData);
             MeshUtilities.PopulateMeshUvs(meshData);
 
-            return meshData;
+            Mesh mesh = MeshUtilities.LoadMesh(meshData);
+            return mesh;
         }
     }
 }

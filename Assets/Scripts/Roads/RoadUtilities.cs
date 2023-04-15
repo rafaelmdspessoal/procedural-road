@@ -1,14 +1,17 @@
-﻿using Road.Obj;
-using Road.NodeObj;
-using UnityEngine;
-using Road.Placement;
+﻿using UnityEngine;
+using Roads.Placement;
+using Nodes;
+using UnityEngine.InputSystem;
+using TMPro;
+using World;
+using System.Drawing.Printing;
 
-namespace Road.Utilities {
+namespace Roads.Utilities {
 
     public static class RoadUtilities {
 
         public static Vector3 GetRoadLeftSideVertice(float roadWidth, Vector3 centerVertice, Vector3 startVertice) {
-            Vector3 verticeDirection = GetVerticeNormalizedDirection(startVertice, centerVertice);
+            Vector3 verticeDirection = (centerVertice - startVertice).normalized;
             Vector3 left = new(-verticeDirection.z, verticeDirection.y, verticeDirection.x);
             Vector3 leftSideVertice = centerVertice + .5f * roadWidth * left;
             return leftSideVertice;
@@ -27,7 +30,8 @@ namespace Road.Utilities {
 
         public static GameObject CreateNodeGFX(RoadObjectSO roadObjectSO) {
             GameObject nodeGFX = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            nodeGFX.transform.GetComponent<Collider>().enabled = false;
+            nodeGFX.layer = 2;
+            nodeGFX.transform.GetComponent<SphereCollider>().radius = 1f;
             nodeGFX.transform.localScale = roadObjectSO.roadWidth * Vector3.one;
             nodeGFX.transform.name = "Node GFX";
             return nodeGFX;
@@ -41,29 +45,13 @@ namespace Road.Utilities {
             return controlNodeObject;
         }
 
-        public static Vector3 GetHitPosition(Vector3 hitPosition, GameObject hitObject, bool splitRoad = false) {
-            Vector3 targetPosition = hitPosition;
-            if (hitObject.TryGetComponent(out Node _)) 
-                return hitObject.transform.position;
-
-            if (hitObject.TryGetComponent(out RoadObject roadObject)) {
-                targetPosition = Bezier.GetClosestPointTo(roadObject, hitPosition);
-                if (splitRoad)
-                    RoadPlacementManager.Instance.AddRoadToSplit(targetPosition, roadObject);
-                return targetPosition;
-            }
-
-            // If hit ground raise by 0.1f
-            return new Vector3(targetPosition.x, targetPosition.y + 0.1f, targetPosition.z);
-        }
-
         public static Vector3 GetHitPositionWithSnapping(Vector3 hitPosition, Node startNode, int angleSnap) {
             Vector3 currentDirection = hitPosition - startNode.Position;
             Vector3 targetPosition;
             Vector3 baseDirection = Vector3.forward;
             Vector3 projection = SnapTo(currentDirection, baseDirection, angleSnap);
             foreach (RoadObject roadObject in startNode.ConnectedRoads) {
-                baseDirection = (startNode.Position - roadObject.ControlPosition).normalized;
+                baseDirection = (startNode.Position - roadObject.ControlNodePosition).normalized;
                 projection =  SnapTo(currentDirection, baseDirection, angleSnap);
             }
 
@@ -96,12 +84,61 @@ namespace Road.Utilities {
             return q * v3;
         }
 
-        public static Vector3 GetProjectedPosition(Vector3 positionToProject, Vector3 directionToProject, Vector3 intersectionPosition) {
+        public static Vector3 GetProjectedPosition(Vector3 positionToProject, Vector3 directionToProject, Vector3 intersectionPosition) 
+        {
             Vector3 currentDirection = positionToProject - intersectionPosition;
             float angle = Vector3.Angle(currentDirection, directionToProject);
 
-            Vector3 projectedPosition = currentDirection.magnitude * Mathf.Cos(angle * Mathf.Deg2Rad) * directionToProject.normalized;
+            float minProjectionLengh = Mathf.Clamp(
+                currentDirection.magnitude * Mathf.Cos(angle * Mathf.Deg2Rad),
+                10f,
+                Mathf.Infinity);
+
+            Vector3 projectedPosition = minProjectionLengh * directionToProject.normalized;
             return projectedPosition + intersectionPosition;
+        }
+
+        public static bool TryRaycastObject(out Vector3 hitPosition, out GameObject hitObject, int radius = 4, bool splitRoad = false)
+        {
+            hitObject = null;
+            hitPosition = Vector3.zero;
+            Vector3 mousePosition = Mouse.current.position.ReadValue();
+            Ray ray = Camera.main.ScreenPointToRay(mousePosition);
+
+            if (Physics.Raycast(ray, out RaycastHit rayHit, Mathf.Infinity))
+            {
+                hitPosition = rayHit.point;
+                hitObject = rayHit.transform.gameObject;
+                RaycastHit[] sphereHits = Physics.SphereCastAll(hitPosition, radius, new Vector3(1f, 0, 0), radius);
+                foreach (RaycastHit sphereHit in sphereHits)
+                {
+                    GameObject hitObj = sphereHit.transform.gameObject;
+
+                    if (hitObj.TryGetComponent(out Node _))
+                    {
+                        hitObject = hitObj;
+                        hitPosition = hitObj.transform.position;
+                        return true;
+                    }
+                }
+                foreach (RaycastHit sphereHit in sphereHits)
+                {
+                    GameObject hitObj = sphereHit.transform.gameObject;
+                    if (hitObj.TryGetComponent(out RoadObject roadObject))
+                    {
+                        hitObject = hitObj;
+                        hitPosition = Bezier.GetClosestPointTo(roadObject, hitPosition);
+                        if (splitRoad)
+                            RoadPlacementSystem.Instance.AddRoadToSplit(hitPosition, roadObject);
+                        return true;
+                    }
+                }
+                if (hitObject.TryGetComponent(out Ground ground))
+                    hitPosition = new Vector3(hitPosition.x, hitPosition.y + 0.1f, hitPosition.z);
+                
+                return true;
+            }
+            return false;
         }
     }
 }

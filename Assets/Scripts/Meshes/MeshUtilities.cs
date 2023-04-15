@@ -1,25 +1,43 @@
 ﻿using UnityEngine;
-using Road.Obj;
-using Road.NodeObj;
+using Roads;
+using Nodes;
 
-namespace MeshHandler.Utilities {
+namespace Roads.MeshHandler {
     public class MeshUtilities {
 
-        private readonly int resolution;
+        public static MeshData PopulateStartNodeVerticesWOIntersection(
+            MeshData meshData,
+            int resolution,
+            Vector3 startPosition,
+            Vector3 endLeft,
+            Vector3 controlLeft,
+            Vector3 startCenter,
+            Vector3 endRight,
+            Vector3 controlRight)
+        {
+            float t;
 
-        private Vector3 startLeft;
-        private Vector3 endLeft;
-        private Vector3 controlLeft;
+            for (int i = 0; i < resolution; i++)
+            {
+                t = i / (float)(resolution - 1);
+                Vector3 leftRoadVertice = Bezier.QuadraticCurve(startPosition, endLeft, controlLeft, t);
+                Vector3 rightRoadVertice = Bezier.QuadraticCurve(startPosition, endRight, controlRight, t);
 
-        private Vector3 startCenter;
-        private Vector3 endCenter;
-        private Vector3 controlCenter;
+                meshData.AddVertice(leftRoadVertice);
+                meshData.AddVertice(startCenter);
+                meshData.AddVertice(rightRoadVertice);
+            }
+            return meshData;
+        }
 
-        private Vector3 startRight;
-        private Vector3 endRight;
-        private Vector3 controlRight;
-
-        public MeshUtilities(
+        /// <summary>
+        /// Populates mesh for a starting node where the left side of a road meets the right
+        /// side of the other
+        /// </summary>
+        /// <param name="meshData"></param>
+        /// <returns></returns>
+        public static MeshData PopulateNodeMeshVerticesWSIntersection(
+            MeshData meshData,
             int resolution,
             Vector3 startLeft,
             Vector3 endLeft,
@@ -30,71 +48,6 @@ namespace MeshHandler.Utilities {
             Vector3 startRight,
             Vector3 endRight,
             Vector3 controlRight) {
-            this.resolution = resolution *= 3;
-
-            this.startLeft = startLeft;
-            this.endLeft = endLeft;
-            this.controlLeft = controlLeft;
-
-            this.startCenter = startCenter;
-            this.endCenter = endCenter;
-            this.controlCenter = controlCenter;
-
-            this.startRight = startRight;
-            this.endRight = endRight;
-            this.controlRight = controlRight;
-        }
-
-        #region NodesWithoutIntersection
-        /// <summary>
-        /// Builds a mesh that has the same point for 
-        /// both sides of the mesh AKA a Node without
-        /// intersection
-        /// </summary>
-        /// <param name="meshData"></param>
-        public MeshData PopulateStartNodeVerticesWOIntersection(MeshData meshData) {
-            float t;
-
-            for (int i = 0; i < resolution; i++) {
-                t = i / (float)(resolution - 1);
-                Vector3 leftRoadVertice = Bezier.QuadraticCurve(startLeft, endLeft, controlLeft, t);
-                Vector3 rightRoadVertice = Bezier.QuadraticCurve(startRight, endRight, controlRight, t);
-
-                meshData.AddVertice(leftRoadVertice);
-                meshData.AddVertice(startCenter);
-                meshData.AddVertice(rightRoadVertice);
-            }
-            return meshData;
-        }
-
-        /// <summary>
-        /// Builds a mesh that ends at a common Point for
-        /// both sides of the mesh AKA a Node without intersection
-        /// </summary>
-        /// <param name="meshData"></param>
-        public MeshData PopulateEndNodeVerticesWOIntersection(MeshData meshData) {
-            float t;
-            for (int i = 0; i < resolution; i++) {
-                t = i / (float)(resolution - 1);
-                Vector3 leftRoadVertice = Bezier.QuadraticCurve(startLeft, endLeft, controlLeft, t);
-                Vector3 rightRoadVertice = Bezier.QuadraticCurve(startRight, endRight, controlRight, t);
-
-                meshData.AddVertice(leftRoadVertice);
-                meshData.AddVertice(endCenter);
-                meshData.AddVertice(rightRoadVertice);
-            }
-            return meshData;
-        }
-        #endregion
-
-        #region NodesWithSingleIntersection
-        /// <summary>
-        /// Populates mesh for a starting node where the left side of a road meets the right
-        /// side of the other
-        /// </summary>
-        /// <param name="meshData"></param>
-        /// <returns></returns>
-        public MeshData PopulateStartNodeMeshVerticesWSIntersection(MeshData meshData) {
             float t;
 
             for (int i = resolution / 2 - 1; i < resolution - 1; i++) {
@@ -110,29 +63,6 @@ namespace MeshHandler.Utilities {
             return meshData;
         }
 
-        /// <summary>
-        /// Populates mesh for a starting node where the left side of a road meets the right
-        /// side of the other
-        /// </summary>
-        /// <param name="meshData"></param>
-        /// <returns></returns>
-        public MeshData PopulateEndtNodeMeshVerticesWSIntersection(MeshData meshData) {
-            float t;
-            for (int i = 0; i < resolution / 2; i++) {
-                t = i / (float)(resolution - 2);
-                Vector3 leftRoadVertice = Bezier.QuadraticCurve(startLeft, endLeft, controlLeft, t);
-                Vector3 centerRoadVertice = Bezier.QuadraticCurve(startCenter, endCenter, controlCenter, t);
-                Vector3 rightRoadVertice = Bezier.QuadraticCurve(startRight, endRight, controlRight, t);
-
-                meshData.AddVertice(leftRoadVertice);
-                meshData.AddVertice(centerRoadVertice);
-                meshData.AddVertice(rightRoadVertice);
-            }
-            return meshData;
-        }
-        #endregion
-
-        #region NodesWithDoubleIntersection
         /// <summary>
         /// Calculate the vertices for starting Node
         /// when the intersection has three or more 
@@ -143,7 +73,17 @@ namespace MeshHandler.Utilities {
         /// </summary>
         /// <param name="meshData"></param>
         /// <returns></returns>
-        public MeshData PopulateStartNodeMeshVerticesWDIntersection(MeshData meshData) {
+        public static MeshData PopulateNodeMeshVerticesWDIntersection(
+            MeshData meshData,
+            int resolution,
+            Vector3 startLeft,
+            Vector3 endLeft,
+            Vector3 controlLeft,
+            Vector3 startCenter,
+            Vector3 endCenter,
+            Vector3 startRight,
+            Vector3 endRight,
+            Vector3 controlRight) {
             float t;
             for (int i = resolution / 2 - 1; i < resolution - 1; i++) {
                 t = i / (float)(resolution - 2);
@@ -158,34 +98,19 @@ namespace MeshHandler.Utilities {
             return meshData;
         }
 
-        /// <summary>
-        /// Calculate the vertices for end Node
-        /// when the intersection has three or more 
-        /// roads.
-        /// It will start calculating at the begginig 
-        /// of the Road mesh and finish half way into
-        /// the Node
-        /// </summary>
-        /// <param name="meshData"></param>
-        /// <returns></returns>
-        public MeshData PopulateEndNodeMeshVerticesWDIntersection(MeshData meshData) {
-            float t;
 
-            for (int i = 0; i < resolution / 2; i++) {
-                t = i / (float)(resolution - 2);
-                Vector3 leftRoadVertice = Bezier.QuadraticCurve(startLeft, endLeft, controlLeft, t);
-                Vector3 centerRoadVertice = Bezier.LinearCurve(startCenter, endCenter, t);
-                Vector3 rightRoadVertice = Bezier.QuadraticCurve(startRight, endRight, controlRight, t);
-
-                meshData.AddVertice(leftRoadVertice);
-                meshData.AddVertice(centerRoadVertice);
-                meshData.AddVertice(rightRoadVertice);
-            }
-            return meshData;
-        }
-        #endregion
-
-        public MeshData PopulateRoadMeshVertices(MeshData meshData) {
+        public static MeshData PopulateRoadMeshVertices(
+            MeshData meshData,
+            int resolution,
+            Vector3 startLeft,
+            Vector3 endLeft,
+            Vector3 controlLeft,
+            Vector3 startCenter,
+            Vector3 endCenter,
+            Vector3 controlCenter,
+            Vector3 startRight,
+            Vector3 endRight,
+            Vector3 controlRight) {
             float t;
 
             for (int i = 0; i < resolution; i++) {
@@ -271,8 +196,8 @@ namespace MeshHandler.Utilities {
 
             Node otherNode = adjecentRoad.OtherNodeTo(node);
             float offsetDistance = node.GetNodeSizeForRoad(adjecentRoad);
-            Vector3 otherNodePostion = otherNode.Position - roadPosition;
-            adjacentRoadControlNodePosition = adjecentRoad.ControlNodeObject.transform.position - roadPosition;
+            Vector3 otherNodePostion = otherNode.Position - node.Position;
+            adjacentRoadControlNodePosition = adjecentRoad.ControlNodeObject.transform.position - node.Position;
 
             adjacentRoadNodeMeshPosition = Bezier.GetOffsettedPosition(nodePosition, otherNodePostion, adjacentRoadControlNodePosition, offsetDistance);
         }

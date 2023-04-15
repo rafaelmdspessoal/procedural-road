@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.EventSystems;
 using UI.Controller;
 using Rafael.Utils;
+using Roads.Utilities;
 
 public class InputManager : MonoBehaviour
 {
@@ -14,7 +15,7 @@ public class InputManager : MonoBehaviour
 
 	public event EventHandler<OnObjectHitedEventArgs> OnSelected;
 	public event EventHandler<OnObjectHitedEventArgs> OnNodePlaced;
-	public event EventHandler<OnObjectHitedEventArgs> OnDemolished;
+	public event EventHandler<OnObjectHitedEventArgs> OnObjectRemoved;
 	public class OnObjectHitedEventArgs : EventArgs {
 		public Vector3 position;
 		public GameObject obj;
@@ -66,10 +67,10 @@ public class InputManager : MonoBehaviour
     private void PlaceNode_performed(InputAction.CallbackContext obj) {
 		if (EventSystem.current.IsPointerOverGameObject()) return;
 
-		if (RafaelUtils.TryRaycastObject(out RaycastHit hit)) {
-			OnNodePlaced?.Invoke(this, new OnObjectHitedEventArgs {
-				position = hit.point,
-				obj = hit.transform.gameObject
+		if (RoadUtilities.TryRaycastObject(out Vector3 hitPosition, out GameObject hitObject, splitRoad: true)) {
+            OnNodePlaced?.Invoke(this, new OnObjectHitedEventArgs {
+				position = hitPosition,
+				obj = hitObject
 			});
 		}
 	}
@@ -83,7 +84,7 @@ public class InputManager : MonoBehaviour
 		if (EventSystem.current.IsPointerOverGameObject()) return;
 
 		if (RafaelUtils.TryRaycastObject(out RaycastHit hit)) {
-			OnDemolished?.Invoke(this, new OnObjectHitedEventArgs {
+			OnObjectRemoved?.Invoke(this, new OnObjectHitedEventArgs {
 				position = hit.point,
 				obj = hit.transform.gameObject
 			});
