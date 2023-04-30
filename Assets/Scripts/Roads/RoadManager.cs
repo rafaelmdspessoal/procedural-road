@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Nodes;
 using Roads.Placement;
+using System.Linq;
 
 namespace Roads.Manager {
 
@@ -57,6 +58,14 @@ namespace Roads.Manager {
             if (!HasNode(node))
                 placedNodesDict.Add(node.Position, node);
         }
+        public void RemoveNode(Node node)
+        {
+            if (HasNode(node))
+            {
+                placedNodesDict.Remove(node.Position);
+                Destroy(node.gameObject);
+            }
+        }
 
         public Node GetNodeAt(Vector3 position) => placedNodesDict.GetValueOrDefault(position);
         private bool HasNode(Node node) => placedNodesDict.ContainsValue(node);
@@ -73,6 +82,10 @@ namespace Roads.Manager {
             Node newNode = nodeObject.GetComponent<Node>();
             AddNode(newNode);
             return newNode;
+        }
+        public Node GetRandomNode()
+        {
+            return placedNodesDict.Values.ToList()[UnityEngine.Random.Range(0, placedNodesDict.Count)];
         }
     }
 }

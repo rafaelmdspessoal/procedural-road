@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using Nodes.MeshHandler;
+using System;
 
 namespace Nodes {
     [RequireComponent(typeof(MeshRenderer))]
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshCollider))]
-    public class Node : MonoBehaviour {
+    public class Node : MonoBehaviour, IEquatable<Node>
+    {
 
-        [SerializeField] private List<RoadObject> connectedRoads = new();
+        [SerializeField] private List<RoadObject> connectedRoadsList = new();
 
         private MeshFilter meshFilter;
         private MeshRenderer meshRenderer;
@@ -60,42 +62,41 @@ namespace Nodes {
             meshCollider.sharedMesh = mesh;
             // Material tiling will depend on the road lengh, so let's have
             // different instances
-            meshRenderer.material = new Material(connectedRoads[0].GetRoadObjectSO.roadMaterial);
+            meshRenderer.material = new Material(connectedRoadsList[0].GetRoadObjectSO.roadMaterial);
 
             meshRenderer.material.mainTextureScale = new Vector2(.5f, 1);
             meshRenderer.material.mainTextureOffset = new Vector2(0, 0);
         }
 
-        public bool HasIntersection() => connectedRoads.Count > 1;
+        public bool HasIntersection() => connectedRoadsList.Count > 1;
 
         public void AddRoad(RoadObject segment) {
-            if (!connectedRoads.Contains(segment)) {
-                connectedRoads.Add(segment);
-                segment.transform.name = "Road number " + connectedRoads.Count;
+            if (!connectedRoadsList.Contains(segment)) {
+                connectedRoadsList.Add(segment);
+                segment.transform.name = "Road number " + connectedRoadsList.Count;
             }
-
         }
 
         public void RemoveRoad(RoadObject roadObject, bool keepNodes) {
-            if (connectedRoads.Contains(roadObject)) {
-                connectedRoads.Remove(roadObject);
+            if (connectedRoadsList.Contains(roadObject)) {
+                connectedRoadsList.Remove(roadObject);
 
-                if (connectedRoads.Count <= 0 && !keepNodes)
+                if (connectedRoadsList.Count <= 0 && !keepNodes)
                     Destroy(gameObject);
             }
         }
 
-        public List<RoadObject> ConnectedRoads => connectedRoads;
-        public bool HasConnectedRoads => connectedRoads.Count > 0;
+        public List<RoadObject> ConnectedRoads => connectedRoadsList;
+        public bool HasConnectedRoads => connectedRoadsList.Count > 0;
         public Vector3 Position => transform.position;
-        public Vector3 Direction => Position - connectedRoads.First().ControlNodePosition;
+        public Vector3 Direction => Position - connectedRoadsList.First().ControlNodePosition;
         public Dictionary<float, RoadObject> GetAdjacentRoadsTo(RoadObject roadObject) {
             Dictionary<float, RoadObject> connectedRoadsDict = new();
 
             if (HasIntersection() && roadObject != null) {
                 Vector3 roadObjectDirection = Position - roadObject.ControlNodePosition;
 
-                foreach (RoadObject road in connectedRoads) {
+                foreach (RoadObject road in connectedRoadsList) {
                     if (road != roadObject) {
                         Vector3 connectedRoadDirection = Position - road.ControlNodeObject.transform.position;
                         float angle = Vector3.SignedAngle(roadObjectDirection, connectedRoadDirection, transform.up);
@@ -117,6 +118,21 @@ namespace Nodes {
                 adjacentRoads.Add(connectedRoadsDict.Last().Key, connectedRoadsDict.Last().Value);
 
             return adjacentRoads;
+        }
+        public List<Node> GetConnectedNodes()
+        {
+            List<Node> connectedNodes = new();
+            foreach (RoadObject connectedRoad in connectedRoadsList)
+            {
+                connectedNodes.Add(connectedRoad.OtherNodeTo(this));
+            }
+
+            return connectedNodes;
+        }
+
+        public bool Equals(Node other)
+        {
+            return Vector3.SqrMagnitude(Position - other.Position) < 0.0001f;
         }
     }
 }

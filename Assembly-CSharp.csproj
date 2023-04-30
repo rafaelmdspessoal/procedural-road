@@ -82,6 +82,7 @@
     <Compile Include="Assets\Scripts\Meshes\PreviewRoadMeshData.cs" />
     <Compile Include="Assets\Scripts\Roads\States\BuildingCurvedRoad.cs" />
     <Compile Include="Assets\Scripts\TestVectorScript.cs" />
+    <Compile Include="Assets\Scripts\Roads\AIDirector.cs" />
     <Compile Include="Assets\Scripts\Roads\States\IBuildingState.cs" />
     <Compile Include="Assets\Scripts\UI\UIController.cs" />
     <Compile Include="Assets\Scripts\UI\RoadUIController.cs" />
@@ -89,6 +90,8 @@
     <Compile Include="Assets\Scripts\InputManagers\InputManager.cs" />
     <Compile Include="Assets\Scripts\Meshes\MeshData.cs" />
     <Compile Include="Assets\Scripts\Roads\RoadObjectSO.cs" />
+    <Compile Include="Assets\Scripts\Roads\AIDirectorEditor.cs" />
+    <Compile Include="Assets\Scripts\Path\PathFinding.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
