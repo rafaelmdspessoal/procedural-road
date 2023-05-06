@@ -2,6 +2,7 @@ using UnityEngine;
 using Roads.Utilities;
 using Nodes;
 using UnityEditor;
+using System.Collections.Generic;
 
 namespace Roads.MeshHandler.Data {
     public class RoadMeshData {
@@ -29,14 +30,40 @@ namespace Roads.MeshHandler.Data {
         /// <returns></returns>
         public MeshData PopulateRoadMeshVertices(MeshData meshData) 
         {
-            Vector3 startCenterNode = roadObject.StartMeshCenterPosition();
-            Vector3 endCenterNode = roadObject.EndMeshCenterPosition();
+            Node startNode = roadObject.StartNode;
+            Node endNode = roadObject.EndNode;
+            Vector3 roadPosition = roadObject.transform.position;
 
-            Vector3 startLeft = roadObject.StartMeshLeftPosition();
-            Vector3 startRight = roadObject.StartMeshRightPosition();
+            Vector3 startCenterNode = startNode.GetMeshEdjeFor(
+                roadObject,
+                MeshEdje.EdjePosition.StartCenter
+                ).transform.position - roadPosition;
 
-            Vector3 endLeft = roadObject.EndMeshLeftPosition();
-            Vector3 endRight = roadObject.EndMeshRightPosition();
+            Vector3 startLeft = startNode.GetMeshEdjeFor(
+                roadObject,
+                MeshEdje.EdjePosition.StartLeft
+                ).transform.position - roadPosition;
+
+            Vector3 startRight = startNode.GetMeshEdjeFor(
+                roadObject,
+                MeshEdje.EdjePosition.StartRight
+                ).transform.position - roadPosition;
+
+
+            Vector3 endCenterNode = endNode.GetMeshEdjeFor(
+                roadObject,
+                MeshEdje.EdjePosition.EndCenter
+                ).transform.position - roadPosition;
+
+            Vector3 endLeft = endNode.GetMeshEdjeFor(
+                roadObject,
+                MeshEdje.EdjePosition.EndLeft
+                ).transform.position - roadPosition;
+
+            Vector3 endRight = endNode.GetMeshEdjeFor(
+                roadObject,
+                MeshEdje.EdjePosition.EndRight
+                ).transform.position - roadPosition;
 
             Vector3 controlPosition = roadObject.ControlPosition();
 

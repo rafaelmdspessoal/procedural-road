@@ -35,20 +35,20 @@ namespace Roads.Manager {
             roadObject.OnRoadPlaced += RoadObject_OnRoadPlaced;
         }
 
-        private void RoadObject_OnRoadPlaced(object sender, RoadObject.OnRoadChangedEventArgs e) {
+        private void RoadObject_OnRoadPlaced(object sender, EventArgs e) {
             throw new NotImplementedException();
         }
 
-        private void RoadObject_OnRoadBuilt(object sender, RoadObject.OnRoadChangedEventArgs e) {
+        private void RoadObject_OnRoadBuilt(object sender, EventArgs e) {
             throw new NotImplementedException();
         }
 
-        private void RoadObject_OnRoadUpdated(object sender, RoadObject.OnRoadChangedEventArgs e) {
+        private void RoadObject_OnRoadUpdated(object sender, EventArgs e) {
             throw new NotImplementedException();
         }
 
-        private void RoadObject_OnRoadRemoved(object sender, RoadObject.OnRoadChangedEventArgs e) {
-            List<RoadObject> connectedRoads = e.roadObject.GetAllConnectedRoads();
+        private void RoadObject_OnRoadRemoved(object sender, EventArgs e) {
+            List<RoadObject> connectedRoads = (sender as RoadObject).GetAllConnectedRoads();
             foreach (RoadObject roadObj in connectedRoads) {
                 roadObj.UpdateMesh();
             }

@@ -97,7 +97,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f9db6f417f200841b916e9d27dcfcab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  connectedRoads: []
+  pathNodePrefab: {fileID: 1739219237215934384, guid: 78eb668d3f4e2e54d86c248520d4e4dd, type: 3}
+  meshEdjePrefab: {fileID: 2375173470940681689, guid: ef6f856f3a208674c9de00ab23f463f6, type: 3}
+  connectedRoadsList: []
 --- !u!64 &2340103648613023107
 MeshCollider:
   m_ObjectHideFlags: 0

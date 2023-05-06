@@ -447,7 +447,7 @@ namespace Roads.Placement {
             RoadObject roadObject = roadGameObject.GetComponent<RoadObject>();
             GameObject controlNodeObject = RoadUtilities.CreateControlNode(roadObjectSO, controlNodePosition);
 
-            roadObject.PlaceRoad(startNode, endNode, controlNodeObject);
+            roadObject.Init(startNode, endNode, controlNodeObject);
             affectedRoadsList.Add(roadObject);
             affectedRoadsList.AddRange(roadObject.GetAllConnectedRoads());
             return roadObject;
