@@ -74,7 +74,6 @@ namespace Roads.Manager {
         public Node GetOrCreateNodeAt(Vector3 position) {
             if (HasNode(position)) {
                 Node existingNode = GetNodeAt(position);
-                Debug.Log("existingNode: " + existingNode);
                 return existingNode;
             }
 

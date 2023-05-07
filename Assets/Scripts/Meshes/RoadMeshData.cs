@@ -65,7 +65,7 @@ namespace Roads.MeshHandler.Data {
                 MeshEdje.EdjePosition.EndRight
                 ).transform.position - roadPosition;
 
-            Vector3 controlPosition = roadObject.ControlPosition();
+            Vector3 controlPosition = roadObject.ControlNodePosition - roadPosition;
 
             Vector3 controlLeft;
             Vector3 controlRight;

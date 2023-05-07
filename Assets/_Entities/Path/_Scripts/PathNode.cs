@@ -7,23 +7,32 @@ using Roads;
 
 public class PathNode : MonoBehaviour, IEquatable<PathNode>
 {
-    public enum PathOrientation
+    public enum PathPosition
     {
-        Start,
-        End,
+        StartNodeStartPath,
+        StartNodeEndPath,
+        EndNodeStartPath,
+        EndNodeEndPath,
     }
 
 
     public EventHandler OnConnectionRemoved;
 
-    [SerializeField] private PathOrientation pathOrientation;
+    [SerializeField] private PathPosition pathPosition;
     [SerializeField] private List<PathNode> connectedNodesList = new();
 
-    public void Init(PathOrientation pathOrientation, string name)
+    public PathPosition PathPos => pathPosition;
+
+    public void Init(PathPosition pathPosition)
     {
-        this.pathOrientation = pathOrientation;
-        transform.name = name;
+        this.pathPosition = pathPosition;
+        transform.name = pathPosition.ToString();
     }
+
+    public bool IsStartOfPath => (
+        pathPosition == PathPosition.StartNodeStartPath || 
+        pathPosition == PathPosition.EndNodeStartPath
+        );
 
     public void AddPathNode(PathNode pathNode)
     {
@@ -34,17 +43,18 @@ public class PathNode : MonoBehaviour, IEquatable<PathNode>
     private void PathNode_OnConnectionRemoved(object sender, EventArgs e)
     {
         PathNode pathNode = (PathNode)sender;
-        pathNode.OnConnectionRemoved -= PathNode_OnConnectionRemoved;
-        pathNode.RemovePathConnection(this);
-        connectedNodesList.Remove(pathNode);
-        Destroy(pathNode.gameObject);
+        RemovePathConnection(pathNode);
+    }
+
+    private void OnDestroy()
+    {
+        OnConnectionRemoved?.Invoke(this, EventArgs.Empty);
+        OnConnectionRemoved = null;
     }
 
     public void RemovePathConnection(PathNode pathNode)
     {
         connectedNodesList.Remove(pathNode);
-        OnConnectionRemoved?.Invoke(this, EventArgs.Empty);
-        OnConnectionRemoved = null;
     }
 
     public void ClearConnections()
@@ -57,7 +67,7 @@ public class PathNode : MonoBehaviour, IEquatable<PathNode>
         connectedNodesList.Clear();
     }
 
-    public List<PathNode> getConnectedNodes()
+    public List<PathNode> GetConnectedNodes()
     {
         return connectedNodesList;
     }

@@ -24,20 +24,9 @@ namespace Roads {
         private MeshFilter meshFilter;
         private MeshRenderer meshRenderer;
         private MeshCollider meshCollider;
-        private Node startNode;
-        private Node endNode;
+        [SerializeField] private Node startNode;
+        [SerializeField] private Node endNode;
         private GameObject controlNodeObject;
-
-        private GameObject startMeshCenterGO;
-
-        private GameObject endMeshCenterGO;
-
-        public Vector3 StartMeshCenterPostion => startMeshCenterGO.transform.position;
-        public Vector3 EndMeshCenterPostion => endMeshCenterGO.transform.position;
-
-        public Vector3 ControlPosition() { 
-            return controlNodeObject.transform.position - transform.position; 
-        }
 
         public Node StartNode { get { return startNode; } }
         public Node EndNode { get { return endNode; } }
@@ -75,49 +64,26 @@ namespace Roads {
             startNode.Init(this);
             endNode.Init(this);
 
-            // PlaceRoadEdjes();
-            // UpdateMeshEdjes();
+            ConnectRoadPathNodes();
+
             OnRoadPlaced?.Invoke(this, EventArgs.Empty);
         }
 
         public void SetMesh()
         {
-            // UpdateMeshEdjes();
             SetRoadMesh();
             startNode.SetMesh();
-            //startNode.SetPathPostions();
-            //startNode.ConnectPathNodes();
 
             endNode.SetMesh();
-            // endNode.SetPathPostions();
-            //endNode.ConnectPathNodes();
-
-            // ConnectRoadPathNodes();
         }
 
         private void ConnectRoadPathNodes()
         {
-            PathNode startNodeStartPath;
-            PathNode startNodeEndPath;
+            PathNode startNodeStartPath = startNode.GetPathNodeFor(this, PathNode.PathPosition.StartNodeStartPath);
+            PathNode startNodeEndPath = startNode.GetPathNodeFor(this, PathNode.PathPosition.StartNodeEndPath);
 
-            PathNode endNodeStartPath;
-            PathNode endNodeEndPath;
-
-            Vector3 dir = StartMeshCenterPostion - startNode.Position;
-            Vector3 left = new Vector3(-dir.z, dir.y, dir.x);
-            Vector3 startPathPosition = StartMeshCenterPostion - left.normalized;
-            Vector3 endPathPosition = StartMeshCenterPostion + left.normalized;
-
-            startNodeStartPath = startNode.GetStartNodeAt(startPathPosition);
-            startNodeEndPath = startNode.GetEndNodeAt(endPathPosition);
-
-            dir = EndMeshCenterPostion - endNode.Position;
-            left = new Vector3(-dir.z, dir.y, dir.x);
-            startPathPosition = EndMeshCenterPostion - left.normalized;
-            endPathPosition = EndMeshCenterPostion + left.normalized;
-
-            endNodeStartPath = endNode.GetStartNodeAt(startPathPosition);
-            endNodeEndPath = endNode.GetEndNodeAt(endPathPosition);
+            PathNode endNodeStartPath = endNode.GetPathNodeFor(this, PathNode.PathPosition.EndNodeStartPath);
+            PathNode endNodeEndPath = endNode.GetPathNodeFor(this, PathNode.PathPosition.EndNodeEndPath);
 
             startNodeStartPath.AddPathNode(endNodeEndPath);
             endNodeStartPath.AddPathNode(startNodeEndPath);
@@ -140,15 +106,9 @@ namespace Roads {
 
         public void UpdateMesh()
         {
-            // UpdateMeshEdjes();
             SetRoadMesh();
             startNode.SetMesh();
-            // startNode.SetPathPostions();
-            // startNode.ConnectPathNodes();
-
             endNode.SetMesh();
-            // endNode.SetPathPostions();
-            // endNode.ConnectPathNodes();
         }
 
         public void Remove(bool keepNodes) {
