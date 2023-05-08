@@ -256,7 +256,7 @@ namespace Nodes {
                 meshEdjesDict.Add(roadObject, new List<MeshEdje> {centerEdje, leftEdje, rightEdje });
         }
 
-        private bool IsStartNodeOf(RoadObject roadObject)
+        public bool IsStartNodeOf(RoadObject roadObject)
         {
             return roadObject.StartNode.Equals(this);
         }

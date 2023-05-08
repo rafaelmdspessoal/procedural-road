@@ -86,5 +86,14 @@ namespace Roads.Manager {
         {
             return placedNodesDict.Values.ToList()[UnityEngine.Random.Range(0, placedNodesDict.Count)];
         }
+        public RoadObject GetRoadBetween(Node startNode, Node endNode)
+        {
+            foreach (RoadObject roadObject in startNode.ConnectedRoads)
+            {
+                if (roadObject.OtherNodeTo(startNode).Equals(endNode))
+                    return roadObject;
+            }
+            return null;
+        }
     }
 }

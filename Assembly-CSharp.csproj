@@ -92,6 +92,7 @@
     <Compile Include="Assets\Scripts\SimpleCameraController.cs" />
     <Compile Include="Assets\Scripts\InputManagers\InputManager.cs" />
     <Compile Include="Assets\Scripts\Meshes\MeshData.cs" />
+    <Compile Include="Assets\_Entities\Path\Pedestrian\_Scripts\PedestrianPathFinding.cs" />
     <Compile Include="Assets\Scripts\Roads\RoadObjectSO.cs" />
     <Compile Include="Assets\Scripts\Roads\AIDirectorEditor.cs" />
   </ItemGroup>

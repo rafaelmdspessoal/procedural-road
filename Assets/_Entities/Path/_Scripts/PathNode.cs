@@ -76,6 +76,7 @@ public class PathNode : MonoBehaviour, IEquatable<PathNode>
 
     private void OnDrawGizmos()
     {
+        return;
         Gizmos.color = Color.red;
         foreach (var node in connectedNodesList)
         {

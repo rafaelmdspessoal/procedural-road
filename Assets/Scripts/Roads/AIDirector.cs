@@ -7,7 +7,7 @@ using UnityEngine;
 public class AIDirector : MonoBehaviour
 {
     private RoadManager roadManager;
-    private List<Node> path = new();
+    private List<Vector3> path = new();
 
     public LineRenderer lineRenderer;
 
@@ -19,14 +19,15 @@ public class AIDirector : MonoBehaviour
 
     public void GetPathBetween(Node startNode, Node endNode)
     {
-        path = PathFinding.GetPathBetween(startNode, endNode);
+        path = PedestrianPathFinding.GetPathBetween(startNode, endNode);
+
         if (path.Count > 1)
         {
             lineRenderer.positionCount = path.Count;
             Vector3[] positions = new Vector3[path.Count];
             for (int i = 0; i < path.Count; i++)
             {
-                positions[i] = path[i].Position + Vector3.up * 0.1f;
+                positions[i] = path[i] + Vector3.up * 0.1f;
             }
             lineRenderer.SetPositions(positions);
         }

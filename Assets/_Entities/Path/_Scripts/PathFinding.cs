@@ -10,50 +10,45 @@ public class PathFinding
     public static List<Node> GetPathBetween(Node startNode, Node endNode)
     {
         List<Node> resultPath = AStarSearch(startNode, endNode);
-        List<Node> path = new();
-        foreach (Node node in resultPath)
-        {
-            path.Add(node);
-        }
-        return path;
+        return resultPath;
     }
 
     private static List<Node> AStarSearch(Node startNode, Node endNode)
     {
         List<Node> path = new();
 
-        List<Node> positionsTocheck = new();
+        List<Node> nodesTocheck = new();
         Dictionary<Node, float> costDictionary = new();
         Dictionary<Node, float> priorityDictionary = new();
         Dictionary<Node, Node> parentsDictionary = new();
 
-        positionsTocheck.Add(startNode);
+        nodesTocheck.Add(startNode);
         priorityDictionary.Add(startNode, 0);
         costDictionary.Add(startNode, 0);
         parentsDictionary.Add(startNode, null);
 
-        while (positionsTocheck.Count > 0)
+        while (nodesTocheck.Count > 0)
         {
-            Node current = GetClosestNode(positionsTocheck, priorityDictionary);
-            positionsTocheck.Remove(current);
-            if (current.Equals(endNode))
+            Node currentNode = GetClosestNode(nodesTocheck, priorityDictionary);
+            nodesTocheck.Remove(currentNode);
+            if (currentNode.Equals(endNode))
             {
-                path = GeneratePath(parentsDictionary, current);
+                path = GeneratePath(parentsDictionary, currentNode);
                 return path;
             }
 
-            foreach (Node neighbour in current.GetConnectedNodes())
+            foreach (Node neighbour in currentNode.GetConnectedNodes())
             {
-                float newCost = costDictionary[current] + 1;
+                float newCost = costDictionary[currentNode] + 1;
                 if (!costDictionary.ContainsKey(neighbour) || newCost < costDictionary[neighbour])
                 {
                     costDictionary[neighbour] = newCost;
 
                     float priority = newCost + ManhattanDiscance(endNode, neighbour);
-                    positionsTocheck.Add(neighbour);
+                    nodesTocheck.Add(neighbour);
                     priorityDictionary[neighbour] = priority;
 
-                    parentsDictionary[neighbour] = current;
+                    parentsDictionary[neighbour] = currentNode;
                 }
             }
         }
