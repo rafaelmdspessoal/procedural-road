@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Nodes;
 using Roads.Placement;
+using System.Linq;
 
 namespace Roads.Manager {
 
@@ -34,20 +35,20 @@ namespace Roads.Manager {
             roadObject.OnRoadPlaced += RoadObject_OnRoadPlaced;
         }
 
-        private void RoadObject_OnRoadPlaced(object sender, RoadObject.OnRoadChangedEventArgs e) {
+        private void RoadObject_OnRoadPlaced(object sender, EventArgs e) {
             throw new NotImplementedException();
         }
 
-        private void RoadObject_OnRoadBuilt(object sender, RoadObject.OnRoadChangedEventArgs e) {
+        private void RoadObject_OnRoadBuilt(object sender, EventArgs e) {
             throw new NotImplementedException();
         }
 
-        private void RoadObject_OnRoadUpdated(object sender, RoadObject.OnRoadChangedEventArgs e) {
+        private void RoadObject_OnRoadUpdated(object sender, EventArgs e) {
             throw new NotImplementedException();
         }
 
-        private void RoadObject_OnRoadRemoved(object sender, RoadObject.OnRoadChangedEventArgs e) {
-            List<RoadObject> connectedRoads = e.roadObject.GetAllConnectedRoads();
+        private void RoadObject_OnRoadRemoved(object sender, EventArgs e) {
+            List<RoadObject> connectedRoads = (sender as RoadObject).GetAllConnectedRoads();
             foreach (RoadObject roadObj in connectedRoads) {
                 roadObj.UpdateMesh();
             }
@@ -57,6 +58,14 @@ namespace Roads.Manager {
             if (!HasNode(node))
                 placedNodesDict.Add(node.Position, node);
         }
+        public void RemoveNode(Node node)
+        {
+            if (HasNode(node))
+            {
+                placedNodesDict.Remove(node.Position);
+                Destroy(node.gameObject);
+            }
+        }
 
         public Node GetNodeAt(Vector3 position) => placedNodesDict.GetValueOrDefault(position);
         private bool HasNode(Node node) => placedNodesDict.ContainsValue(node);
@@ -65,7 +74,6 @@ namespace Roads.Manager {
         public Node GetOrCreateNodeAt(Vector3 position) {
             if (HasNode(position)) {
                 Node existingNode = GetNodeAt(position);
-                Debug.Log("existingNode: " + existingNode);
                 return existingNode;
             }
 
@@ -73,6 +81,19 @@ namespace Roads.Manager {
             Node newNode = nodeObject.GetComponent<Node>();
             AddNode(newNode);
             return newNode;
+        }
+        public Node GetRandomNode()
+        {
+            return placedNodesDict.Values.ToList()[UnityEngine.Random.Range(0, placedNodesDict.Count)];
+        }
+        public RoadObject GetRoadBetween(Node startNode, Node endNode)
+        {
+            foreach (RoadObject roadObject in startNode.ConnectedRoads)
+            {
+                if (roadObject.OtherNodeTo(startNode).Equals(endNode))
+                    return roadObject;
+            }
+            return null;
         }
     }
 }

@@ -412,10 +412,10 @@ namespace Roads.Placement {
         }
         private void ResetRoadPositions() {
             if (startNode != null && !startNode.HasConnectedRoads) {
-                Destroy(startNode.gameObject);
+                roadManager.RemoveNode(startNode);
             }
             if (endNode != null && !endNode.HasConnectedRoads) {
-                Destroy(endNode.gameObject);
+                roadManager.RemoveNode(endNode);
             }
             controlPosition = Vector3.negativeInfinity;
             startNode = null;
@@ -447,7 +447,7 @@ namespace Roads.Placement {
             RoadObject roadObject = roadGameObject.GetComponent<RoadObject>();
             GameObject controlNodeObject = RoadUtilities.CreateControlNode(roadObjectSO, controlNodePosition);
 
-            roadObject.PlaceRoad(startNode, endNode, controlNodeObject);
+            roadObject.Init(startNode, endNode, controlNodeObject);
             affectedRoadsList.Add(roadObject);
             affectedRoadsList.AddRange(roadObject.GetAllConnectedRoads());
             return roadObject;
