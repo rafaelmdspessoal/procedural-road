@@ -120,11 +120,17 @@ namespace Nodes {
             Vector3 startPathPosition = (center + left) / 2f;
             Vector3 endPathPosition = (center + right) / 2f;
 
+            Vector3 forward = (center - left);
+            forward = new Vector3(-forward.z, forward.y, forward.x);
+
             startPathNode.transform.position = startPathPosition;
             endPathNode.transform.position = endPathPosition;
+
+            startPathNode.transform.LookAt(startPathPosition + forward);
+            endPathNode.transform.LookAt(endPathPosition + forward);
         }
 
-        public void ConnectPathNodes()
+        public List<PathNode> GetAllPathNodes()
         {
             List<PathNode> pathNodesList = new();
 
@@ -132,6 +138,12 @@ namespace Nodes {
             {
                 pathNodesList.AddRange(pathNodes);
             }
+            return pathNodesList;
+        }
+
+        public void ConnectPathNodes()
+        {
+            List<PathNode> pathNodesList = GetAllPathNodes();
 
             foreach (PathNode endPathNode in pathNodesList)
             {

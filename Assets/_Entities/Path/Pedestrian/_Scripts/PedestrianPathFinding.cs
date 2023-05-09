@@ -14,9 +14,9 @@ public class PedestrianPathFinding
 
     private static List<Vector3> AStarSearch(Node startNode, Node endNode)
     {
-        List<Node> pathNodes = PathFinding.GetPathBetween(startNode, endNode);
-        RoadObject startRoad = RoadManager.Instance.GetRoadBetween(pathNodes[0], pathNodes[1]);
-        RoadObject endRoad = RoadManager.Instance.GetRoadBetween(pathNodes[pathNodes.Count - 2], pathNodes[pathNodes.Count - 1]);
+        List<Node> nodes = PathFinding.GetPathBetween(startNode, endNode);
+        RoadObject startRoad = RoadManager.Instance.GetRoadBetween(nodes[0], nodes[1]);
+        RoadObject endRoad = RoadManager.Instance.GetRoadBetween(nodes[nodes.Count - 2], nodes[nodes.Count - 1]);
         PathNode startPathNode;
         PathNode endPathNode;
         List <Vector3> path = new();
