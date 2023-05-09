@@ -25,12 +25,13 @@ namespace Rafael.Utils
             if (crossVec1and2.sqrMagnitude > 0.0001f)
             {
                 float s = Vector3.Dot(crossVec3and2, crossVec1and2) / crossVec1and2.sqrMagnitude;
-                intersection = linePoint1 + (lineVec1 * s);
+                intersection = (linePoint1 + (lineVec1 * s) + linePoint2 + (lineVec2 * s)) / 2;
                 return true;
             }
             else
             {
                 intersection = (linePoint1 + linePoint2) / 2;
+                Debug.Log("No intersection!");
                 return false;
             }
         }

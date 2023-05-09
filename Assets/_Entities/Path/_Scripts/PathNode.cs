@@ -73,16 +73,7 @@ public class PathNode : MonoBehaviour, IEquatable<PathNode>
     }
 
     public Vector3 Position => transform.position;
-
-    private void OnDrawGizmos()
-    {
-        return;
-        Gizmos.color = Color.red;
-        foreach (var node in connectedNodesList)
-        {
-            Gizmos.DrawLine(Position, node.Position);
-        }
-    }
+    public Vector3 Direction => transform.forward;
 
     public bool Equals(PathNode other)
     {

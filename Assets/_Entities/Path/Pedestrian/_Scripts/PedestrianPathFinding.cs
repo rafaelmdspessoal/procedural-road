@@ -1,4 +1,5 @@
 using Nodes;
+using Rafael.Utils;
 using Roads;
 using Roads.Manager;
 using System;
@@ -8,18 +9,40 @@ using UnityEngine;
 public class PedestrianPathFinding
 {    public static List<Vector3> GetPathBetween(Node startNode, Node endNode)
     {
-        List<Vector3> resultPath = AStarSearch(startNode, endNode);
-        return resultPath;
+        List<PathNode> pathNodesForPath = AStarSearch(startNode, endNode);
+        List<Vector3> path = new();
+        int numPathPoints = 10;
+        for (int i = 0; i < pathNodesForPath.Count - 1; i++)
+        {
+            RafaelUtils.LineLineIntersection(
+                out Vector3 intersection,
+                pathNodesForPath[i].Position,
+                pathNodesForPath[i].Direction,
+                pathNodesForPath[i + 1].Position,
+                pathNodesForPath[i + 1].Direction);
+
+            for (int j = 0; j < numPathPoints; j++)
+            {
+                float t = j / (float)(numPathPoints - 1);
+                Vector3 pathPoint = Bezier.QuadraticCurve(
+                    pathNodesForPath[i].Position,
+                    pathNodesForPath[i + 1].Position,
+                    intersection,
+                    t);
+                path.Add(pathPoint);
+            }
+        }
+        return path;
     }
 
-    private static List<Vector3> AStarSearch(Node startNode, Node endNode)
+    private static List<PathNode> AStarSearch(Node startNode, Node endNode)
     {
         List<Node> nodes = PathFinding.GetPathBetween(startNode, endNode);
         RoadObject startRoad = RoadManager.Instance.GetRoadBetween(nodes[0], nodes[1]);
         RoadObject endRoad = RoadManager.Instance.GetRoadBetween(nodes[nodes.Count - 2], nodes[nodes.Count - 1]);
         PathNode startPathNode;
         PathNode endPathNode;
-        List <Vector3> path = new();
+        List <PathNode> path = new();
 
         if(startNode.IsStartNodeOf(startRoad)) 
             startPathNode = startNode.GetPathNodeFor(startRoad, PathNode.PathPosition.StartNodeStartPath);        
@@ -87,13 +110,13 @@ public class PedestrianPathFinding
         return Math.Abs(endPos.Position.x - position.Position.x) + Math.Abs(endPos.Position.z - position.Position.z);
     }
 
-    public static List<Vector3> GeneratePath(Dictionary<PathNode, PathNode> parentMap, PathNode endState)
+    public static List<PathNode> GeneratePath(Dictionary<PathNode, PathNode> parentMap, PathNode endState)
     {
-        List<Vector3> path = new();
+        List<PathNode> path = new();
         PathNode parent = endState;
         while (parent != null && parentMap.ContainsKey(parent))
         {
-            path.Add(parent.Position);
+            path.Add(parent);
             parent = parentMap[parent];
         }
         path.Reverse();
