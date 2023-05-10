@@ -4,12 +4,12 @@ using UnityEngine;
 using System.Linq;
 using Nodes.MeshHandler;
 using System;
-using UnityEditor.Experimental.GraphView;
 using Roads.Utilities;
 using static MeshEdje;
 using static PathNode;
 
-namespace Nodes {
+namespace Nodes
+{
     [RequireComponent(typeof(MeshRenderer))]
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshCollider))]
@@ -156,14 +156,16 @@ namespace Nodes {
             }
         }
 
-        public float GetNodeSizeForRoad(RoadObject roadObject) {
+        public float GetNodeSizeForRoad(RoadObject roadObject)
+        {
             if (!HasIntersection) return 0;
 
             Dictionary<float, RoadObject> adjacentRoads = GetAdjacentRoadsTo(roadObject);
             float offset;
             float cosAngle;
             int width = roadObject.RoadWidth / 2;
-            if (adjacentRoads.Count == 1) {                
+            if (adjacentRoads.Count == 1)
+            {
                 float angle = adjacentRoads.First().Key;
                 if (angle > 180) angle = Mathf.Abs(angle - 360);
                 angle = Mathf.Clamp(angle, 0, 90);
@@ -265,7 +267,7 @@ namespace Nodes {
             if (meshEdjesDict.ContainsKey(roadObject))
                 meshEdjesDict[roadObject].AddRange(new List<MeshEdje> { centerEdje, leftEdje, rightEdje });
             else
-                meshEdjesDict.Add(roadObject, new List<MeshEdje> {centerEdje, leftEdje, rightEdje });
+                meshEdjesDict.Add(roadObject, new List<MeshEdje> { centerEdje, leftEdje, rightEdje });
         }
 
         public bool IsStartNodeOf(RoadObject roadObject)
@@ -300,15 +302,20 @@ namespace Nodes {
             pathNodesDict.Add(roadObject, new List<PathNode> { newStartPathNode, newEndPathNode });
         }
 
-        public void RemoveRoad(RoadObject roadObject, bool keepNodes) {
-            if (connectedRoadsList.Contains(roadObject)) {
+        public void RemoveRoad(RoadObject roadObject, bool keepNodes)
+        {
+            if (connectedRoadsList.Contains(roadObject))
+            {
                 connectedRoadsList.Remove(roadObject);
                 RemoveMeshEdjesFor(roadObject);
                 RemovePathNodesFor(roadObject);
                 ConnectPathNodes();
 
                 if (connectedRoadsList.Count <= 0 && !keepNodes)
+                {
+                    RoadManager.Instance.RemoveNode(this);
                     Destroy(gameObject);
+                }
             }
         }
 
@@ -333,16 +340,20 @@ namespace Nodes {
         public bool HasConnectedRoads => connectedRoadsList.Count > 0;
         public Vector3 Position => transform.position;
         public Vector3 Direction => Position - connectedRoadsList.First().ControlNodePosition;
-        public Dictionary<float, RoadObject> GetAdjacentRoadsTo(RoadObject roadObject) {
+        public Dictionary<float, RoadObject> GetAdjacentRoadsTo(RoadObject roadObject)
+        {
             Dictionary<float, RoadObject> connectedRoadsDict = new();
 
             if (!HasIntersection) return connectedRoadsDict;
 
-            if (HasIntersection && roadObject != null) {
+            if (HasIntersection && roadObject != null)
+            {
                 Vector3 roadObjectDirection = Position - roadObject.ControlNodePosition;
 
-                foreach (RoadObject road in connectedRoadsList) {
-                    if (road != roadObject) {
+                foreach (RoadObject road in connectedRoadsList)
+                {
+                    if (road != roadObject)
+                    {
                         Vector3 connectedRoadDirection = Position - road.ControlNodeObject.transform.position;
                         float angle = Vector3.SignedAngle(roadObjectDirection, connectedRoadDirection, transform.up);
                         if (angle < 0) angle += 360;
@@ -378,6 +389,27 @@ namespace Nodes {
         public bool Equals(Node other)
         {
             return Vector3.SqrMagnitude(Position - other.Position) < 0.0001f;
+        }
+
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = Color.red;
+            foreach (var items in meshEdjesDict.Values)
+            {
+                foreach (var item in items)
+                {
+                    Gizmos.DrawLine(item.Position, item.Position + item.Direction);
+                }
+            }
+
+            Gizmos.color = Color.blue;
+            foreach (var items in pathNodesDict.Values)
+            {
+                foreach (var item in items)
+                {
+                    Gizmos.DrawLine(item.Position, item.Position + item.Direction);
+                }
+            }
         }
     }
 }

@@ -24,4 +24,7 @@ public class MeshEdje : MonoBehaviour
         this.edjePosition = edjePosition;        
         transform.name = edjePosition.ToString();
     }
+
+    public Vector3 Position => transform.position;
+    public Vector3 Direction => transform.forward;
 }
