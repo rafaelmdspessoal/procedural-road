@@ -105,43 +105,45 @@ namespace Nodes
 
         public void UpdatePathPostions(RoadObject roadObject)
         {
-            Vector3 center;
-            Vector3 left;
-            Vector3 right;
+            MeshEdje center;
+            MeshEdje left;
+            MeshEdje right;
+
             PathNode startPathNode;
             PathNode endPathNode;
 
 
             if (IsStartNodeOf(roadObject))
             {
-                center = GetMeshEdjeFor(roadObject, EdjePosition.StartCenter).transform.position;
-                left = GetMeshEdjeFor(roadObject, EdjePosition.StartLeft).transform.position;
-                right = GetMeshEdjeFor(roadObject, EdjePosition.StartRight).transform.position;
+                center = GetMeshEdjeFor(roadObject, EdjePosition.StartCenter);
+                left = GetMeshEdjeFor(roadObject, EdjePosition.StartLeft);
+                right = GetMeshEdjeFor(roadObject, EdjePosition.StartRight);
 
                 startPathNode = GetPathNodeFor(roadObject, PathPosition.StartNodeStartPath);
                 endPathNode = GetPathNodeFor(roadObject, PathPosition.StartNodeEndPath);
             }
             else
             {
-                center = GetMeshEdjeFor(roadObject, EdjePosition.EndCenter).transform.position;
-                left = GetMeshEdjeFor(roadObject, EdjePosition.EndLeft).transform.position;
-                right = GetMeshEdjeFor(roadObject, EdjePosition.EndRight).transform.position;
+                center = GetMeshEdjeFor(roadObject, EdjePosition.EndCenter);
+                left = GetMeshEdjeFor(roadObject, EdjePosition.EndLeft);
+                right = GetMeshEdjeFor(roadObject, EdjePosition.EndRight);
 
                 startPathNode = GetPathNodeFor(roadObject, PathPosition.EndNodeStartPath);
                 endPathNode = GetPathNodeFor(roadObject, PathPosition.EndNodeEndPath);
             }
 
-            Vector3 startPathPosition = (center + left) / 2f;
-            Vector3 endPathPosition = (center + right) / 2f;
+            Vector3 centerPos = center.Position; 
+            Vector3 leftPos = left.Position;
+            Vector3 rightPos = right.Position;
 
-            Vector3 forward = (center - left);
-            forward = new Vector3(-forward.z, forward.y, forward.x);
+            Vector3 startPathPosition = (centerPos + leftPos) / 2f;
+            Vector3 endPathPosition = (centerPos + rightPos) / 2f;
 
             startPathNode.transform.position = startPathPosition;
             endPathNode.transform.position = endPathPosition;
 
-            startPathNode.transform.rotation = Quaternion.LookRotation(forward);
-            endPathNode.transform.rotation = Quaternion.LookRotation(forward);
+            startPathNode.transform.rotation = Quaternion.LookRotation(center.Direction);
+            endPathNode.transform.rotation = Quaternion.LookRotation(center.Direction);
         }
 
         public List<PathNode> GetAllPathNodes()
@@ -336,12 +338,12 @@ namespace Nodes
                     RoadManager.Instance.RemoveNode(this);
                     Destroy(gameObject);
                 }
-                else
+
+                if (HasConnectedRoads)
                 {
                     SetMesh();
+                    ConnectPathNodes();
                 }
-
-                ConnectPathNodes();
             }
         }
 
