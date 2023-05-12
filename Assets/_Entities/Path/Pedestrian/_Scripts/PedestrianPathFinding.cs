@@ -11,7 +11,7 @@ public class PedestrianPathFinding
     {
         List<PathNode> pathNodesForPath = AStarSearch(startNode, endNode);
         List<Vector3> path = new();
-        int numPathPoints = 10;
+        int numPathPoints = 15;
         for (int i = 0; i < pathNodesForPath.Count - 1; i++)
         {
             RafaelUtils.LineLineIntersection(

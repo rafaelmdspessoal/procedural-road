@@ -46,7 +46,7 @@ namespace Roads {
 
         private void Update() {
             if (RoadManager.Instance.updateRoads) {
-                //controlNodeObject.transform.position = (startNode.Position + endNode.Position) / 2;
+                controlNodeObject.transform.position = (startNode.Position + endNode.Position) / 2;
                 UpdateMesh();
             }
         }
@@ -73,7 +73,6 @@ namespace Roads {
         {
             SetRoadMesh();
             startNode.SetMesh();
-
             endNode.SetMesh();
         }
 
@@ -107,13 +106,12 @@ namespace Roads {
         public void UpdateMesh()
         {
             SetRoadMesh();
-            startNode.SetMesh();
-            endNode.SetMesh();
         }
 
-        public void Remove(bool keepNodes) {
-            StartNode.RemoveRoad(this, keepNodes);
-            EndNode.RemoveRoad(this, keepNodes);
+        public void Remove(bool keepNodes)
+        {
+            startNode.RemoveRoad(this, keepNodes);
+            endNode.RemoveRoad(this, keepNodes);
 
             OnRoadRemoved?.Invoke(this, EventArgs.Empty);
 
@@ -121,11 +119,6 @@ namespace Roads {
             OnRoadPlaced = null;
             OnRoadBuilt = null;
             OnRoadUpdated = null;
-
-            foreach (RoadObject roadToUpdate in GetAllConnectedRoads())
-            {
-                roadToUpdate.UpdateMesh();
-            }
 
             Destroy(gameObject);
         }

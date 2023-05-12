@@ -34,7 +34,7 @@ public static class Bezier
                 t
             );
             float distance = Vector3.Distance(position, point);
-            if (distance <= minDistanceToSegment)
+            if (distance < minDistanceToSegment)
                 minDistanceToSegment = distance;
             else
                 break;
@@ -71,7 +71,7 @@ public static class Bezier
                 t
             );
             float distance = Vector3.Distance(bezierPoint, point);
-            if (distance <= minDistanceToSegment)
+            if (distance < minDistanceToSegment)
                 minDistanceToSegment = distance;
             else {
                 pointA = Lerp(startPosition, controlPointPosition, t);
@@ -86,7 +86,7 @@ public static class Bezier
             Debug.LogError("pointA point is infinity");
         if (pointB == Vector3.positiveInfinity)
             Debug.LogError("pointB point is infinity");
-        return tangent;
+        return tangent.normalized;
     }
 
     public static Vector3 GetOffsettedPosition(Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition, float offsetDistance)

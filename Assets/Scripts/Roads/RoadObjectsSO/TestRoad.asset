@@ -15,6 +15,6 @@ MonoBehaviour:
   roadObjectPrefab: {fileID: 7375371456769866339, guid: 79e1b0f70d00c1343a0657a03699ae19, type: 3}
   roadMaterial: {fileID: 2100000, guid: 97eea5cdb1de9445fb7f71ee7ce5083c, type: 2}
   roadWidth: 4
-  roadResolution: 10
+  roadResolution: 15
   roadTextureTiling: 7
   minIntersectionAngle: 30

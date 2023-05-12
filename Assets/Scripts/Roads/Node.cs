@@ -4,12 +4,13 @@ using UnityEngine;
 using System.Linq;
 using Nodes.MeshHandler;
 using System;
-using UnityEditor.Experimental.GraphView;
 using Roads.Utilities;
 using static MeshEdje;
 using static PathNode;
+using Roads.Manager;
 
-namespace Nodes {
+namespace Nodes
+{
     [RequireComponent(typeof(MeshRenderer))]
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshCollider))]
@@ -42,11 +43,13 @@ namespace Nodes {
             ConnectPathNodes();
         }
 
-        private void UpdateEdjePositions(RoadObject roadObject)
+        public void UpdateEdjePositions(RoadObject roadObject)
         {
             float meshStartOffset = GetNodeSizeForRoad(roadObject);
-            float roadWidth = roadObject.RoadWidth;
+            int roadWidth = roadObject.RoadWidth;
             Vector3 controlPosition = roadObject.ControlNodePosition;
+            Vector3 leftMeshPosition;
+             Vector3 rightMeshPosition;
 
             Vector3 centerMeshPosition = Bezier.GetOffsettedPosition(
                 Position,
@@ -54,27 +57,38 @@ namespace Nodes {
                 controlPosition,
                 meshStartOffset);
 
-            Vector3 leftMeshPosition = RoadUtilities.GetRoadLeftSideVertice(
-                roadWidth,
-                centerMeshPosition,
-                controlPosition);
-            Vector3 rightMeshPosition = RoadUtilities.GetRoadRightSideVertice(
-               roadWidth,
-               centerMeshPosition,
-               controlPosition);
 
+            Vector3 direction = Bezier.GetTangentAt(roadObject, centerMeshPosition, out _, out _);
+
+            leftMeshPosition = RoadUtilities.GetLeftPointTo(centerMeshPosition, direction, roadWidth / 2);
+            rightMeshPosition = RoadUtilities.GetRightPointTo(centerMeshPosition, direction, roadWidth / 2);
+
+            MeshEdje center;
+            MeshEdje left;
+            MeshEdje right;
+
+            int flipDirection = 1;
             if (IsStartNodeOf(roadObject))
             {
-                GetMeshEdjeFor(roadObject, EdjePosition.StartCenter).transform.position = centerMeshPosition;
-                GetMeshEdjeFor(roadObject, EdjePosition.StartLeft).transform.position = leftMeshPosition;
-                GetMeshEdjeFor(roadObject, EdjePosition.StartRight).transform.position = rightMeshPosition;
+                center = GetMeshEdjeFor(roadObject, EdjePosition.StartCenter);
+                right = GetMeshEdjeFor(roadObject, EdjePosition.StartLeft);
+                left = GetMeshEdjeFor(roadObject, EdjePosition.StartRight);
+                flipDirection = -1;
             }
             else
             {
-                GetMeshEdjeFor(roadObject, EdjePosition.EndCenter).transform.position = centerMeshPosition;
-                GetMeshEdjeFor(roadObject, EdjePosition.EndLeft).transform.position = leftMeshPosition;
-                GetMeshEdjeFor(roadObject, EdjePosition.EndRight).transform.position = rightMeshPosition;
+                center = GetMeshEdjeFor(roadObject, EdjePosition.EndCenter);
+                left = GetMeshEdjeFor(roadObject, EdjePosition.EndLeft);
+                right = GetMeshEdjeFor(roadObject, EdjePosition.EndRight);
             }
+
+            center.transform.position = centerMeshPosition;
+            left.transform.position = leftMeshPosition;
+            right.transform.position = rightMeshPosition;
+
+            center.transform.rotation = Quaternion.LookRotation(direction * flipDirection);
+            left.transform.rotation = Quaternion.LookRotation(direction * flipDirection);
+            right.transform.rotation = Quaternion.LookRotation(direction * flipDirection);
         }
 
         public MeshEdje GetMeshEdjeFor(RoadObject roadObject, EdjePosition edjePosition)
@@ -91,43 +105,45 @@ namespace Nodes {
 
         public void UpdatePathPostions(RoadObject roadObject)
         {
-            Vector3 center;
-            Vector3 left;
-            Vector3 right;
+            MeshEdje center;
+            MeshEdje left;
+            MeshEdje right;
+
             PathNode startPathNode;
             PathNode endPathNode;
 
 
             if (IsStartNodeOf(roadObject))
             {
-                center = GetMeshEdjeFor(roadObject, EdjePosition.StartCenter).transform.position;
-                left = GetMeshEdjeFor(roadObject, EdjePosition.StartLeft).transform.position;
-                right = GetMeshEdjeFor(roadObject, EdjePosition.StartRight).transform.position;
+                center = GetMeshEdjeFor(roadObject, EdjePosition.StartCenter);
+                left = GetMeshEdjeFor(roadObject, EdjePosition.StartLeft);
+                right = GetMeshEdjeFor(roadObject, EdjePosition.StartRight);
 
                 startPathNode = GetPathNodeFor(roadObject, PathPosition.StartNodeStartPath);
                 endPathNode = GetPathNodeFor(roadObject, PathPosition.StartNodeEndPath);
             }
             else
             {
-                center = GetMeshEdjeFor(roadObject, EdjePosition.EndCenter).transform.position;
-                left = GetMeshEdjeFor(roadObject, EdjePosition.EndLeft).transform.position;
-                right = GetMeshEdjeFor(roadObject, EdjePosition.EndRight).transform.position;
+                center = GetMeshEdjeFor(roadObject, EdjePosition.EndCenter);
+                left = GetMeshEdjeFor(roadObject, EdjePosition.EndLeft);
+                right = GetMeshEdjeFor(roadObject, EdjePosition.EndRight);
 
                 startPathNode = GetPathNodeFor(roadObject, PathPosition.EndNodeStartPath);
                 endPathNode = GetPathNodeFor(roadObject, PathPosition.EndNodeEndPath);
             }
 
-            Vector3 startPathPosition = (center + left) / 2f;
-            Vector3 endPathPosition = (center + right) / 2f;
+            Vector3 centerPos = center.Position; 
+            Vector3 leftPos = left.Position;
+            Vector3 rightPos = right.Position;
 
-            Vector3 forward = (center - left);
-            forward = new Vector3(-forward.z, forward.y, forward.x);
+            Vector3 startPathPosition = (centerPos + leftPos) / 2f;
+            Vector3 endPathPosition = (centerPos + rightPos) / 2f;
 
             startPathNode.transform.position = startPathPosition;
             endPathNode.transform.position = endPathPosition;
 
-            startPathNode.transform.LookAt(startPathPosition + forward);
-            endPathNode.transform.LookAt(endPathPosition + forward);
+            startPathNode.transform.rotation = Quaternion.LookRotation(center.Direction);
+            endPathNode.transform.rotation = Quaternion.LookRotation(center.Direction);
         }
 
         public List<PathNode> GetAllPathNodes()
@@ -156,14 +172,16 @@ namespace Nodes {
             }
         }
 
-        public float GetNodeSizeForRoad(RoadObject roadObject) {
+        public float GetNodeSizeForRoad(RoadObject roadObject)
+        {
             if (!HasIntersection) return 0;
 
             Dictionary<float, RoadObject> adjacentRoads = GetAdjacentRoadsTo(roadObject);
             float offset;
             float cosAngle;
             int width = roadObject.RoadWidth / 2;
-            if (adjacentRoads.Count == 1) {                
+            if (adjacentRoads.Count == 1)
+            {
                 float angle = adjacentRoads.First().Key;
                 if (angle > 180) angle = Mathf.Abs(angle - 360);
                 angle = Mathf.Clamp(angle, 0, 90);
@@ -265,7 +283,7 @@ namespace Nodes {
             if (meshEdjesDict.ContainsKey(roadObject))
                 meshEdjesDict[roadObject].AddRange(new List<MeshEdje> { centerEdje, leftEdje, rightEdje });
             else
-                meshEdjesDict.Add(roadObject, new List<MeshEdje> {centerEdje, leftEdje, rightEdje });
+                meshEdjesDict.Add(roadObject, new List<MeshEdje> { centerEdje, leftEdje, rightEdje });
         }
 
         public bool IsStartNodeOf(RoadObject roadObject)
@@ -300,15 +318,32 @@ namespace Nodes {
             pathNodesDict.Add(roadObject, new List<PathNode> { newStartPathNode, newEndPathNode });
         }
 
-        public void RemoveRoad(RoadObject roadObject, bool keepNodes) {
-            if (connectedRoadsList.Contains(roadObject)) {
+        public void RemoveRoad(RoadObject roadObject, bool keepNodes)
+        {
+            if (connectedRoadsList.Contains(roadObject))
+            {
                 connectedRoadsList.Remove(roadObject);
                 RemoveMeshEdjesFor(roadObject);
                 RemovePathNodesFor(roadObject);
-                ConnectPathNodes();
+                
+                foreach (RoadObject roadToUpdate in GetAdjacentRoadsTo(roadObject).Values)
+                {
+                    UpdateEdjePositions(roadToUpdate);
+                    UpdatePathPostions(roadToUpdate);
+                    roadToUpdate.UpdateMesh();
+                }
 
                 if (connectedRoadsList.Count <= 0 && !keepNodes)
+                {
+                    RoadManager.Instance.RemoveNode(this);
                     Destroy(gameObject);
+                }
+
+                if (HasConnectedRoads)
+                {
+                    SetMesh();
+                    ConnectPathNodes();
+                }
             }
         }
 
@@ -333,16 +368,20 @@ namespace Nodes {
         public bool HasConnectedRoads => connectedRoadsList.Count > 0;
         public Vector3 Position => transform.position;
         public Vector3 Direction => Position - connectedRoadsList.First().ControlNodePosition;
-        public Dictionary<float, RoadObject> GetAdjacentRoadsTo(RoadObject roadObject) {
+        public Dictionary<float, RoadObject> GetAdjacentRoadsTo(RoadObject roadObject)
+        {
             Dictionary<float, RoadObject> connectedRoadsDict = new();
 
             if (!HasIntersection) return connectedRoadsDict;
 
-            if (HasIntersection && roadObject != null) {
+            if (HasIntersection && roadObject != null)
+            {
                 Vector3 roadObjectDirection = Position - roadObject.ControlNodePosition;
 
-                foreach (RoadObject road in connectedRoadsList) {
-                    if (road != roadObject) {
+                foreach (RoadObject road in connectedRoadsList)
+                {
+                    if (road != roadObject)
+                    {
                         Vector3 connectedRoadDirection = Position - road.ControlNodeObject.transform.position;
                         float angle = Vector3.SignedAngle(roadObjectDirection, connectedRoadDirection, transform.up);
                         if (angle < 0) angle += 360;
@@ -378,6 +417,27 @@ namespace Nodes {
         public bool Equals(Node other)
         {
             return Vector3.SqrMagnitude(Position - other.Position) < 0.0001f;
+        }
+
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = Color.red;
+            foreach (var items in meshEdjesDict.Values)
+            {
+                foreach (var item in items)
+                {
+                    Gizmos.DrawLine(item.Position, item.Position + item.Direction);
+                }
+            }
+
+            Gizmos.color = Color.blue;
+            foreach (var items in pathNodesDict.Values)
+            {
+                foreach (var item in items)
+                {
+                    Gizmos.DrawLine(item.Position, item.Position + item.Direction);
+                }
+            }
         }
     }
 }
