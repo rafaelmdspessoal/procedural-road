@@ -106,16 +106,10 @@ namespace Roads {
         public void UpdateMesh()
         {
             SetRoadMesh();
-            startNode.UpdatePathPostions(this);
-            endNode.UpdatePathPostions(this);
-            startNode.UpdateEdjePositions(this);
-            endNode.UpdateEdjePositions(this);
-
-            startNode.SetMesh();
-            endNode.SetMesh();
         }
 
-        public void Remove(bool keepNodes) {
+        public void Remove(bool keepNodes)
+        {
             startNode.RemoveRoad(this, keepNodes);
             endNode.RemoveRoad(this, keepNodes);
 
@@ -125,11 +119,6 @@ namespace Roads {
             OnRoadPlaced = null;
             OnRoadBuilt = null;
             OnRoadUpdated = null;
-
-            foreach (RoadObject roadToUpdate in GetAllConnectedRoads())
-            {
-                roadToUpdate.UpdateMesh();
-            }
 
             Destroy(gameObject);
         }

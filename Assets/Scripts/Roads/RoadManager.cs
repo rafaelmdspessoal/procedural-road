@@ -48,10 +48,10 @@ namespace Roads.Manager {
         }
 
         private void RoadObject_OnRoadRemoved(object sender, EventArgs e) {
-            List<RoadObject> connectedRoads = (sender as RoadObject).GetAllConnectedRoads();
-            foreach (RoadObject roadObj in connectedRoads) {
-                roadObj.UpdateMesh();
-            }
+            //List<RoadObject> connectedRoads = (sender as RoadObject).GetAllConnectedRoads();
+            //foreach (RoadObject roadObj in connectedRoads) {
+            //    roadObj.UpdateMesh();
+            //}
         }
 
         public void AddNode(Node node) {
