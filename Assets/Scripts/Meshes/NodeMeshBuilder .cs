@@ -1,22 +1,23 @@
 using UnityEngine;
 using Nodes.MeshHandler.Data;
-using Roads;
-using Roads.MeshHandler;
+using Paths;
+using Paths.MeshHandler;
+using Path.Entities;
 
 namespace Nodes.MeshHandler {
 
     public class NodeMeshBuilder {
 
-        public static Mesh CreateNodeMesh(Node node)
+        public static Mesh CreateNodeMesh(NodeObject node)
         {
             NodeMeshData nodeMeshData = new(node);
-            CombineInstance[] meshes = new CombineInstance[node.ConnectedRoads.Count];
+            CombineInstance[] meshes = new CombineInstance[node.ConnectedPaths.Count];
 
             int i = 0;
-            foreach (RoadObject connectedRoad in node.ConnectedRoads)
+            foreach (PathObject connectedPath in node.ConnectedPaths)
             {
                 MeshData meshData = new();
-                nodeMeshData.PopulateMesh(meshData, connectedRoad);
+                nodeMeshData.PopulateMesh(meshData, connectedPath);
 
                 MeshUtilities.PopulateMeshTriangles(meshData);
                 MeshUtilities.PopulateMeshUvs(meshData);

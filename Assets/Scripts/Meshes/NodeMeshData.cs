@@ -1,269 +1,268 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using Roads.Utilities;
-using Roads;
-using Roads.MeshHandler;
-using UnityEngine.SocialPlatforms.GameCenter;
+using Paths.MeshHandler;
 using Rafael.Utils;
+using Path.Entities;
+using Path.Entities.Meshes;
 
 namespace Nodes.MeshHandler.Data {
     public class NodeMeshData {
 
-        private readonly Node node;
+        private readonly NodeObject node;
 
         private int resolution;
-        private int roadWidth;
+        private int pathWidth;
 
         private Vector3 startNodePosition = Vector3.zero;
 
-        public NodeMeshData(Node node) 
+        public NodeMeshData(NodeObject node) 
         {
             this.node = node;
         }
 
-        public MeshData PopulateMesh(MeshData meshData, RoadObject connectedRoad)
+        public MeshData PopulateMesh(MeshData meshData, PathObject connectedPath)
         {
-            roadWidth = connectedRoad.RoadWidth;
-            resolution = connectedRoad.RoadResolution;
+            pathWidth = connectedPath.Width;
+            resolution = connectedPath.Resolution * 2;
 
             if (!node.HasIntersection)
             {
-                return PopulateNodeWithoutIntersection(meshData, connectedRoad);
+                return PopulateNodeWithoutIntersection(meshData, connectedPath);
             }
 
-            List<RoadObject> adjacentRoads = node.GetAdjacentRoadsTo(connectedRoad).Values.ToList<RoadObject>();
-            if (adjacentRoads.Count == 1)
+            List<PathObject> adjacentPaths = node.GetAdjacentPathsTo(connectedPath).Values.ToList<PathObject>();
+            if (adjacentPaths.Count == 1)
             {
-                return PopulateNodeWithSingleIntersection(meshData, connectedRoad, adjacentRoads.First());
+                return PopulateNodeWithSingleIntersection(meshData, connectedPath, adjacentPaths.First());
             }
 
-            return PopulateNodeWithDoubleIntersection(meshData, connectedRoad, adjacentRoads);
+            return PopulateNodeWithDoubleIntersection(meshData, connectedPath, adjacentPaths);
         }
 
         /// <summary>
-        /// Populate vertices for the start Node of a Road
+        /// Populate vertices for the start Node of a Path
         /// It stats where the left and right side of the mesh
         /// meets and finish on the left and righ sides of the
-        /// Road, forming a semi circle
+        /// Path, forming a semi circle
         /// </summary>
         /// <param name="meshData"></param>
         /// <returns></returns>
-        public MeshData PopulateNodeWithoutIntersection(MeshData meshData, RoadObject connectedRoad)
+        public MeshData PopulateNodeWithoutIntersection(MeshData meshData, PathObject connectedPath)
         {
-            MeshEdje roadCenter;
-            MeshEdje roadRight;
-            MeshEdje roadLeft;
+            MeshEdje pathCenter;
+            MeshEdje pathRight;
+            MeshEdje pathLeft;
 
-            if (connectedRoad.StartNode == node)
+            if (connectedPath.StartNode == node)
             {
-                roadCenter = node.GetMeshEdjeFor(connectedRoad, MeshEdje.EdjePosition.StartCenter);
-                roadLeft = node.GetMeshEdjeFor(connectedRoad, MeshEdje.EdjePosition.StartLeft);
-                roadRight = node.GetMeshEdjeFor(connectedRoad, MeshEdje.EdjePosition.StartRight);
+                pathCenter = node.GetMeshEdjeFor(connectedPath, MeshEdje.EdjePosition.StartCenter);
+                pathLeft = node.GetMeshEdjeFor(connectedPath, MeshEdje.EdjePosition.StartLeft);
+                pathRight = node.GetMeshEdjeFor(connectedPath, MeshEdje.EdjePosition.StartRight);
 
             }
             else
             {
-                roadCenter = node.GetMeshEdjeFor(connectedRoad, MeshEdje.EdjePosition.EndCenter);
-                roadLeft = node.GetMeshEdjeFor(connectedRoad, MeshEdje.EdjePosition.EndLeft);
-                roadRight = node.GetMeshEdjeFor(connectedRoad, MeshEdje.EdjePosition.EndRight);
+                pathCenter = node.GetMeshEdjeFor(connectedPath, MeshEdje.EdjePosition.EndCenter);
+                pathLeft = node.GetMeshEdjeFor(connectedPath, MeshEdje.EdjePosition.EndLeft);
+                pathRight = node.GetMeshEdjeFor(connectedPath, MeshEdje.EdjePosition.EndRight);
             }
 
-            Vector3 roadCenterPos = roadCenter.Position - node.Position;
-            Vector3 roadLeftPos = roadLeft.Position - node.Position;
-            Vector3 roadRightPos = roadRight.Position - node.Position;
+            Vector3 pathCenterPos = pathCenter.Position - node.Position;
+            Vector3 pathLeftPos = pathLeft.Position - node.Position;
+            Vector3 pathRightPos = pathRight.Position - node.Position;
 
-            Vector3 startPosition = roadCenterPos - roadCenterPos.normalized * roadWidth / 2;
-            Vector3 leftDir = (roadLeftPos - roadCenterPos).normalized;
-            Vector3 controlLeft = startPosition + leftDir * roadWidth / 2;
-            Vector3 controlRight = startPosition - leftDir * roadWidth / 2;
+            Vector3 startPosition = pathCenterPos - pathCenterPos.normalized * pathWidth / 2;
+            Vector3 leftDir = (pathLeftPos - pathCenterPos).normalized;
+            Vector3 controlLeft = startPosition + leftDir * pathWidth / 2;
+            Vector3 controlRight = startPosition - leftDir * pathWidth / 2;
 
             MeshUtilities.PopulateStartNodeVerticesWOIntersection(
                 meshData,
                 resolution,
                 startPosition,
-                roadLeftPos,
+                pathLeftPos,
                 controlLeft,
-                roadCenterPos,
-                roadRightPos,
+                pathCenterPos,
+                pathRightPos,
                 controlRight);
            
             return meshData;
         }
 
         /// <summary>
-        /// Populate vertices for the start Node of a Road
-        /// For this the left side of each road is connecte
+        /// Populate vertices for the start Node of a Path
+        /// For this the left side of each path is connecte
         /// to the right side of the next one
         /// </summary>
         /// <param name="meshData"></param>
-        /// <param name="adjacentRoad"></param>
+        /// <param name="adjacentPath"></param>
         /// <returns></returns>
         public MeshData PopulateNodeWithSingleIntersection(
             MeshData meshData, 
-            RoadObject connectedRoad, 
-            RoadObject adjacentRoad) 
+            PathObject connectedPath, 
+            PathObject adjacentPath) 
         {
-            MeshEdje thisRoadCenter;
-            MeshEdje otherRoadCenter;
+            MeshEdje thisPathCenter;
+            MeshEdje otherPathCenter;
 
-            MeshEdje thisRoadRight;
-            MeshEdje thisRoadLeft;
+            MeshEdje thisPathRight;
+            MeshEdje thisPathLeft;
 
-            MeshEdje otherRoadRight;
-            MeshEdje otherRoadLeft;
+            MeshEdje otherPathRight;
+            MeshEdje otherPathLeft;
 
-            if (connectedRoad.StartNode == node)
+            if (connectedPath.StartNode == node)
             {
-                thisRoadCenter = node.GetMeshEdjeFor(connectedRoad, MeshEdje.EdjePosition.StartCenter);
-                thisRoadLeft = node.GetMeshEdjeFor(connectedRoad, MeshEdje.EdjePosition.StartLeft);
-                thisRoadRight = node.GetMeshEdjeFor(connectedRoad, MeshEdje.EdjePosition.StartRight);
+                thisPathCenter = node.GetMeshEdjeFor(connectedPath, MeshEdje.EdjePosition.StartCenter);
+                thisPathLeft = node.GetMeshEdjeFor(connectedPath, MeshEdje.EdjePosition.StartLeft);
+                thisPathRight = node.GetMeshEdjeFor(connectedPath, MeshEdje.EdjePosition.StartRight);
 
             }
             else
             {
-                thisRoadCenter = node.GetMeshEdjeFor(connectedRoad, MeshEdje.EdjePosition.EndCenter);
-                thisRoadLeft = node.GetMeshEdjeFor(connectedRoad, MeshEdje.EdjePosition.EndLeft);
-                thisRoadRight = node.GetMeshEdjeFor(connectedRoad, MeshEdje.EdjePosition.EndRight);
+                thisPathCenter = node.GetMeshEdjeFor(connectedPath, MeshEdje.EdjePosition.EndCenter);
+                thisPathLeft = node.GetMeshEdjeFor(connectedPath, MeshEdje.EdjePosition.EndLeft);
+                thisPathRight = node.GetMeshEdjeFor(connectedPath, MeshEdje.EdjePosition.EndRight);
             }
 
-            if (adjacentRoad.StartNode == node)
+            if (adjacentPath.StartNode == node)
             {
-                otherRoadCenter = node.GetMeshEdjeFor(adjacentRoad, MeshEdje.EdjePosition.StartCenter);
-                otherRoadLeft = node.GetMeshEdjeFor(adjacentRoad, MeshEdje.EdjePosition.StartLeft);
-                otherRoadRight = node.GetMeshEdjeFor(adjacentRoad, MeshEdje.EdjePosition.StartRight);
+                otherPathCenter = node.GetMeshEdjeFor(adjacentPath, MeshEdje.EdjePosition.StartCenter);
+                otherPathLeft = node.GetMeshEdjeFor(adjacentPath, MeshEdje.EdjePosition.StartLeft);
+                otherPathRight = node.GetMeshEdjeFor(adjacentPath, MeshEdje.EdjePosition.StartRight);
 
             }
             else
             {
-                otherRoadCenter = node.GetMeshEdjeFor(adjacentRoad, MeshEdje.EdjePosition.EndCenter);
-                otherRoadLeft = node.GetMeshEdjeFor(adjacentRoad, MeshEdje.EdjePosition.EndLeft);
-                otherRoadRight = node.GetMeshEdjeFor(adjacentRoad, MeshEdje.EdjePosition.EndRight);
+                otherPathCenter = node.GetMeshEdjeFor(adjacentPath, MeshEdje.EdjePosition.EndCenter);
+                otherPathLeft = node.GetMeshEdjeFor(adjacentPath, MeshEdje.EdjePosition.EndLeft);
+                otherPathRight = node.GetMeshEdjeFor(adjacentPath, MeshEdje.EdjePosition.EndRight);
             }
 
-            Vector3 thisRoadCenterPos = thisRoadCenter.Position - node.Position;
-            Vector3 thisRoadLeftPos = thisRoadLeft.Position - node.Position;
-            Vector3 thisRoadRightPos = thisRoadRight.Position - node.Position;
+            Vector3 thisPathCenterPos = thisPathCenter.Position - node.Position;
+            Vector3 thisPathLeftPos = thisPathLeft.Position - node.Position;
+            Vector3 thisPathRightPos = thisPathRight.Position - node.Position;
 
-            Vector3 otherRoadCenterPos = otherRoadCenter.Position - node.Position;
-            Vector3 otherRoadLeftPos = otherRoadLeft.Position - node.Position;
-            Vector3 otherRoadRightPos = otherRoadRight.Position - node.Position;
+            Vector3 otherPathCenterPos = otherPathCenter.Position - node.Position;
+            Vector3 otherPathLeftPos = otherPathLeft.Position - node.Position;
+            Vector3 otherPathRightPos = otherPathRight.Position - node.Position;
 
             RafaelUtils.LineLineIntersection(out Vector3 controlLeftPos,
-                thisRoadRightPos,
-                thisRoadRight.Direction,
-                otherRoadLeftPos,
-                otherRoadLeft.Direction);
+                thisPathRightPos,
+                thisPathRight.Direction,
+                otherPathLeftPos,
+                otherPathLeft.Direction);
             RafaelUtils.LineLineIntersection(
                 out Vector3 controlRightPos,
-                thisRoadLeftPos,
-                thisRoadLeft.Direction,
-                otherRoadRightPos,
-                otherRoadRight.Direction);
+                thisPathLeftPos,
+                thisPathLeft.Direction,
+                otherPathRightPos,
+                otherPathRight.Direction);
 
 
             meshData = MeshUtilities.PopulateNodeMeshVerticesWSIntersection(
                 meshData,
                 resolution,
-                thisRoadRightPos,
-                otherRoadLeftPos,
+                thisPathRightPos,
+                otherPathLeftPos,
                 controlLeftPos,
-                thisRoadCenterPos,
-                otherRoadCenterPos,
+                thisPathCenterPos,
+                otherPathCenterPos,
                 startNodePosition,
-                thisRoadLeftPos,
-                otherRoadRightPos,
+                thisPathLeftPos,
+                otherPathRightPos,
                 controlRightPos);
 
             return meshData;
         }
 
         /// <summary>
-        /// Populate vertices for the start Node of a Road
-        /// For this the left side of the road connects to
-        /// the right side of the left road and the right
-        /// side connects to the left side of the right road
+        /// Populate vertices for the start Node of a Path
+        /// For this the left side of the path connects to
+        /// the right side of the left path and the right
+        /// side connects to the left side of the right path
         /// </summary>
         /// <param name="meshData"></param>
-        /// <param name="adjacentRoads"></param>
+        /// <param name="adjacentPaths"></param>
         /// <returns></returns>
         public MeshData PopulateNodeWithDoubleIntersection(
             MeshData meshData, 
-            RoadObject connectedRoad, 
-            List<RoadObject> adjacentRoads)
+            PathObject connectedPath, 
+            List<PathObject> adjacentPaths)
         {
-            if (adjacentRoads.Count != 2)
+            if (adjacentPaths.Count != 2)
             {
-                throw new System.Exception("Intersection MUST have two roads, but has " + adjacentRoads.Count);
+                throw new System.Exception("Intersection MUST have two paths, but has " + adjacentPaths.Count);
             }
 
-            RoadObject leftRoad = adjacentRoads.First();
-            RoadObject rightRoad = adjacentRoads.Last();
+            PathObject leftPath = adjacentPaths.First();
+            PathObject rightPath = adjacentPaths.Last();
 
-            MeshEdje thisRoadCenter;
-            MeshEdje thisRoadRight;
-            MeshEdje thisRoadLeft;
+            MeshEdje thisPathCenter;
+            MeshEdje thisPathRight;
+            MeshEdje thisPathLeft;
 
-            MeshEdje leftRoadRight;
-            MeshEdje rightRoadLeft;
+            MeshEdje leftPathRight;
+            MeshEdje rightPathLeft;
 
-            if (connectedRoad.StartNode == node)
+            if (connectedPath.StartNode == node)
             {
-                thisRoadCenter = node.GetMeshEdjeFor(connectedRoad, MeshEdje.EdjePosition.StartCenter);
-                thisRoadLeft = node.GetMeshEdjeFor(connectedRoad, MeshEdje.EdjePosition.StartLeft);
-                thisRoadRight = node.GetMeshEdjeFor(connectedRoad, MeshEdje.EdjePosition.StartRight);
+                thisPathCenter = node.GetMeshEdjeFor(connectedPath, MeshEdje.EdjePosition.StartCenter);
+                thisPathLeft = node.GetMeshEdjeFor(connectedPath, MeshEdje.EdjePosition.StartLeft);
+                thisPathRight = node.GetMeshEdjeFor(connectedPath, MeshEdje.EdjePosition.StartRight);
             }
             else
             {
-                thisRoadCenter = node.GetMeshEdjeFor(connectedRoad, MeshEdje.EdjePosition.EndCenter);
-                thisRoadLeft = node.GetMeshEdjeFor(connectedRoad, MeshEdje.EdjePosition.EndLeft);
-                thisRoadRight = node.GetMeshEdjeFor(connectedRoad, MeshEdje.EdjePosition.EndRight);
+                thisPathCenter = node.GetMeshEdjeFor(connectedPath, MeshEdje.EdjePosition.EndCenter);
+                thisPathLeft = node.GetMeshEdjeFor(connectedPath, MeshEdje.EdjePosition.EndLeft);
+                thisPathRight = node.GetMeshEdjeFor(connectedPath, MeshEdje.EdjePosition.EndRight);
             }
 
-            if (leftRoad.StartNode == node)
-                leftRoadRight = node.GetMeshEdjeFor(leftRoad, MeshEdje.EdjePosition.StartRight);
+            if (leftPath.StartNode == node)
+                leftPathRight = node.GetMeshEdjeFor(leftPath, MeshEdje.EdjePosition.StartRight);
             else
-                leftRoadRight = node.GetMeshEdjeFor(leftRoad, MeshEdje.EdjePosition.EndRight);
+                leftPathRight = node.GetMeshEdjeFor(leftPath, MeshEdje.EdjePosition.EndRight);
 
-            if (rightRoad.StartNode == node)
-                rightRoadLeft = node.GetMeshEdjeFor(rightRoad, MeshEdje.EdjePosition.StartLeft);
+            if (rightPath.StartNode == node)
+                rightPathLeft = node.GetMeshEdjeFor(rightPath, MeshEdje.EdjePosition.StartLeft);
             else
-                rightRoadLeft = node.GetMeshEdjeFor(rightRoad, MeshEdje.EdjePosition.EndLeft);
+                rightPathLeft = node.GetMeshEdjeFor(rightPath, MeshEdje.EdjePosition.EndLeft);
 
-            Vector3 thisRoadCenterPos = thisRoadCenter.Position - node.Position;
-            Vector3 thisRoadLeftPos = thisRoadLeft.Position - node.Position;
-            Vector3 thisRoadRightPos = thisRoadRight.Position - node.Position;
-            Vector3 leftRoadRightPos = leftRoadRight.Position - node.Position;
-            Vector3 rightRoadLeftPos = rightRoadLeft.Position - node.Position;
+            Vector3 thisPathCenterPos = thisPathCenter.Position - node.Position;
+            Vector3 thisPathLeftPos = thisPathLeft.Position - node.Position;
+            Vector3 thisPathRightPos = thisPathRight.Position - node.Position;
+            Vector3 leftPathRightPos = leftPathRight.Position - node.Position;
+            Vector3 rightPathLeftPos = rightPathLeft.Position - node.Position;
 
-            Vector3 intersectionCenter = -thisRoadCenterPos;
+            Vector3 intersectionCenter = -thisPathCenterPos;
 
             RafaelUtils.LineLineIntersection(
                 out Vector3 controlLeftPos,
-                leftRoadRightPos,
-                leftRoadRight.Direction,
-                thisRoadLeftPos,
-                thisRoadLeft.Direction);
+                leftPathRightPos,
+                leftPathRight.Direction,
+                thisPathLeftPos,
+                thisPathLeft.Direction);
             RafaelUtils.LineLineIntersection(
                 out Vector3 controlRightPos,
-                rightRoadLeftPos,
-                rightRoadLeft.Direction,
-                thisRoadRightPos,
-                thisRoadRight.Direction);
+                rightPathLeftPos,
+                rightPathLeft.Direction,
+                thisPathRightPos,
+                thisPathRight.Direction);
 
             meshData = MeshUtilities.PopulateNodeMeshVerticesWDIntersection(
                 meshData,
                 resolution,
 
-                leftRoadRightPos,
-                thisRoadLeftPos,
+                leftPathRightPos,
+                thisPathLeftPos,
                 controlLeftPos,
 
                 intersectionCenter,
-                thisRoadCenterPos,
+                thisPathCenterPos,
 
-                rightRoadLeftPos,
-                thisRoadRightPos,
+                rightPathLeftPos,
+                thisPathRightPos,
                 controlRightPos);
 
             return meshData;

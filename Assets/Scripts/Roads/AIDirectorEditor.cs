@@ -1,12 +1,13 @@
 using UnityEngine;
 using UnityEditor;
 using Nodes;
+using Path.Entities;
 
 [CustomEditor(typeof(AIDirector))]
 public class AIDirectorEditor : Editor
 {
-    Node startNode;
-    Node endNode;
+    NodeObject startNode;
+    NodeObject endNode;
 
     public override void OnInspectorGUI()
     {

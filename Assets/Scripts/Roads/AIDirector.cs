@@ -1,23 +1,24 @@
 using Nodes;
-using Roads.Manager;
-using System.Collections;
+using Path.Entities;
+using Path;
 using System.Collections.Generic;
 using UnityEngine;
+using Path.AI.Pedestrian;
 
 public class AIDirector : MonoBehaviour
 {
-    private RoadManager roadManager;
+    private PathManager pathManager;
     private List<Vector3> path = new();
 
     public LineRenderer lineRenderer;
 
     private void Start()
     {
-        roadManager = RoadManager.Instance;
+        pathManager = PathManager.Instance;
         lineRenderer = GetComponent<LineRenderer>();
     }
 
-    public void GetPathBetween(Node startNode, Node endNode)
+    public void GetPathBetween(NodeObject startNode, NodeObject endNode)
     {
         path = PedestrianPathFinding.GetPathBetween(startNode, endNode);
 
@@ -33,8 +34,8 @@ public class AIDirector : MonoBehaviour
         }
     }
 
-    public Node GetRandomNode()
+    public NodeObject GetRandomNode()
     {
-        return roadManager.GetRandomNode();
+        return pathManager.GetRandomNode();
     }
 }

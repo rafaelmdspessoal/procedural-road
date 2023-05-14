@@ -2,24 +2,24 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace UI.Controller {
+namespace Global.UI {
     public class UIController : MonoBehaviour {
         public static UIController Instance { get; private set; }
-        public Action OnBuildingRoads;
+        public Action OnBuildingPath;
         public Action OnRemovingObjects;
 
-        [SerializeField] private Button buildRoadsButton;
-        [SerializeField] private Button removeRoadsButton;
+        [SerializeField] private Button buildPathButton;
+        [SerializeField] private Button removePathButton;
 
         private void Awake() {
             Instance = this;
         }
 
         private void Start() {
-            buildRoadsButton.onClick.AddListener(() => {
-                OnBuildingRoads?.Invoke();
+            buildPathButton.onClick.AddListener(() => {
+                OnBuildingPath?.Invoke();
             });
-            removeRoadsButton.onClick.AddListener(() => {
+            removePathButton.onClick.AddListener(() => {
                 OnRemovingObjects?.Invoke();
             });
         }

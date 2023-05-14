@@ -2,9 +2,9 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.EventSystems;
-using UI.Controller;
 using Rafael.Utils;
-using Roads.Utilities;
+using Path.Utilities;
+using Global.UI;
 
 public class InputManager : MonoBehaviour
 {
@@ -37,27 +37,27 @@ public class InputManager : MonoBehaviour
 
 		gameInputActions.Destroying.Demolish.performed += Demolish_performed;
 
-        gameInputActions.BuildingRoad.PlaceNode.performed += PlaceNode_performed;
-        gameInputActions.BuildingRoad.Cancel.performed += Cancel_performed;
+        gameInputActions.BuildingPath.PlaceNode.performed += PlaceNode_performed;
+        gameInputActions.BuildingPath.Cancel.performed += Cancel_performed;
 	}
 
     private void Start() {
 		UIController = UIController.Instance;
-		UIController.OnBuildingRoads += RoadUIController_OnBuildingRoads;
-		UIController.OnRemovingObjects += RoadUIController_OnRemovingObjects;
+		UIController.OnBuildingPath += PathUIController_OnBuildingPath;
+		UIController.OnRemovingObjects += PathUIController_OnRemovingObjects;
 
 	}
 
-    private void RoadUIController_OnRemovingObjects() {
+    private void PathUIController_OnRemovingObjects() {
 		gameInputActions.Idle.Disable();
 		gameInputActions.Destroying.Enable();
-		gameInputActions.BuildingRoad.Disable(); ;
+		gameInputActions.BuildingPath.Disable(); ;
     }
 
-    private void RoadUIController_OnBuildingRoads() {
+    private void PathUIController_OnBuildingPath() {
 		gameInputActions.Idle.Disable();
 		gameInputActions.Destroying.Disable();
-		gameInputActions.BuildingRoad.Enable();
+		gameInputActions.BuildingPath.Enable();
     }
 
     private void Cancel_performed(InputAction.CallbackContext obj) {
@@ -67,7 +67,7 @@ public class InputManager : MonoBehaviour
     private void PlaceNode_performed(InputAction.CallbackContext obj) {
 		if (EventSystem.current.IsPointerOverGameObject()) return;
 
-		if (RoadUtilities.TryRaycastObject(out Vector3 hitPosition, out GameObject hitObject, splitRoad: true)) {
+		if (PathUtilities.TryRaycastObject(out Vector3 hitPosition, out GameObject hitObject, splitPath: true)) {
             OnNodePlaced?.Invoke(this, new OnObjectHitedEventArgs {
 				position = hitPosition,
 				obj = hitObject
@@ -104,7 +104,7 @@ public class InputManager : MonoBehaviour
 	}
 		
 	private void ResetToIdle() {
-		gameInputActions.BuildingRoad.Disable();
+		gameInputActions.BuildingPath.Disable();
 		gameInputActions.Destroying.Disable();
 		gameInputActions.Idle.Enable();
 	}

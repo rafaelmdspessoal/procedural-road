@@ -1,4 +1,6 @@
-using Roads;
+using Path.Entities;
+using Paths;
+using System.Drawing;
 using UnityEngine;
 
 public static class Bezier
@@ -19,7 +21,7 @@ public static class Bezier
         return start + (end - start) * t;
     }
 
-    public static Vector3 GetClosestPointTo(RoadObject roadObject, Vector3 position)
+    public static Vector3 GetClosestPointTo(PathObject pathObject, Vector3 position)
     {
         float t = 0;
         float minDistanceToSegment = Mathf.Infinity;
@@ -28,9 +30,9 @@ public static class Bezier
         {
             t += .001f;
             point = QuadraticCurve(
-                roadObject.StartNode.Position, 
-                roadObject.EndNode.Position, 
-                roadObject.ControlNodeObject.transform.position, 
+                pathObject.StartNode.Position, 
+                pathObject.EndNode.Position, 
+                pathObject.ControlPosition, 
                 t
             );
             float distance = Vector3.Distance(position, point);
@@ -44,20 +46,36 @@ public static class Bezier
         return point;
     }
 
-    public static float GetLengh(Vector3 startPos, Vector3 endPos)
+    public static float GetLengh(Vector3 startPosition, Vector3 endPosition, Vector3 controlPosition)
     {
-        return (endPos - startPos).magnitude;
+        float distance = 0;
+        float t = 0f;
+        Vector3 point_1 = Vector3.zero;
+        Vector3 point_2 = Vector3.zero;
+        while (t <= 1)
+        {
+            t += .001f;
+            point_1 = QuadraticCurve(
+                startPosition,
+                endPosition,
+                controlPosition,
+                t
+            );
+            distance += Vector3.Distance(point_1, point_2);
+            point_2 = point_1;
+        }
+        return distance;
     }
 
-    public static Vector3 GetTangentAt(RoadObject roadObject, Vector3 point, out Vector3 pointA, out Vector3 pointB)
+    public static Vector3 GetTangentAt(PathObject pathObject, Vector3 point, out Vector3 pointA, out Vector3 pointB)
     {
         float t = 0;
         float minDistanceToSegment = Mathf.Infinity;
         Vector3 tangent = Vector3.positiveInfinity;
 
-        Vector3 startPosition = roadObject.StartNode.transform.position;
-        Vector3 endPosition = roadObject.EndNode.transform.position;
-        Vector3 controlPointPosition = roadObject.ControlNodeObject.transform.position;
+        Vector3 startPosition = pathObject.StartNode.transform.position;
+        Vector3 endPosition = pathObject.EndNode.transform.position;
+        Vector3 controlPointPosition = pathObject.ControlPosition;
 
         pointA = Vector3.negativeInfinity;
         pointB = Vector3.negativeInfinity;
