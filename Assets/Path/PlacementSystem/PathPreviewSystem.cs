@@ -1,3 +1,4 @@
+using Paths.MeshHandler;
 using Paths.Preview.MeshHandler;
 using System;
 using UnityEngine;
@@ -32,7 +33,7 @@ namespace Path.Preview
             int pathResolution,
             bool canBuildPath)
         {
-            Mesh mesh = PathTempMeshBuilder.CreateTempPathMesh(
+            Mesh mesh = CreateTempPathMesh(
                 startPosition,
                 endPosition,
                 controlPosition,
@@ -45,6 +46,20 @@ namespace Path.Preview
                 meshRenderer.sharedMaterial = temporaryPathMaterial;
 
             meshFilter.mesh = mesh;
+        }
+
+        public Mesh CreateTempPathMesh(
+            Vector3 startPosition,
+            Vector3 endPosition,
+            Vector3 controlPosition,
+            int pathWidth,
+            int resolution)
+        {
+            MeshData meshData = new();
+            PreviewPathMeshData displayPathMeshData = new(startPosition, endPosition, controlPosition, resolution, pathWidth);
+            meshData = displayPathMeshData.PopulateTempPathMeshVertices(meshData);
+            Mesh mesh = MeshUtilities.LoadMesh(meshData);
+            return mesh;
         }
 
         public void StopPreview()

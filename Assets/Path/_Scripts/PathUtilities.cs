@@ -8,24 +8,11 @@ using Path.PlacementSystem;
 namespace Path.Utilities {
 
     public static class PathUtilities {       
-        public static Vector3 GetPathLeftSideVertice(float pathWidth, Vector3 centerVertice, Vector3 startVertice) {
-            Vector3 verticeDirection = (centerVertice - startVertice).normalized;
-            Vector3 left = new(-verticeDirection.z, verticeDirection.y, verticeDirection.x);
-            Vector3 leftSideVertice = centerVertice + .5f * pathWidth * left;
-            return leftSideVertice;
-        }
+      
         public static Vector3 GetLeftPointTo(Vector3 point, Vector3 direction, int distance)
         {
             Vector3 left = new(-direction.z, direction.y, direction.x);
             Vector3 leftSideVertice = point + distance * left;
-            return leftSideVertice;
-        }
-
-        public static Vector3 GetPathRightSideVertice(float pathWidth, Vector3 centerVertice, Vector3 startVertice)
-        {
-            Vector3 verticeDirection = (centerVertice - startVertice).normalized;
-            Vector3 left = new(-verticeDirection.z, verticeDirection.y, verticeDirection.x);
-            Vector3 leftSideVertice = centerVertice - .5f * pathWidth * left;
             return leftSideVertice;
         }
 
@@ -43,14 +30,6 @@ namespace Path.Utilities {
             nodeGFX.transform.localScale = pathObjectSO.width * Vector3.one;
             nodeGFX.transform.name = "Node GFX";
             return nodeGFX;
-        }
-
-        public static GameObject CreateControlNode(PathSO pathObjectSO, Vector3 controlNodePosition) {
-            GameObject controlNodeObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            controlNodeObject.transform.localScale = 0.25f * pathObjectSO.width * Vector3.one;
-            controlNodeObject.transform.position = controlNodePosition;
-            controlNodeObject.transform.name = "Control Node";
-            return controlNodeObject;
         }
 
         public static Vector3 GetHitPositionWithSnapping(Vector3 hitPosition, NodeObject startNode, int angleSnap) {

@@ -37,7 +37,7 @@ public class GameManager : MonoBehaviour
     private void InputManager_OnObjectRemoved(object sender, InputManager.OnObjectHitedEventArgs e) {
         if (IsDemolishing()) {
             if (e.obj.TryGetComponent(out IPath removeableObject)) {
-                removeableObject.RemovePath(false);
+                removeableObject.RemovePath();
             }
         }
     }

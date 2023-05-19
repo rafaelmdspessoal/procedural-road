@@ -512,7 +512,7 @@ GameObject:
   m_Component:
   - component: {fileID: 228958930}
   m_Layer: 0
-  m_Name: Roads
+  m_Name: Paths
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1305,8 +1305,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8255ad96f39159f43a4efe4046dd2672, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  temporaryPathMaterial: {fileID: 0}
-  cantBuildPathMaterial: {fileID: 0}
+  temporaryPathMaterial: {fileID: 2100000, guid: 0f5068376c299d948b4f19a9b997998a, type: 2}
+  cantBuildPathMaterial: {fileID: 2100000, guid: 69bffef08a90db44d9c1bff4c9cfcb6f, type: 2}
 --- !u!23 &800580843
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2698,10 +2698,10 @@ GameObject:
   - component: {fileID: 1524344559}
   - component: {fileID: 1524344564}
   - component: {fileID: 1524344565}
-  - component: {fileID: 1524344566}
+  - component: {fileID: 1524344568}
   - component: {fileID: 1524344567}
   m_Layer: 0
-  m_Name: RoadManager
+  m_Name: PathManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2788,7 +2788,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   updatePaths: 0
-  pathParentTransform: {fileID: 0}
+  pathParentTransform: {fileID: 228958930}
   nodeParentTransform: {fileID: 1882003443}
   nodePrefab: {fileID: 8225037638980379295, guid: bf08ccc28c080f44eae6896c0a2a8c9f, type: 3}
 --- !u!114 &1524344565
@@ -2803,19 +2803,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abf53d2d4a1777840a957dd033c88251, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1524344566
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1524344554}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3415a1545653595429891ca02016e4b1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  lineRenderer: {fileID: 0}
 --- !u!120 &1524344567
 LineRenderer:
   serializedVersion: 2
@@ -2920,6 +2907,19 @@ LineRenderer:
   m_UseWorldSpace: 1
   m_Loop: 0
   m_ApplyActiveColorSpace: 1
+--- !u!114 &1524344568
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1524344554}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8701ea3537d4ec4ba48c895a1067941, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lineRenderer: {fileID: 0}
 --- !u!1 &1535615085
 GameObject:
   m_ObjectHideFlags: 0

@@ -220,18 +220,21 @@ namespace Path.Entities
         private void PathObject_OnPathRemoved(object sender, EventArgs e)
         {
             PathObject pathObject = (PathObject)sender;
+            List<PathObject> adjacentPaths = GetAdjacentPathsTo(pathObject).Values.ToList();
             if (connectedPathList.Contains(pathObject))
             {
                 connectedPathList.Remove(pathObject);
                 RemoveMeshEdjesFor(pathObject);
                 RemovePedestrianPathNodesFor(pathObject);
             }
-            foreach (PathObject pathToUpdate in GetAdjacentPathsTo(pathObject).Values)
+
+            foreach (PathObject pathToUpdate in adjacentPaths)
             {
                 UpdateEdjePositions(pathToUpdate);
                 UpdatePathPostions(pathToUpdate);
                 pathToUpdate.UpdateMesh();
             }
+
             if (HasConnectedPaths)
             {
                 ConnectPathNodes();
@@ -240,7 +243,7 @@ namespace Path.Entities
             }
             else
             {
-                Destroy(this.gameObject);
+                Destroy(gameObject);
             }
         }
         public void UpdateEdjePositions(PathObject pathObject)
@@ -249,18 +252,9 @@ namespace Path.Entities
             int pathWidth = pathObject.Width;
             Vector3 controlPosition = pathObject.ControlPosition;
             Vector3 leftMeshPosition;
-             Vector3 rightMeshPosition;
-
-            Vector3 centerMeshPosition = Bezier.GetOffsettedPosition(
-                Position,
-                pathObject.OtherNodeTo(this).Position,
-                controlPosition,
-                meshStartOffset);
-
-            Vector3 direction = Bezier.GetTangentAt(pathObject, centerMeshPosition, out _, out _);
-
-            leftMeshPosition = PathUtilities.GetLeftPointTo(centerMeshPosition, direction, pathWidth / 2);
-            rightMeshPosition = PathUtilities.GetRightPointTo(centerMeshPosition, direction, pathWidth / 2);
+            Vector3 rightMeshPosition;
+            Vector3 centerMeshPosition;
+            Vector3 direction;
 
             MeshEdje center;
             MeshEdje left;
@@ -281,6 +275,17 @@ namespace Path.Entities
                 right = GetMeshEdjeFor(pathObject, MeshEdje.EdjePosition.EndRight);
             }
 
+            centerMeshPosition = Bezier.GetOffsettedPosition(
+                Position,
+                pathObject.OtherNodeTo(this).Position,
+                controlPosition,
+                meshStartOffset);
+
+            direction = Bezier.GetTangentAt(pathObject, centerMeshPosition, out _, out _);
+
+            leftMeshPosition = PathUtilities.GetLeftPointTo(centerMeshPosition, direction, pathWidth / 2);
+            rightMeshPosition = PathUtilities.GetRightPointTo(centerMeshPosition, direction, pathWidth / 2);
+
             center.transform.position = centerMeshPosition;
             left.transform.position = leftMeshPosition;
             right.transform.position = rightMeshPosition;
@@ -297,7 +302,6 @@ namespace Path.Entities
 
             PedestrianPathNode startPathNode;
             PedestrianPathNode endPathNode;
-
 
             if (IsStartNodeOf(pathObject))
             {
@@ -333,7 +337,6 @@ namespace Path.Entities
         }
         public void SetMesh(Mesh mesh)
         {
-            // Mesh mesh = NodeMeshBuilder.CreateNodeMesh(this);
             meshFilter.mesh = mesh;
             meshCollider.sharedMesh = mesh;
             // Material tiling will depend on the path lengh, so let's have
@@ -351,34 +354,7 @@ namespace Path.Entities
             }
             meshEdjesDict.Remove(pathObject);
         }
-        public void RemovePath(PathObject pathObject, bool keepNodes)
-        {
-            if (connectedPathList.Contains(pathObject))
-            {
-                connectedPathList.Remove(pathObject);
-                RemoveMeshEdjesFor(pathObject);
-                RemovePedestrianPathNodesFor(pathObject);
-
-                foreach (PathObject pathToUpdate in GetAdjacentPathsTo(pathObject).Values)
-                {
-                    UpdateEdjePositions(pathToUpdate);
-                    UpdatePathPostions(pathToUpdate);
-                    pathToUpdate.UpdateMesh();
-                }
-
-                if (connectedPathList.Count <= 0 && !keepNodes)
-                {
-                    PathManager.Instance.RemoveNode(this);
-                    pathObject.OnPathRemoved -= PathObject_OnPathRemoved;
-                    Destroy(gameObject);
-                }
-
-                if (HasConnectedPaths)
-                {
-                    ConnectPathNodes();
-                }
-            }
-        }
+ 
         private void RemovePedestrianPathNodesFor(PathObject pathObject)
         {
             foreach (PedestrianPathNode pathNode in pathNodesDict[pathObject])

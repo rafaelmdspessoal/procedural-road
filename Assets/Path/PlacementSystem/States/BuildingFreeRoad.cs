@@ -83,7 +83,6 @@ namespace Path.Placement.States {
                 pathPlacementSystem.EndPosition = hitPosition;
                 pathPlacementSystem.PlacePath();
                 pathPlacementSystem.SplitPath();
-                pathPlacementSystem.SetPathMesh();
                 return;
             }
         }

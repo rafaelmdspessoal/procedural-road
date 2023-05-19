@@ -18,6 +18,34 @@ namespace Path.Entities.SO
 
         public int minIntersectionAngle;
 
+        public PathObject CreatePathObject(
+            NodeObject startNode,
+            NodeObject endNode,
+            Vector3 controlPosition,
+            Transform parentTransform)
+        {
+            Vector3 pathPosition = (startNode.Position + endNode.Position) / 2;
+            PathObject pathObject = Instantiate(
+                pathObjectPrefab,
+                pathPosition,
+                Quaternion.identity,
+                parentTransform).GetComponent<PathObject>();
+
+            pathObject.PlacePath(startNode, endNode, controlPosition);
+            return pathObject;
+        }
+
+        public void SplitPathObject(
+            NodeObject startNode,
+            NodeObject endNode,
+            NodeObject intersectionNode,
+            Vector3 startControlPosition,
+            Vector3 endControlPosition,
+            Transform parentTransform)
+        {
+            CreatePathObject(startNode, intersectionNode, startControlPosition, parentTransform);
+            CreatePathObject(intersectionNode, endNode, endControlPosition, parentTransform);
+        }
 
         public Mesh CreatePathMesh(PathObject pathObject)
         {
@@ -30,7 +58,6 @@ namespace Path.Entities.SO
             Mesh mesh = MeshUtilities.LoadMesh(meshData);
             return mesh;
         }
-
         public Mesh CreateNodeMesh(NodeObject node)
         {
             CombineInstance[] meshes = new CombineInstance[node.ConnectedPaths.Count];
@@ -51,13 +78,11 @@ namespace Path.Entities.SO
             mesh.CombineMeshes(meshes, true, false);
             return mesh;
         }
-
-        public MeshData PopulatePathMesh(MeshData meshData, PathObject pathObject)
+        
+        private MeshData PopulatePathMesh(MeshData meshData, PathObject pathObject)
         {
             NodeObject startNode = pathObject.StartNode;
             NodeObject endNode = pathObject.EndNode;
-            Vector3 pathPosition = pathObject.transform.position;
-            Vector3 controlPosition = pathObject.ControlPosition - pathPosition;
 
             MeshEdje startCenter = startNode.GetMeshEdjeFor(pathObject, MeshEdje.EdjePosition.StartCenter);
             MeshEdje startRight = startNode.GetMeshEdjeFor(pathObject, MeshEdje.EdjePosition.StartRight);
@@ -67,6 +92,9 @@ namespace Path.Entities.SO
             MeshEdje endLeft = endNode.GetMeshEdjeFor(pathObject, MeshEdje.EdjePosition.EndLeft);
             MeshEdje endRight = endNode.GetMeshEdjeFor(pathObject, MeshEdje.EdjePosition.EndRight);
 
+            Vector3 pathPosition = pathObject.transform.position;
+            pathPosition.y = 0;
+
             Vector3 startCenterPos = startCenter.Position - pathPosition;
             Vector3 startLeftPos = startLeft.Position - pathPosition;
             Vector3 startRightPos = startRight.Position - pathPosition;
@@ -74,6 +102,8 @@ namespace Path.Entities.SO
             Vector3 endCenterPos = endCenter.Position - pathPosition;
             Vector3 endLeftPos = endLeft.Position - pathPosition;
             Vector3 endRightPos = endRight.Position - pathPosition;
+
+            Vector3 controlPosition = pathObject.ControlPosition - pathPosition;
 
             RafaelUtils.LineLineIntersection(
                 out Vector3 controlLeftPos,
@@ -88,65 +118,32 @@ namespace Path.Entities.SO
                 endLeftPos,
                 endLeft.Direction);
 
-            meshData = PopulatePathMeshVertices(
-                meshData,
-                startLeftPos,
-                endLeftPos,
-                controlLeftPos,
-                startCenterPos,
-                endCenterPos,
-                controlPosition,
-                startRightPos,
-                endRightPos,
-                controlRightPos);
-
-            return meshData;
-        }
-
-        public MeshData PopulatePathMeshVertices(
-            MeshData meshData,
-            Vector3 startLeft,
-            Vector3 endLeft,
-            Vector3 controlLeft,
-            Vector3 startCenter,
-            Vector3 endCenter,
-            Vector3 controlCenter,
-            Vector3 startRight,
-            Vector3 endRight,
-            Vector3 controlRight)
-        {
-            float t;
-
             for (int i = 0; i < resolution; i++)
             {
-                t = i / (resolution - 1);
-                Vector3 leftPathVertice = Bezier.QuadraticCurve(startLeft, endRight, controlLeft, t);
-                Vector3 centerPathVertice = Bezier.QuadraticCurve(startCenter, endCenter, controlCenter, t);
-                Vector3 rightPathVertice = Bezier.QuadraticCurve(startRight, endLeft, controlRight, t);
+                float t = i / (float)(resolution - 1);
+                Vector3 leftPathVertice = Bezier.QuadraticCurve(startLeftPos, endRightPos, controlLeftPos, t);
+                Vector3 centerPathVertice = Bezier.QuadraticCurve(startCenterPos, endCenterPos, controlPosition, t);
+                Vector3 rightPathVertice = Bezier.QuadraticCurve(startRightPos, endLeftPos, controlRightPos, t);
 
                 meshData.AddVertice(leftPathVertice);
                 meshData.AddVertice(centerPathVertice);
                 meshData.AddVertice(rightPathVertice);
             }
+
             return meshData;
         }
-
-        public MeshData PopulateNodeMesh(MeshData meshData, PathObject connectedPath, NodeObject node)
+        private MeshData PopulateNodeMesh(MeshData meshData, PathObject connectedPath, NodeObject node)
         {
             if (!node.HasIntersection)
-            {
                 return PopulateNodeWithoutIntersection(meshData, connectedPath, node);
-            }
 
             List<PathObject> adjacentPaths = node.GetAdjacentPathsTo(connectedPath).Values.ToList();
             if (adjacentPaths.Count == 1)
-            {
                 return PopulateNodeWithSingleIntersection(meshData, connectedPath, adjacentPaths.First(), node);
-            }
 
             return PopulateNodeWithDoubleIntersection(meshData, connectedPath, adjacentPaths, node);
         }
-        public MeshData PopulateNodeWithoutIntersection(MeshData meshData, PathObject connectedPath, NodeObject node)
+        private MeshData PopulateNodeWithoutIntersection(MeshData meshData, PathObject connectedPath, NodeObject node)
         {
             MeshEdje pathCenter;
             MeshEdje pathRight;
@@ -186,7 +183,7 @@ namespace Path.Entities.SO
             }
             return meshData;
         }
-        public MeshData PopulateNodeWithSingleIntersection(
+        private MeshData PopulateNodeWithSingleIntersection(
             MeshData meshData,
             PathObject connectedPath,
             PathObject adjacentPath,
@@ -263,7 +260,7 @@ namespace Path.Entities.SO
             return meshData;
         }
 
-        public MeshData PopulateNodeWithDoubleIntersection(
+        private MeshData PopulateNodeWithDoubleIntersection(
             MeshData meshData,
             PathObject connectedPath,
             List<PathObject> adjacentPaths,
@@ -345,7 +342,7 @@ namespace Path.Entities.SO
 
             return meshData;
         }
-        public MeshData PopulateNodeMeshDataWithIntersection(
+        private MeshData PopulateNodeMeshDataWithIntersection(
             MeshData meshData,
             Vector3 startLeft,
             Vector3 endLeft,

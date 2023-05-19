@@ -9,6 +9,6 @@ namespace Path
         public void PlacePath(NodeObject startNode, NodeObject endNode, Vector3 controlPosition);
         public void BuildPath();
         public void UpdatePath();
-        public void RemovePath(bool keepNodes);
+        public void RemovePath();
     }
 }

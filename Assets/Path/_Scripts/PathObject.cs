@@ -5,6 +5,7 @@ using Path.Utilities;
 using Path.Entities.Pedestrian;
 using Path.Entities.SO;
 using Paths.MeshHandler;
+using Rafael.Utils;
 
 namespace Path.Entities{
     [RequireComponent(typeof(MeshFilter))]
@@ -12,7 +13,6 @@ namespace Path.Entities{
     [RequireComponent(typeof(MeshCollider))]
     public class PathObject : MonoBehaviour, IPath {
 
-        public EventHandler OnPathPlaced;
         public EventHandler OnPathBuilt;
         public EventHandler OnPathRemoved;
         public EventHandler OnPathUpdated;
@@ -42,7 +42,7 @@ namespace Path.Entities{
 
         private void Update() {
             if (PathManager.Instance.updatePaths) {
-                controlNodeObject.transform.position = (startNode.Position + endNode.Position) / 2;
+                // controlNodeObject.transform.position = (startNode.Position + endNode.Position) / 2;
                 UpdateMesh();
             }
         }
@@ -54,30 +54,12 @@ namespace Path.Entities{
         public NodeObject StartNode => startNode;
         public NodeObject EndNode => endNode;
 
-        public void Init(NodeObject startNode, NodeObject endNode, Vector3 controlPosition)
-        {
-            this.startNode = startNode;
-            this.endNode = endNode;
-
-            controlNodeObject = PathUtilities.CreateControlNode(pathSO, controlPosition);
-            controlNodeObject.transform.parent = transform;
-
-            this.startNode.AddPath(this);
-            this.endNode.AddPath(this);
-
-            startNode.Init(this);
-            endNode.Init(this);
-
-            ConnectPathNodes();
-
-            OnPathPlaced?.Invoke(this, EventArgs.Empty);
-        }
 
         public void SetMesh()
         {
             Mesh pathMesh = pathSO.CreatePathMesh(this);
-            Mesh startNodeMesh = pathSO.CreateNodeMesh(this.StartNode);
-            Mesh endNodeMesh = pathSO.CreateNodeMesh(this.EndNode);
+            Mesh startNodeMesh = pathSO.CreateNodeMesh(startNode);
+            Mesh endNodeMesh = pathSO.CreateNodeMesh(endNode);
 
             SetPathMesh(pathMesh);
             startNode.SetMesh(startNodeMesh);
@@ -131,7 +113,27 @@ namespace Path.Entities{
         # region CRUD
         public void PlacePath(NodeObject startNode, NodeObject endNode, Vector3 controlPosition)
         {
-            throw new NotImplementedException();
+            this.startNode = startNode;
+            this.endNode = endNode;
+
+            controlNodeObject = RafaelUtils.CreateSphere(controlPosition, "Control Node", transform, 1f);
+
+            this.startNode.AddPath(this);
+            this.endNode.AddPath(this);
+
+            startNode.Init(this);
+            endNode.Init(this);
+
+            ConnectPathNodes();
+            SetMesh();
+            foreach (PathObject connectedPath in startNode.GetAdjacentPathsTo(this).Values)
+            {
+                connectedPath.UpdateMesh();
+            }
+            foreach (PathObject connectedPath in endNode.GetAdjacentPathsTo(this).Values)
+            {
+                connectedPath.UpdateMesh();
+            }
         }
 
         public void BuildPath()
@@ -144,18 +146,12 @@ namespace Path.Entities{
             throw new NotImplementedException();
         }
 
-        public void RemovePath(bool keepNodes)
+        public void RemovePath()
         {
-            startNode.RemovePath(this, keepNodes);
-            endNode.RemovePath(this, keepNodes);
-
             OnPathRemoved?.Invoke(this, EventArgs.Empty);
-
             OnPathRemoved = null;
-            OnPathPlaced = null;
             OnPathBuilt = null;
             OnPathUpdated = null;
-
             Destroy(gameObject);
         }
         #endregion

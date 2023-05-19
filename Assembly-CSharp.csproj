@@ -59,38 +59,37 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Path\Pedestrian\_ScriptableObjects\_Scripts\PedestrianPathSO.cs" />
-    <Compile Include="Assets\Scripts\Meshes\PathTempMeshBuilder.cs" />
     <Compile Include="Assets\Scripts\InputSystem\GameInputActions.cs" />
+    <Compile Include="Assets\Path\_AI\AIDirector.cs" />
     <Compile Include="Assets\Scripts\GameManager\GameManager.cs" />
     <Compile Include="Assets\Path\_Scripts\NodeObject.cs" />
     <Compile Include="Assets\Path\PlacementSystem\States\BuildingStraightRoad.cs" />
-    <Compile Include="Assets\Scripts\Meshes\MeshUtilities.cs" />
     <Compile Include="Assets\Path\PlacementSystem\States\BuildingCurvedRoad.cs" />
     <Compile Include="Assets\Path\_ScriptableObjects\_Scripts\PathSO.cs" />
     <Compile Include="Assets\Scripts\Ground.cs" />
     <Compile Include="Assets\Scripts\RafaelUtils.cs" />
     <Compile Include="Assets\Scripts\Bezier.cs" />
+    <Compile Include="Assets\Path\Mesh\_Scripts\MeshData.cs" />
     <Compile Include="Assets\Path\PlacementSystem\Interfaces\IBuildingState.cs" />
+    <Compile Include="Assets\Path\_Scripts\PathUtilities.cs" />
     <Compile Include="Assets\Path\Pedestrian\_Scripts\PedestrianPathNode.cs" />
+    <Compile Include="Assets\Path\_AI\AIDirectorEditor.cs" />
+    <Compile Include="Assets\Path\PlacementSystem\PathPreview\PreviewRoadMeshData.cs" />
     <Compile Include="Assets\Path\PlacementSystem\States\BuildingFreeRoad.cs" />
     <Compile Include="Assets\Path\_Interfaces\IPath.cs" />
-    <Compile Include="Assets\Scripts\Roads\PathUtilities.cs" />
     <Compile Include="Assets\Path\Mesh\_Scripts\MeshEdje.cs" />
-    <Compile Include="Assets\Scripts\Meshes\PreviewRoadMeshData.cs" />
     <Compile Include="Assets\Path\_Scripts\PathManager.cs" />
     <Compile Include="Assets\Path\PlacementSystem\PathPreviewSystem.cs" />
     <Compile Include="Assets\Scripts\TestVectorScript.cs" />
-    <Compile Include="Assets\Scripts\Roads\AIDirector.cs" />
     <Compile Include="Assets\Path\_Scripts\PathObject.cs" />
     <Compile Include="Assets\Path\_Scripts\PathFinding.cs" />
     <Compile Include="Assets\Scripts\UI\UIController.cs" />
     <Compile Include="Assets\Path\PlacementSystem\PathPlacementSystem.cs" />
     <Compile Include="Assets\Path\Pedestrian\_Scripts\PedestrianNode.cs" />
     <Compile Include="Assets\Scripts\InputManagers\InputManager.cs" />
-    <Compile Include="Assets\Scripts\Meshes\MeshData.cs" />
     <Compile Include="Assets\Path\Pedestrian\_Scripts\PedestrianPathFinding.cs" />
+    <Compile Include="Assets\Path\Mesh\_Scripts\MeshUtilities.cs" />
     <Compile Include="Assets\Path\UI\PathUIController.cs" />
-    <Compile Include="Assets\Scripts\Roads\AIDirectorEditor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

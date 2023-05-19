@@ -33,12 +33,8 @@ namespace Path {
             pathObject.OnPathRemoved += PathObject_OnPathRemoved;
             pathObject.OnPathUpdated += PathObject_OnPathUpdated;
             pathObject.OnPathBuilt += PathObject_OnPathBuilt;
-            pathObject.OnPathPlaced += PathObject_OnPathPlaced;
         }
 
-        private void PathObject_OnPathPlaced(object sender, EventArgs e) {
-            throw new NotImplementedException();
-        }
 
         private void PathObject_OnPathBuilt(object sender, EventArgs e) {
             throw new NotImplementedException();
@@ -49,10 +45,9 @@ namespace Path {
         }
 
         private void PathObject_OnPathRemoved(object sender, EventArgs e) {
-            //List<PathObject> connectedPaths = (sender as PathObject).GetAllConnectedPaths();
-            //foreach (PathObject pathObj in connectedPaths) {
-            //    pathObj.UpdateMesh();
-            //}
+            PathObject pathObject = (PathObject)sender;
+            if(!pathObject.StartNode.HasConnectedPaths) RemoveNode(pathObject.StartNode);
+            if (!pathObject.EndNode.HasConnectedPaths) RemoveNode(pathObject.EndNode);
         }
 
         public void AddNode(NodeObject node) {
@@ -71,7 +66,7 @@ namespace Path {
         public NodeObject GetNodeAt(Vector3 position) => placedNodesDict.GetValueOrDefault(position);
         private bool HasNode(NodeObject node) => placedNodesDict.ContainsValue(node);
         public bool HasNode(Vector3 position) => placedNodesDict.ContainsKey(position);
-        public Transform GetPathParent() => pathParentTransform;
+        public Transform PathParentTransform => pathParentTransform;
         public NodeObject GetOrCreateNodeAt(Vector3 position) {
             if (HasNode(position)) {
                 NodeObject existingNode = GetNodeAt(position);

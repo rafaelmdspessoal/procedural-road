@@ -27,11 +27,11 @@ namespace Paths.Preview.MeshHandler
             Vector3 startPosition = startNodePosition + (startNodePosition - controlPosition).normalized * pathWidth / 2;
             Vector3 endPosition = endNodePosition + (endNodePosition - controlPosition).normalized * pathWidth / 2;
 
-            Vector3 startLeft = PathUtilities.GetPathLeftSideVertice(pathWidth, startNodePosition, controlPosition);
-            Vector3 endLeft = PathUtilities.GetPathLeftSideVertice(pathWidth, endNodePosition, controlPosition);
+            Vector3 startLeft = GetPathLeftSideVertice(pathWidth, startNodePosition, controlPosition);
+            Vector3 endLeft = GetPathLeftSideVertice(pathWidth, endNodePosition, controlPosition);
 
-            Vector3 startRight = PathUtilities.GetPathRightSideVertice(pathWidth, startNodePosition, controlPosition);
-            Vector3 endRight = PathUtilities.GetPathRightSideVertice(pathWidth, endNodePosition, controlPosition);
+            Vector3 startRight = GetPathRightSideVertice(pathWidth, startNodePosition, controlPosition);
+            Vector3 endRight = GetPathRightSideVertice(pathWidth, endNodePosition, controlPosition);
 
             Vector3 controlLeft;
             Vector3 controlRight;
@@ -109,6 +109,21 @@ namespace Paths.Preview.MeshHandler
                 meshData.AddVertice(endNodePosition);
                 meshData.AddVertice(rightPathVertice);
             }
+        }
+
+        public Vector3 GetPathLeftSideVertice(float pathWidth, Vector3 centerVertice, Vector3 startVertice)
+        {
+            Vector3 verticeDirection = (centerVertice - startVertice).normalized;
+            Vector3 left = new(-verticeDirection.z, verticeDirection.y, verticeDirection.x);
+            Vector3 leftSideVertice = centerVertice + .5f * pathWidth * left;
+            return leftSideVertice;
+        }
+        public Vector3 GetPathRightSideVertice(float pathWidth, Vector3 centerVertice, Vector3 startVertice)
+        {
+            Vector3 verticeDirection = (centerVertice - startVertice).normalized;
+            Vector3 left = new(-verticeDirection.z, verticeDirection.y, verticeDirection.x);
+            Vector3 leftSideVertice = centerVertice - .5f * pathWidth * left;
+            return leftSideVertice;
         }
     }
 }

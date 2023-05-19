@@ -184,28 +184,6 @@ namespace Path.PlacementSystem {
             throw new NotImplementedException();
         }
 
-        private bool CheckNodeSize(float angle,
-            int width,
-            Vector3 startPosition,
-            Vector3 endPosition,
-            Vector3 controlPosition)
-        {
-            angle *= Mathf.Deg2Rad;
-
-            float offset = (1 + Mathf.Cos(angle)) * (width + 1.2f) / Mathf.Sin(angle);
-            float lengh = Bezier.GetLengh(startPosition, endPosition, controlPosition) / 2;
-
-            if (lengh <= offset)
-                return false;
-
-            return true;
-        }
-
-        /// <summary>
-        /// Handles first nodePrefab placement
-        /// </summary>
-        /// <param name="pathDirection">The direction of reference to check the firstAngle</param>
-        /// <returns></returns>
         public bool CheckPathAngleInRange(Vector3 pathDirection) {
             if (startNode == null && pathsToSplit.Count <= 0) 
                 return true;
@@ -213,7 +191,6 @@ namespace Path.PlacementSystem {
             float angle;
             float firstAngle; 
             float secondAngle;
-            bool angleInRange = true;
 
             foreach (PathObject pathObject in startNode.ConnectedPaths)
             {
@@ -222,16 +199,7 @@ namespace Path.PlacementSystem {
                 angle = Mathf.Clamp(angle, 0, 90);
 
                 if (angle < minAllowedAngle)
-                    return false;
-
-                angleInRange = CheckNodeSize(
-                    angle,
-                    pathObject.Width / 2,
-                    pathObject.StartNode.Position,
-                    pathObject.EndNode.Position,
-                    pathObject.ControlPosition);
-
-                if (!angleInRange) return angleInRange;
+                    return false;;
             }
 
             if (pathsToSplit.Count > 0) {
@@ -246,64 +214,26 @@ namespace Path.PlacementSystem {
 
                 if (firstAngle < minAllowedAngle || secondAngle < minAllowedAngle) 
                     return false;
-
-                int width = pathObject.Width / 2;
-
-                angleInRange = CheckNodeSize(
-                    firstAngle,
-                    width,
-                    pathObject.StartNode.Position,
-                    hitPosition, 
-                    pathObject.ControlPosition);
-
-                if (!angleInRange) return angleInRange;
-
-                angleInRange = CheckNodeSize(
-                    secondAngle,
-                    width,
-                    pathObject.EndNode.Position,
-                    hitPosition,
-                    pathObject.ControlPosition);
-
-                if (!angleInRange) return angleInRange;
             }
 
-            return angleInRange;
+            return true;
         }
 
-        /// <summary>
-        /// Handle cases for second nodePrefab placement
-        /// </summary>
-        /// <param name="pathDirection">The direction of the segment being placed</param>
-        /// <param name="hitObj">The object we hit (grond, nodePrefab or path)</param>
-        /// <returns></returns>
-        public bool CheckPathAngleInRange(Vector3 pathDirection, GameObject hitObj, Vector3 hitPosition) {
-            bool angleInRange = true
-                ;
-            if (hitObj.TryGetComponent(out NodeObject node)) {
-                foreach (PathObject pathObj in node.ConnectedPaths) {
-                    // TODO If the Path is curved the direction will depend on which half of
-                    // the path we hit. This must be accounteable.
+        public bool CheckPathAngleInRange(Vector3 pathDirection, GameObject hitObj, Vector3 hitPosition) 
+        {            
+            if (hitObj.TryGetComponent(out NodeObject node)) 
+            {
+                foreach (PathObject pathObj in node.ConnectedPaths) 
+                {
                     Vector3 nextPathDirection = pathObj.ControlPosition - node.Position;
                     float angle = Vector3.Angle(nextPathDirection, pathDirection);
                     if (angle < minAllowedAngle) 
                         return false;
-
-                    angleInRange = CheckNodeSize(
-                        angle,
-                        pathObj.Width / 2, 
-                        pathObj.StartNode.Position, 
-                        pathObj.EndNode.Position,
-                        pathObj.ControlPosition);
-
-                    if (!angleInRange) return angleInRange;
                 }
             }                
 
-            if (hitObj.TryGetComponent(out PathObject pathObject)) {
-                // We are endind our path on top of another
-                // In case of the path is curved we must get the tangent at hitPosition to
-                // calculate the correct firstAngle.
+            if (hitObj.TryGetComponent(out PathObject pathObject)) 
+            {
                 Vector3 nextPathDirection = Bezier.GetTangentAt(pathObject, hitPosition, out _, out _);
 
                 float firstAngle = Vector3.Angle(nextPathDirection, pathDirection);
@@ -313,29 +243,9 @@ namespace Path.PlacementSystem {
 
                 if (firstAngle < minAllowedAngle || secondAngle < minAllowedAngle)
                     return false;
-
-                int width = pathObject.Width / 2;
-
-                angleInRange = CheckNodeSize(
-                    firstAngle,
-                    width,
-                    pathObject.StartNode.Position,
-                    hitPosition,
-                    pathObject.ControlPosition);
-
-                if (!angleInRange) return angleInRange;
-
-                angleInRange = CheckNodeSize(
-                    secondAngle,
-                    width,
-                    pathObject.EndNode.Position,
-                    hitPosition,
-                    pathObject.ControlPosition);
-
-                if (!angleInRange) return angleInRange;
             }
 
-            return angleInRange;
+            return true;
         }
 
         private void UIController_OnRemovingObjects() {
@@ -400,7 +310,7 @@ namespace Path.PlacementSystem {
         public bool IsBuildingControlNode() => nodeBuildingState == NodeBuildingState.ControlNode;
         public bool IsBuildingEndNode() => nodeBuildingState == NodeBuildingState.EndNode;
         
-       public NodeObject StartNode { get { return startNode; } }
+        public NodeObject StartNode { get { return startNode; } }
         public Vector3 StartPosition { 
             get { return startNode.Position; } 
             set { startNode = pathManager.GetOrCreateNodeAt(value); } 
@@ -422,17 +332,21 @@ namespace Path.PlacementSystem {
             canBuildPath = true;
             buildingState?.StopPreviewDisplay();
         }
-        private void ResetPathPositions() {
-            if (startNode != null && !startNode.HasConnectedPaths) {
+        private void ResetPathPositions()
+        {
+            if (startNode != null && !startNode.HasConnectedPaths)
+            {
                 pathManager.RemoveNode(startNode);
+                startNode = null;
             }
-            if (endNode != null && !endNode.HasConnectedPaths) {
+            if (endNode != null && !endNode.HasConnectedPaths)
+            {
                 pathManager.RemoveNode(endNode);
+                endNode = null;
             }
             controlPosition = Vector3.negativeInfinity;
-            startNode = null;
-            endNode = null;
         }
+
         private void InputManager_OnCancel() {
             nodeBuildingState = NodeBuildingState.StartNode;
             ClearAffectedPath();
@@ -440,7 +354,7 @@ namespace Path.PlacementSystem {
         }
 
         public void PlacePath() {
-            PathObject placedPath = CreatePathObject(startNode, endNode, controlPosition, pathSO);
+            PathObject placedPath = pathSO.CreatePathObject(startNode, endNode, controlPosition, pathManager.PathParentTransform);
             NodeObject cachedEndNode = endNode;
             ResetPathPositions();
             startNode = cachedEndNode;
@@ -448,50 +362,33 @@ namespace Path.PlacementSystem {
             OnPathPlaced?.Invoke(this, new OnPathPlacedEventArgs { pathObject = placedPath });
         }
 
-        private PathObject CreatePathObject(NodeObject startNode, NodeObject endNode, Vector3 controlPosition, PathSO pathObjectSO) {
-            Vector3 pathPosition = (startNode.gameObject.transform.position + endNode.gameObject.transform.position) / 2;
-            GameObject pathGameObject = Instantiate(
-                pathObjectSO.pathObjectPrefab, 
-                pathPosition, 
-                Quaternion.identity, 
-                pathManager.GetPathParent());
-
-            PathObject pathObject = pathGameObject.GetComponent<PathObject>();
-            
-
-            pathObject.Init(startNode, endNode, controlPosition);
-            affectedPathsList.Add(pathObject);
-            affectedPathsList.AddRange(pathObject.GetAllConnectedPaths());
-            return pathObject;
-        }
-
         public void SplitPath() {
             foreach (Vector3 positionToSplit in pathsToSplit.Keys) {
                 PathObject pathToSplit = pathsToSplit[positionToSplit];
-                NodeObject startNode = pathToSplit.StartNode;
-                NodeObject centerNode = pathManager.GetNodeAt(positionToSplit);
-                NodeObject endNode = pathToSplit.EndNode;
-
+                NodeObject intersectionNode = pathManager.GetNodeAt(positionToSplit);
                 Bezier.GetTangentAt(
                     pathToSplit,
-                    centerNode.Position,
-                    out Vector3 newStartControlPointPosition,
-                    out Vector3 newEndControlPointPosition);
+                    intersectionNode.Position,
+                    out Vector3 startControlPosition,
+                    out Vector3 endControlPosition);
 
-                pathToSplit.RemovePath(true);
-                CreatePathObject(startNode, centerNode, newStartControlPointPosition, pathToSplit.PathSO);
-                CreatePathObject(centerNode, endNode, newEndControlPointPosition, pathToSplit.PathSO);
-            }
-            ClearAffectedPath();
-        }
+                Vector3 startNodePosition = pathToSplit.StartNode.Position;
+                Vector3 endNodePosition = pathToSplit.EndNode.Position;
 
-        public void SetPathMesh()
-        {
-            foreach (PathObject pathObject in affectedPathsList)
-            {
-                pathObject.SetMesh();
+                pathToSplit.RemovePath();
+
+                NodeObject startNode = pathManager.GetOrCreateNodeAt(startNodePosition);
+                NodeObject endNode = pathManager.GetOrCreateNodeAt(endNodePosition);
+
+                pathToSplit.PathSO.SplitPathObject(
+                    startNode,
+                    endNode,
+                    intersectionNode,
+                    startControlPosition,
+                    endControlPosition,
+                    pathManager.PathParentTransform);
             }
-            affectedPathsList.Clear();
+            pathsToSplit.Clear();
         }
 
         private void ClearAffectedPath() {

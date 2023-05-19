@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: TestPath
   m_EditorClassIdentifier: 
   pathObjectPrefab: {fileID: 7375371456769866339, guid: 79e1b0f70d00c1343a0657a03699ae19, type: 3}
-  material: {fileID: 2100000, guid: 9ddee2461ff997243a95c105961be63b, type: 2}
+  material: {fileID: 2100000, guid: 97eea5cdb1de9445fb7f71ee7ce5083c, type: 2}
   width: 4
   resolution: 15
   textureTiling: 10
   minIntersectionAngle: 30
+  pathParentObject: {fileID: 0}

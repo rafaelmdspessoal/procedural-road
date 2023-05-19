@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: TestPedestrianPath
   m_EditorClassIdentifier: 
   pathObjectPrefab: {fileID: 2335641471727730, guid: cbe3769974b95c44e907036f6ab72d05, type: 3}
-  material: {fileID: 2100000, guid: 77fe2bf290d8853459c2a74367a05e2c, type: 2}
-  width: 2
-  resolution: 10
-  textureTiling: 1
+  material: {fileID: 2100000, guid: 97eea5cdb1de9445fb7f71ee7ce5083c, type: 2}
+  width: 4
+  resolution: 15
+  textureTiling: 25
   minIntersectionAngle: 40
