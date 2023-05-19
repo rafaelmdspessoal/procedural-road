@@ -61,7 +61,6 @@
     <Compile Include="Assets\Path\Pedestrian\_ScriptableObjects\_Scripts\PedestrianPathSO.cs" />
     <Compile Include="Assets\Scripts\Meshes\PathTempMeshBuilder.cs" />
     <Compile Include="Assets\Scripts\InputSystem\GameInputActions.cs" />
-    <Compile Include="Assets\Scripts\Meshes\PathMeshBuilder.cs" />
     <Compile Include="Assets\Scripts\GameManager\GameManager.cs" />
     <Compile Include="Assets\Path\_Scripts\NodeObject.cs" />
     <Compile Include="Assets\Path\PlacementSystem\States\BuildingStraightRoad.cs" />
@@ -69,16 +68,13 @@
     <Compile Include="Assets\Path\PlacementSystem\States\BuildingCurvedRoad.cs" />
     <Compile Include="Assets\Path\_ScriptableObjects\_Scripts\PathSO.cs" />
     <Compile Include="Assets\Scripts\Ground.cs" />
-    <Compile Include="Assets\Scripts\Meshes\NodeMeshData.cs" />
     <Compile Include="Assets\Scripts\RafaelUtils.cs" />
-    <Compile Include="Assets\Scripts\Meshes\PathMeshData.cs" />
     <Compile Include="Assets\Scripts\Bezier.cs" />
     <Compile Include="Assets\Path\PlacementSystem\Interfaces\IBuildingState.cs" />
     <Compile Include="Assets\Path\Pedestrian\_Scripts\PedestrianPathNode.cs" />
     <Compile Include="Assets\Path\PlacementSystem\States\BuildingFreeRoad.cs" />
     <Compile Include="Assets\Path\_Interfaces\IPath.cs" />
     <Compile Include="Assets\Scripts\Roads\PathUtilities.cs" />
-    <Compile Include="Assets\Scripts\Meshes\NodeMeshBuilder .cs" />
     <Compile Include="Assets\Path\Mesh\_Scripts\MeshEdje.cs" />
     <Compile Include="Assets\Scripts\Meshes\PreviewRoadMeshData.cs" />
     <Compile Include="Assets\Path\_Scripts\PathManager.cs" />

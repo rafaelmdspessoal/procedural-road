@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-using Nodes.MeshHandler;
 using System;
 using Path.Entities.Pedestrian;
 using Path.Entities.Meshes;
@@ -52,8 +51,10 @@ namespace Path.Entities
                     UpdatePathPostions(connectedPath);
                     ConnectPathNodes();
                 }
+                pathObject.OnPathRemoved += PathObject_OnPathRemoved;
             }
         }
+
         public void ConnectPathNodes()
         {
             List<PedestrianPathNode> pathNodesList = GetAllPathNodes();
@@ -214,6 +215,34 @@ namespace Path.Entities
         {
             return pathObject.StartNode.Equals(this);
         }
+
+
+        private void PathObject_OnPathRemoved(object sender, EventArgs e)
+        {
+            PathObject pathObject = (PathObject)sender;
+            if (connectedPathList.Contains(pathObject))
+            {
+                connectedPathList.Remove(pathObject);
+                RemoveMeshEdjesFor(pathObject);
+                RemovePedestrianPathNodesFor(pathObject);
+            }
+            foreach (PathObject pathToUpdate in GetAdjacentPathsTo(pathObject).Values)
+            {
+                UpdateEdjePositions(pathToUpdate);
+                UpdatePathPostions(pathToUpdate);
+                pathToUpdate.UpdateMesh();
+            }
+            if (HasConnectedPaths)
+            {
+                ConnectPathNodes();
+                Mesh nodeMesh = pathObject.PathSO.CreateNodeMesh(this);
+                SetMesh(nodeMesh);
+            }
+            else
+            {
+                Destroy(this.gameObject);
+            }
+        }
         public void UpdateEdjePositions(PathObject pathObject)
         {
             float meshStartOffset = GetNodeSizeFor(pathObject);
@@ -302,9 +331,9 @@ namespace Path.Entities
             startPathNode.transform.rotation = Quaternion.LookRotation(center.Direction);
             endPathNode.transform.rotation = Quaternion.LookRotation(center.Direction);
         }
-        public void SetMesh()
+        public void SetMesh(Mesh mesh)
         {
-            Mesh mesh = NodeMeshBuilder.CreateNodeMesh(this);
+            // Mesh mesh = NodeMeshBuilder.CreateNodeMesh(this);
             meshFilter.mesh = mesh;
             meshCollider.sharedMesh = mesh;
             // Material tiling will depend on the path lengh, so let's have
@@ -340,12 +369,12 @@ namespace Path.Entities
                 if (connectedPathList.Count <= 0 && !keepNodes)
                 {
                     PathManager.Instance.RemoveNode(this);
+                    pathObject.OnPathRemoved -= PathObject_OnPathRemoved;
                     Destroy(gameObject);
                 }
 
                 if (HasConnectedPaths)
                 {
-                    SetMesh();
                     ConnectPathNodes();
                 }
             }

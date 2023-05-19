@@ -1305,8 +1305,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8255ad96f39159f43a4efe4046dd2672, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  temporaryRoadMaterial: {fileID: 2100000, guid: 0f5068376c299d948b4f19a9b997998a, type: 2}
-  cantBuildRoadMaterial: {fileID: 2100000, guid: 69bffef08a90db44d9c1bff4c9cfcb6f, type: 2}
+  temporaryPathMaterial: {fileID: 0}
+  cantBuildPathMaterial: {fileID: 0}
 --- !u!23 &800580843
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1975,15 +1975,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d7fdb6f435283b4dacbe4b99e32b474, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  straightRoadButton: {fileID: 374410297}
-  curveRoadButton: {fileID: 1919570089}
-  freeRoadButton: {fileID: 1673245570}
+  straightPathButton: {fileID: 374410297}
+  curvePathButton: {fileID: 1919570089}
+  freePathButton: {fileID: 1673245570}
   gridSnapButton: {fileID: 1535615087}
   angleSnapButton: {fileID: 233288616}
-  roadUpButton: {fileID: 229447821}
-  roadDownButton: {fileID: 67518924}
+  pathUpButton: {fileID: 229447821}
+  pathDownButton: {fileID: 67518924}
   angleSnapText: {fileID: 212805443}
-  roadObjectSO: {fileID: 11400000, guid: a58c88c30dc3c174f8fe11c3cd2a938c, type: 2}
+  pathObjectSO: {fileID: 11400000, guid: 874652bef83c2bd459985e2e9a000b08, type: 2}
 --- !u!114 &1138966657
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2787,8 +2787,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e7add2883cfe5b47bcb4cae4d8206e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  updateRoads: 0
-  roadParentTransform: {fileID: 228958930}
+  updatePaths: 0
+  pathParentTransform: {fileID: 0}
   nodeParentTransform: {fileID: 1882003443}
   nodePrefab: {fileID: 8225037638980379295, guid: bf08ccc28c080f44eae6896c0a2a8c9f, type: 3}
 --- !u!114 &1524344565
@@ -3157,8 +3157,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d69893124ae2e4b4fb2fdb799ed6b05d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  buildRoadsButton: {fileID: 545349708}
-  removeRoadsButton: {fileID: 196410636}
+  buildPathButton: {fileID: 545349708}
+  removePathButton: {fileID: 196410636}
 --- !u!1 &1574513870
 GameObject:
   m_ObjectHideFlags: 0
@@ -4033,64 +4033,3 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1919570087}
   m_CullTransparentMesh: 1
---- !u!1001 &5846754461028483797
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 1190800966416820790, guid: bf08ccc28c080f44eae6896c0a2a8c9f, type: 3}
-      propertyPath: m_RootOrder
-      value: 9
-      objectReference: {fileID: 0}
-    - target: {fileID: 1190800966416820790, guid: bf08ccc28c080f44eae6896c0a2a8c9f, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -16.105442
-      objectReference: {fileID: 0}
-    - target: {fileID: 1190800966416820790, guid: bf08ccc28c080f44eae6896c0a2a8c9f, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -0.99135935
-      objectReference: {fileID: 0}
-    - target: {fileID: 1190800966416820790, guid: bf08ccc28c080f44eae6896c0a2a8c9f, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -6.4738584
-      objectReference: {fileID: 0}
-    - target: {fileID: 1190800966416820790, guid: bf08ccc28c080f44eae6896c0a2a8c9f, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1190800966416820790, guid: bf08ccc28c080f44eae6896c0a2a8c9f, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1190800966416820790, guid: bf08ccc28c080f44eae6896c0a2a8c9f, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1190800966416820790, guid: bf08ccc28c080f44eae6896c0a2a8c9f, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1190800966416820790, guid: bf08ccc28c080f44eae6896c0a2a8c9f, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1190800966416820790, guid: bf08ccc28c080f44eae6896c0a2a8c9f, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1190800966416820790, guid: bf08ccc28c080f44eae6896c0a2a8c9f, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8225037638980379295, guid: bf08ccc28c080f44eae6896c0a2a8c9f, type: 3}
-      propertyPath: m_Name
-      value: NodeObjectPrefab
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: bf08ccc28c080f44eae6896c0a2a8c9f, type: 3}

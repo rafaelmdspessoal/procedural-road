@@ -75,9 +75,13 @@ namespace Path.Entities{
 
         public void SetMesh()
         {
-            SetPathMesh();
-            startNode.SetMesh();
-            endNode.SetMesh();
+            Mesh pathMesh = pathSO.CreatePathMesh(this);
+            Mesh startNodeMesh = pathSO.CreateNodeMesh(this.StartNode);
+            Mesh endNodeMesh = pathSO.CreateNodeMesh(this.EndNode);
+
+            SetPathMesh(pathMesh);
+            startNode.SetMesh(startNodeMesh);
+            endNode.SetMesh(endNodeMesh);
         }
 
         private void ConnectPathNodes()
@@ -92,8 +96,7 @@ namespace Path.Entities{
             endNodeStartPath.AddPathNode(startNodeEndPath);
         }
 
-        public void SetPathMesh() {
-            Mesh mesh = PathMeshBuilder.CreatePathMesh(this);
+        public void SetPathMesh(Mesh mesh) {
             meshFilter.mesh = mesh;
             meshCollider.sharedMesh = mesh;
             // Material tiling will depend on the path lengh, so let's have
@@ -109,7 +112,7 @@ namespace Path.Entities{
 
         public void UpdateMesh()
         {
-            SetPathMesh();
+            SetMesh();
         }
 
         public List<PathObject> GetAllConnectedPaths() {

@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEditor;
-using Nodes;
 using Path.Entities;
 
 [CustomEditor(typeof(AIDirector))]
