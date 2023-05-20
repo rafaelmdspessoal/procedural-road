@@ -45,9 +45,9 @@ namespace Path {
         }
 
         private void PathObject_OnPathRemoved(object sender, EventArgs e) {
-            PathObject pathObject = (PathObject)sender;
-            if(!pathObject.StartNode.HasConnectedPaths) RemoveNode(pathObject.StartNode);
-            if (!pathObject.EndNode.HasConnectedPaths) RemoveNode(pathObject.EndNode);
+            //PathObject pathObject = (PathObject)sender;
+            //if (pathObject.StartNode != null && !pathObject.StartNode.HasConnectedPaths) RemoveNode(pathObject.StartNode);
+            //if (pathObject.EndNode != null && !pathObject.EndNode.HasConnectedPaths) RemoveNode(pathObject.EndNode);
         }
 
         public void AddNode(NodeObject node) {

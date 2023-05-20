@@ -68,6 +68,8 @@ public class InputManager : MonoBehaviour
 		if (EventSystem.current.IsPointerOverGameObject()) return;
 
 		if (PathUtilities.TryRaycastObject(out Vector3 hitPosition, out GameObject hitObject, splitPath: true)) {
+			print(hitPosition);
+			print(hitObject.transform.name);
             OnNodePlaced?.Invoke(this, new OnObjectHitedEventArgs {
 				position = hitPosition,
 				obj = hitObject

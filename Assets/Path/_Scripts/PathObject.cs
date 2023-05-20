@@ -121,9 +121,6 @@ namespace Path.Entities{
             this.startNode.AddPath(this);
             this.endNode.AddPath(this);
 
-            startNode.Init(this);
-            endNode.Init(this);
-
             ConnectPathNodes();
             SetMesh();
             foreach (PathObject connectedPath in startNode.GetAdjacentPathsTo(this).Values)

@@ -32,12 +32,6 @@ namespace Path.Entities
             meshCollider = GetComponent<MeshCollider>();
         }
 
-        public void Init(PathObject pathObject)
-        {
-            UpdateEdjePositions(pathObject);
-            UpdatePathPostions(pathObject);
-            ConnectPathNodes();
-        }
         public void AddPath(PathObject pathObject)
         {
             if (!connectedPathList.Contains(pathObject))
@@ -51,6 +45,9 @@ namespace Path.Entities
                     UpdatePathPostions(connectedPath);
                     ConnectPathNodes();
                 }
+                UpdateEdjePositions(pathObject);
+                UpdatePathPostions(pathObject);
+                ConnectPathNodes();
                 pathObject.OnPathRemoved += PathObject_OnPathRemoved;
             }
         }
@@ -243,7 +240,7 @@ namespace Path.Entities
             }
             else
             {
-                Destroy(gameObject);
+                PathManager.Instance.RemoveNode(this);
             }
         }
         public void UpdateEdjePositions(PathObject pathObject)

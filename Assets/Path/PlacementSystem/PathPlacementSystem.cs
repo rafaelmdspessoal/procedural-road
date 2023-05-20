@@ -39,7 +39,6 @@ namespace Path.PlacementSystem {
         }
 
         private readonly Dictionary<Vector3, PathObject> pathsToSplit = new();
-        private List<PathObject> affectedPathsList = new();
 
         private PathUIController pathUIController;
         private InputManager inputManager;
@@ -336,14 +335,18 @@ namespace Path.PlacementSystem {
         {
             if (startNode != null && !startNode.HasConnectedPaths)
             {
-                pathManager.RemoveNode(startNode);
-                startNode = null;
+                // pathManager.RemoveNode(startNode);
+                Destroy(startNode.gameObject);
             }
+
             if (endNode != null && !endNode.HasConnectedPaths)
             {
-                pathManager.RemoveNode(endNode);
-                endNode = null;
+                // pathManager.RemoveNode(endNode);
+                Destroy(endNode.gameObject);
             }
+
+            endNode = null;
+            startNode = null;
             controlPosition = Vector3.negativeInfinity;
         }
 

@@ -4,6 +4,7 @@ using World;
 using Path.Entities;
 using Path.Entities.SO;
 using Path.PlacementSystem;
+using System.Drawing.Printing;
 
 namespace Path.Utilities {
 
@@ -33,32 +34,33 @@ namespace Path.Utilities {
         }
 
         public static Vector3 GetHitPositionWithSnapping(Vector3 hitPosition, NodeObject startNode, int angleSnap) {
+            if (!startNode.HasConnectedPaths) return hitPosition;
+
             Vector3 currentDirection = hitPosition - startNode.Position;
-            Vector3 targetPosition;
-            Vector3 baseDirection = Vector3.forward;
-            Vector3 projection = SnapTo(currentDirection, baseDirection, angleSnap);
+            Vector3 projection = Vector3.zero;
+
             foreach (PathObject pathObject in startNode.ConnectedPaths) {
-                baseDirection = (startNode.Position - pathObject.ControlPosition).normalized;
+                Vector3 baseDirection = (startNode.Position - pathObject.ControlPosition).normalized;
                 projection =  SnapTo(currentDirection, baseDirection, angleSnap);
             }
 
-            targetPosition = projection + startNode.Position;
+            Vector3 targetPosition = projection + startNode.Position;
             return targetPosition;
         }
 
-        private static Vector3 SnapTo(Vector3 v3, Vector3 target, float snapAngle) {
-            float angle = Vector3.Angle(v3, target);
+        private static Vector3 SnapTo(Vector3 current, Vector3 target, float snapAngle) {
+            float angle = Vector3.Angle(current, target);
             if (angle < snapAngle / 2.0f)          // Cannot do cross product 
-                return target * v3.magnitude;  //   with angles 0 & 180
+                return target * current.magnitude;  //   with angles 0 & 180
             if (angle > 180.0f - snapAngle / 2.0f)
-                return -1 * v3.magnitude * target;
+                return -1 * current.magnitude * target;
 
             float t = Mathf.Round(angle / snapAngle);
             float deltaAngle = (t * snapAngle) - angle;
 
-            Vector3 axis = Vector3.Cross(target, v3);
+            Vector3 axis = Vector3.Cross(target, current);
             Quaternion q = Quaternion.AngleAxis(deltaAngle, axis);
-            return q * v3;
+            return q * current;
         }
 
         public static Vector3 GetProjectedPosition(Vector3 positionToProject, Vector3 directionToProject, Vector3 intersectionPosition) 
@@ -110,7 +112,7 @@ namespace Path.Utilities {
                         return true;
                     }
                 }
-                if (hitObject.TryGetComponent(out Ground ground))
+                if (hitObject.TryGetComponent(out Ground _))
                     hitPosition = new Vector3(hitPosition.x, hitPosition.y + 0.1f, hitPosition.z);
                 
                 return true;
