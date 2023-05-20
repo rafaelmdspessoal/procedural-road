@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Path.Entities.SO
 {
-    public class PathSO : ScriptableObject
+    public abstract class PathSO : ScriptableObject
     {
         public GameObject pathObjectPrefab;
         public Material material;
@@ -93,7 +93,6 @@ namespace Path.Entities.SO
             MeshEdje endRight = endNode.GetMeshEdjeFor(pathObject, MeshEdje.EdjePosition.EndRight);
 
             Vector3 pathPosition = pathObject.transform.position;
-            pathPosition.y = 0;
 
             Vector3 startCenterPos = startCenter.Position - pathPosition;
             Vector3 startLeftPos = startLeft.Position - pathPosition;
@@ -162,9 +161,10 @@ namespace Path.Entities.SO
                 pathRight = node.GetMeshEdjeFor(connectedPath, MeshEdje.EdjePosition.EndRight);
             }
 
-            Vector3 pathCenterPos = pathCenter.Position - node.Position;
-            Vector3 pathLeftPos = pathLeft.Position - node.Position;
-            Vector3 pathRightPos = pathRight.Position - node.Position;
+            Vector3 nodePosition = node.Position;
+            Vector3 pathCenterPos = pathCenter.Position - nodePosition;
+            Vector3 pathLeftPos = pathLeft.Position - nodePosition;
+            Vector3 pathRightPos = pathRight.Position - nodePosition;
 
             Vector3 leftDir = (pathLeftPos - pathCenterPos).normalized;
             Vector3 startPosition = pathCenterPos - pathCenterPos.normalized * width / 2;
@@ -224,13 +224,14 @@ namespace Path.Entities.SO
                 otherPathRight = node.GetMeshEdjeFor(adjacentPath, MeshEdje.EdjePosition.EndRight);
             }
 
-            Vector3 thisPathCenterPos = thisPathCenter.Position - node.Position;
-            Vector3 thisPathLeftPos = thisPathLeft.Position - node.Position;
-            Vector3 thisPathRightPos = thisPathRight.Position - node.Position;
+            Vector3 nodePosition = node.Position;
+            Vector3 thisPathCenterPos = thisPathCenter.Position - nodePosition;
+            Vector3 thisPathLeftPos = thisPathLeft.Position - nodePosition;
+            Vector3 thisPathRightPos = thisPathRight.Position - nodePosition;
 
-            Vector3 otherPathCenterPos = otherPathCenter.Position - node.Position;
-            Vector3 otherPathLeftPos = otherPathLeft.Position - node.Position;
-            Vector3 otherPathRightPos = otherPathRight.Position - node.Position;
+            Vector3 otherPathCenterPos = otherPathCenter.Position - nodePosition;
+            Vector3 otherPathLeftPos = otherPathLeft.Position - nodePosition;
+            Vector3 otherPathRightPos = otherPathRight.Position - nodePosition;
 
             RafaelUtils.LineLineIntersection(out Vector3 controlLeftPos,
                 thisPathRightPos,
@@ -304,11 +305,12 @@ namespace Path.Entities.SO
             else
                 rightPathLeft = node.GetMeshEdjeFor(rightPath, MeshEdje.EdjePosition.EndLeft);
 
-            Vector3 thisPathCenterPos = thisPathCenter.Position - node.Position;
-            Vector3 thisPathLeftPos = thisPathLeft.Position - node.Position;
-            Vector3 thisPathRightPos = thisPathRight.Position - node.Position;
-            Vector3 leftPathRightPos = leftPathRight.Position - node.Position;
-            Vector3 rightPathLeftPos = rightPathLeft.Position - node.Position;
+            Vector3 nodePosition = node.Position;
+            Vector3 thisPathCenterPos = thisPathCenter.Position - nodePosition;
+            Vector3 thisPathLeftPos = thisPathLeft.Position - nodePosition;
+            Vector3 thisPathRightPos = thisPathRight.Position - nodePosition;
+            Vector3 leftPathRightPos = leftPathRight.Position - nodePosition;
+            Vector3 rightPathLeftPos = rightPathLeft.Position - nodePosition;
 
             Vector3 intersectionCenter = -thisPathCenterPos;
 

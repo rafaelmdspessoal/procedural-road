@@ -4,7 +4,8 @@ using Path.PlacementSystem;
 using Path.Preview;
 
 namespace Path.Placement.States {
-    public class BuildingCurvedPath : IBuildingState {
+    public class BuildingCurvedPath : IBuildingState
+    {
 
         private PathPlacementSystem pathPlacementSystem;
         private PathPreviewSystem pathPreviewSystem;
@@ -66,6 +67,13 @@ namespace Path.Placement.States {
         public void StopPreviewDisplay()
         {
             pathPreviewSystem.StopPreview();
+        }
+
+        public bool CanSnapAngle()
+        {
+            if (!pathPlacementSystem.IsBuildingControlNode()) return false;
+
+            return true;
         }
     }
 }

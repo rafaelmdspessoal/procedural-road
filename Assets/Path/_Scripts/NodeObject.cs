@@ -5,6 +5,9 @@ using System;
 using Path.Entities.Pedestrian;
 using Path.Entities.Meshes;
 using Path.Utilities;
+using Path.Entities.SO;
+using UnityEditor.Experimental.GraphView;
+using UnityEngine.UIElements;
 
 namespace Path.Entities
 {
@@ -51,7 +54,6 @@ namespace Path.Entities
                 pathObject.OnPathRemoved += PathObject_OnPathRemoved;
             }
         }
-
         public void ConnectPathNodes()
         {
             List<PedestrianPathNode> pathNodesList = GetAllPathNodes();
@@ -74,8 +76,7 @@ namespace Path.Entities
                 meshEdjePrefab,
                 transform.position,
                 Quaternion.identity,
-                transform
-                ).GetComponent<MeshEdje>();
+                transform).GetComponent<MeshEdje>();
 
             if (isStartNode)
                 edjePosition = MeshEdje.EdjePosition.StartCenter;
@@ -87,8 +88,7 @@ namespace Path.Entities
                 meshEdjePrefab,
                 transform.position,
                 Quaternion.identity,
-                transform
-                ).GetComponent<MeshEdje>();
+                transform).GetComponent<MeshEdje>();
 
             if (isStartNode)
                 edjePosition = MeshEdje.EdjePosition.StartLeft;
@@ -101,8 +101,7 @@ namespace Path.Entities
                 meshEdjePrefab,
                 transform.position,
                 Quaternion.identity,
-                transform
-                ).GetComponent<MeshEdje>();
+                transform).GetComponent<MeshEdje>();
 
             if (isStartNode)
                 edjePosition = MeshEdje.EdjePosition.StartRight;
@@ -142,78 +141,6 @@ namespace Path.Entities
             }
             pathNodesDict.Add(pathObject, new List<PedestrianPathNode> { newStartPathNode, newEndPathNode });
         }
-        public bool Equals(NodeObject other)
-        {
-            return Vector3.SqrMagnitude(Position - other.Position) < 0.0001f;
-        }
-        public List<PedestrianPathNode> GetAllPathNodes()
-        {
-            List<PedestrianPathNode> pathNodesList = new();
-
-            foreach (List<PedestrianPathNode> pathNodes in pathNodesDict.Values)
-            {
-                pathNodesList.AddRange(pathNodes);
-            }
-            return pathNodesList;
-        }
-        public List<NodeObject> GetConnectedNodes()
-        {
-            List<NodeObject> connectedNodes = new();
-            foreach (PathObject connectedPath in connectedPathList)
-            {
-                connectedNodes.Add(connectedPath.OtherNodeTo(this));
-            }
-
-            return connectedNodes;
-        }
-        public MeshEdje GetMeshEdjeFor(PathObject pathObject, MeshEdje.EdjePosition edjePosition)
-        {
-            List<MeshEdje> meshEdjes = meshEdjesDict[pathObject];
-            return meshEdjes.Find(x => x.EdjePos == edjePosition);
-        }
-        public float GetNodeSizeFor(PathObject pathObject)
-        {
-            if (!HasIntersection) return 0;
-
-            Dictionary<float, PathObject> adjacentPaths = GetAdjacentPathsTo(pathObject);
-            float offset;
-            float cosAngle;
-            int width = pathObject.Width / 2;
-            if (adjacentPaths.Count == 1)
-            {
-                float angle = adjacentPaths.First().Key;
-                if (angle > 180) angle = Mathf.Abs(angle - 360);
-                angle = Mathf.Clamp(angle, 0, 90);
-                angle *= Mathf.Deg2Rad;
-                cosAngle = Mathf.Cos(angle - Mathf.PI / 2);
-                offset = (1 + Mathf.Cos(angle)) * (width + 0.15f) / cosAngle;
-                return offset;
-            }
-
-            float leftAngle = adjacentPaths.First().Key;
-            float rightAngle = adjacentPaths.Last().Key;
-            float smallestAngle;
-
-            if (rightAngle > 180) rightAngle = Mathf.Abs(rightAngle - 360);
-            smallestAngle = Mathf.Min(leftAngle, rightAngle);
-            smallestAngle = Mathf.Clamp(smallestAngle, 0, 90);
-            smallestAngle *= Mathf.Deg2Rad;
-            cosAngle = Mathf.Cos(smallestAngle - Mathf.PI / 2);
-            offset = (1 + Mathf.Cos(smallestAngle)) * (width + 0.15f) / cosAngle;
-
-            return offset;
-        }
-        public PedestrianPathNode GetPathNodeFor(PathObject pathObject, PedestrianPathNode.OnPathPosition pathPosition)
-        {
-            List<PedestrianPathNode> pathNodes = pathNodesDict[pathObject];
-            return pathNodes.Find(x => x.PathPosition == pathPosition);
-        }
-        public bool IsStartNodeOf(PathObject pathObject)
-        {
-            return pathObject.StartNode.Equals(this);
-        }
-
-
         private void PathObject_OnPathRemoved(object sender, EventArgs e)
         {
             PathObject pathObject = (PathObject)sender;
@@ -242,6 +169,57 @@ namespace Path.Entities
             {
                 PathManager.Instance.RemoveNode(this);
             }
+        }
+        public void SetMesh(Mesh mesh)
+        {
+            meshFilter.mesh = mesh;
+            meshCollider.sharedMesh = mesh;
+            // Material tiling will depend on the path lengh, so let's have
+            // different instances
+            meshRenderer.material = new Material(connectedPathList[0].PathSO.material);
+
+            if (connectedPathList.Count == 2)
+            {
+                Vector3 center0;
+                Vector3 center1;
+
+                if (IsStartNodeOf(connectedPathList[0]))
+                    center0 = GetMeshEdjeFor(connectedPathList[0], MeshEdje.EdjePosition.StartCenter).Position;
+                else
+                    center0 = GetMeshEdjeFor(connectedPathList[0], MeshEdje.EdjePosition.EndCenter).Position;
+                
+                if (IsStartNodeOf(connectedPathList[1]))
+                    center1 = GetMeshEdjeFor(connectedPathList[1], MeshEdje.EdjePosition.StartCenter).Position;
+                else
+                    center1 = GetMeshEdjeFor(connectedPathList[1], MeshEdje.EdjePosition.EndCenter).Position;
+
+
+                float pathLengh = Bezier.GetLengh(center0, center1, Position);
+                int textureRepead = Mathf.RoundToInt(connectedPathList[0].PathSO.textureTiling * pathLengh * .01f);
+                meshRenderer.material.mainTextureScale = new Vector2(.5f, textureRepead);
+                meshRenderer.material.mainTextureOffset = new Vector2(0, 0);
+            }
+            else
+            {
+                meshRenderer.material.mainTextureScale = new Vector2(.5f, 1);
+                meshRenderer.material.mainTextureOffset = new Vector2(0, 0);
+            }
+        }
+        private void RemoveMeshEdjesFor(PathObject pathObject)
+        {
+            foreach (MeshEdje meshEdje in meshEdjesDict[pathObject])
+            {
+                Destroy(meshEdje.gameObject);
+            }
+            meshEdjesDict.Remove(pathObject);
+        }
+        private void RemovePedestrianPathNodesFor(PathObject pathObject)
+        {
+            foreach (PedestrianPathNode pathNode in pathNodesDict[pathObject])
+            {
+                Destroy(pathNode.gameObject);
+            }
+            pathNodesDict.Remove(pathObject);
         }
         public void UpdateEdjePositions(PathObject pathObject)
         {
@@ -332,37 +310,61 @@ namespace Path.Entities
             startPathNode.transform.rotation = Quaternion.LookRotation(center.Direction);
             endPathNode.transform.rotation = Quaternion.LookRotation(center.Direction);
         }
-        public void SetMesh(Mesh mesh)
+        public float GetNodeSizeFor(PathObject pathObject)
         {
-            meshFilter.mesh = mesh;
-            meshCollider.sharedMesh = mesh;
-            // Material tiling will depend on the path lengh, so let's have
-            // different instances
-            meshRenderer.material = new Material(connectedPathList[0].PathSO.material);
+            if (!HasIntersection) return 0;
 
-            meshRenderer.material.mainTextureScale = new Vector2(.5f, 1);
-            meshRenderer.material.mainTextureOffset = new Vector2(0, 0);
-        }
-        private void RemoveMeshEdjesFor(PathObject pathObject)
-        {
-            foreach (MeshEdje meshEdje in meshEdjesDict[pathObject])
+            Dictionary<float, PathObject> adjacentPaths = GetAdjacentPathsTo(pathObject);
+            float offset;
+            float cosAngle;
+            int width = pathObject.Width / 2;
+            if (adjacentPaths.Count == 1)
             {
-                Destroy(meshEdje.gameObject);
+                float angle = adjacentPaths.First().Key;
+                if (angle > 180) angle = Mathf.Abs(angle - 360);
+                angle = Mathf.Clamp(angle, 0, 90);
+                angle *= Mathf.Deg2Rad;
+                cosAngle = Mathf.Cos(angle - Mathf.PI / 2);
+                offset = (1 + Mathf.Cos(angle)) * (width + 0.15f) / cosAngle;
+                return offset;
             }
-            meshEdjesDict.Remove(pathObject);
-        }
- 
-        private void RemovePedestrianPathNodesFor(PathObject pathObject)
-        {
-            foreach (PedestrianPathNode pathNode in pathNodesDict[pathObject])
-            {
-                Destroy(pathNode.gameObject);
-            }
-            pathNodesDict.Remove(pathObject);
-        }
 
-        public List<PathObject> ConnectedPaths => connectedPathList;
+            float leftAngle = adjacentPaths.First().Key;
+            float rightAngle = adjacentPaths.Last().Key;
+            float smallestAngle;
+
+            if (rightAngle > 180) rightAngle = Mathf.Abs(rightAngle - 360);
+            smallestAngle = Mathf.Min(leftAngle, rightAngle);
+            smallestAngle = Mathf.Clamp(smallestAngle, 0, 90);
+            smallestAngle *= Mathf.Deg2Rad;
+            cosAngle = Mathf.Cos(smallestAngle - Mathf.PI / 2);
+            offset = (1 + Mathf.Cos(smallestAngle)) * (width + 0.15f) / cosAngle;
+
+            return offset;
+        }
         public Vector3 Direction => Position - connectedPathList.First().ControlPosition;
+        public Vector3 Position => transform.position;
+        public List<PathObject> ConnectedPaths => connectedPathList;
+        public List<NodeObject> GetConnectedNodes()
+        {
+            List<NodeObject> connectedNodes = new();
+            foreach (PathObject connectedPath in connectedPathList)
+            {
+                connectedNodes.Add(connectedPath.OtherNodeTo(this));
+            }
+
+            return connectedNodes;
+        }
+        public List<PedestrianPathNode> GetAllPathNodes()
+        {
+            List<PedestrianPathNode> pathNodesList = new();
+
+            foreach (List<PedestrianPathNode> pathNodes in pathNodesDict.Values)
+            {
+                pathNodesList.AddRange(pathNodes);
+            }
+            return pathNodesList;
+        }
         public Dictionary<float, PathObject> GetAdjacentPathsTo(PathObject pathObject)
         {
             Dictionary<float, PathObject> connectedPathsDict = new();
@@ -398,9 +400,26 @@ namespace Path.Entities
 
             return adjacentPaths;
         }
+        public bool Equals(NodeObject other)
+        {
+            return Vector3.SqrMagnitude(Position - other.Position) < 0.0001f;
+        }
+        public bool IsStartNodeOf(PathObject pathObject)
+        {
+            return pathObject.StartNode.Equals(this);
+        }
         public bool HasConnectedPaths => connectedPathList.Count > 0;
         public bool HasIntersection => connectedPathList.Count > 1;
-        public Vector3 Position => transform.position;
+        public MeshEdje GetMeshEdjeFor(PathObject pathObject, MeshEdje.EdjePosition edjePosition)
+        {
+            List<MeshEdje> meshEdjes = meshEdjesDict[pathObject];
+            return meshEdjes.Find(x => x.EdjePos == edjePosition);
+        }
+        public PedestrianPathNode GetPathNodeFor(PathObject pathObject, PedestrianPathNode.OnPathPosition pathPosition)
+        {
+            List<PedestrianPathNode> pathNodes = pathNodesDict[pathObject];
+            return pathNodes.Find(x => x.PathPosition == pathPosition);
+        }
 
         private void OnDrawGizmos()
         {

@@ -16,5 +16,5 @@ MonoBehaviour:
   material: {fileID: 2100000, guid: 97eea5cdb1de9445fb7f71ee7ce5083c, type: 2}
   width: 4
   resolution: 15
-  textureTiling: 25
+  textureTiling: 20
   minIntersectionAngle: 40

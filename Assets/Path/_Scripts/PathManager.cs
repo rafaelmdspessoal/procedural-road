@@ -11,12 +11,13 @@ namespace Path {
         public static PathManager Instance { get; private set; }
 
         private PathPlacementSystem pathPlacementSystem;
-        public bool updatePaths = false;
         private readonly Dictionary<Vector3, NodeObject> placedNodesDict = new();
 
         [SerializeField] private Transform pathParentTransform;
         [SerializeField] private Transform nodeParentTransform;
         [SerializeField] private GameObject nodePrefab;
+
+        public bool updatePaths = false;
 
         private void Awake() {
             Instance = this;
@@ -26,7 +27,10 @@ namespace Path {
             pathPlacementSystem = PathPlacementSystem.Instance;
             pathPlacementSystem.OnPathPlaced += PathPlacementSystem_OnPathPlaced;
         }
-
+        public void AddNode(NodeObject node) {
+            if (!HasNode(node))
+                placedNodesDict.Add(node.Position, node);
+        }
         private void PathPlacementSystem_OnPathPlaced(object sender, PathPlacementSystem.OnPathPlacedEventArgs e)
         {
             PathObject pathObject = e.pathObject;
@@ -34,25 +38,16 @@ namespace Path {
             pathObject.OnPathUpdated += PathObject_OnPathUpdated;
             pathObject.OnPathBuilt += PathObject_OnPathBuilt;
         }
-
-
         private void PathObject_OnPathBuilt(object sender, EventArgs e) {
             throw new NotImplementedException();
         }
-
         private void PathObject_OnPathUpdated(object sender, EventArgs e) {
             throw new NotImplementedException();
         }
-
         private void PathObject_OnPathRemoved(object sender, EventArgs e) {
             //PathObject pathObject = (PathObject)sender;
             //if (pathObject.StartNode != null && !pathObject.StartNode.HasConnectedPaths) RemoveNode(pathObject.StartNode);
             //if (pathObject.EndNode != null && !pathObject.EndNode.HasConnectedPaths) RemoveNode(pathObject.EndNode);
-        }
-
-        public void AddNode(NodeObject node) {
-            if (!HasNode(node))
-                placedNodesDict.Add(node.Position, node);
         }
         public void RemoveNode(NodeObject node)
         {
@@ -62,11 +57,10 @@ namespace Path {
                 Destroy(node.gameObject);
             }
         }
-
-        public NodeObject GetNodeAt(Vector3 position) => placedNodesDict.GetValueOrDefault(position);
         private bool HasNode(NodeObject node) => placedNodesDict.ContainsValue(node);
         public bool HasNode(Vector3 position) => placedNodesDict.ContainsKey(position);
         public Transform PathParentTransform => pathParentTransform;
+        public NodeObject GetNodeAt(Vector3 position) => placedNodesDict.GetValueOrDefault(position);
         public NodeObject GetOrCreateNodeAt(Vector3 position) {
             if (HasNode(position)) {
                 NodeObject existingNode = GetNodeAt(position);
