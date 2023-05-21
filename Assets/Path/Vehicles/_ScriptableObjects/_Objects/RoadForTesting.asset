@@ -9,12 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 84295e6370b48d54cafa4c128529b973, type: 3}
-  m_Name: TestPedestrianPath
+  m_Script: {fileID: 11500000, guid: 60f594df1f868a34fb429bc4ab29b355, type: 3}
+  m_Name: RoadForTesting
   m_EditorClassIdentifier: 
-  pathObjectPrefab: {fileID: 2335641471727730, guid: cbe3769974b95c44e907036f6ab72d05, type: 3}
-  material: {fileID: 2100000, guid: 77fe2bf290d8853459c2a74367a05e2c, type: 2}
-  width: 1
+  pathObjectPrefab: {fileID: 8494609028928608496, guid: a6717fda7e7b63c47831bb3d1cb10adb, type: 3}
+  material: {fileID: 2100000, guid: 97eea5cdb1de9445fb7f71ee7ce5083c, type: 2}
+  width: 5
   resolution: 15
-  textureTiling: 20
+  textureTiling: 10
   minIntersectionAngle: 40

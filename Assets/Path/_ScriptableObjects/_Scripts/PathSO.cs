@@ -16,7 +16,7 @@ namespace Path.Entities.SO
         public int resolution;
         public int textureTiling;
 
-        public int minIntersectionAngle;
+        public int minIntersectionAngle;        
 
         public PathObject CreatePathObject(
             NodeObject startNode,

@@ -33,22 +33,7 @@ namespace Path.Utilities {
             return nodeGFX;
         }
 
-        public static Vector3 GetHitPositionWithSnapping(Vector3 hitPosition, NodeObject startNode, int angleSnap) {
-            if (!startNode.HasConnectedPaths) return hitPosition;
-
-            Vector3 currentDirection = hitPosition - startNode.Position;
-            Vector3 projection = Vector3.zero;
-
-            foreach (PathObject pathObject in startNode.ConnectedPaths) {
-                Vector3 baseDirection = (startNode.Position - pathObject.ControlPosition).normalized;
-                projection =  SnapTo(currentDirection, baseDirection, angleSnap);
-            }
-
-            Vector3 targetPosition = projection + startNode.Position;
-            return targetPosition;
-        }
-
-        private static Vector3 SnapTo(Vector3 current, Vector3 target, float snapAngle) {
+        public static Vector3 SnapTo(Vector3 current, Vector3 target, float snapAngle) {
             float angle = Vector3.Angle(current, target);
             if (angle < snapAngle / 2.0f)          // Cannot do cross product 
                 return target * current.magnitude;  //   with angles 0 & 180

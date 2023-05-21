@@ -57,5 +57,11 @@ namespace Path.Placement.States {
         {
             pathPreviewSystem.StopPreview();
         }
+        public bool CanSnapAngle()
+        {
+            if (!pathPlacementSystem.IsBuildingEndNode()) return false;
+
+            return true;
+        }
     }
 }

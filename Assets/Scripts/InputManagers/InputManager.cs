@@ -45,7 +45,7 @@ public class InputManager : MonoBehaviour
     private void Start() 
 	{
 		UIController = UIController.Instance;
-		UIController.OnBuildingPath += PathUIController_OnBuildingPath;
+		UIController.OnBuildingObjects += PathUIController_OnBuildingPath;
 		UIController.OnRemovingObjects += PathUIController_OnRemovingObjects;
 
 	}

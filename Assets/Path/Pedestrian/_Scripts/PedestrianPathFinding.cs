@@ -11,7 +11,7 @@ namespace Path.AI.Pedestrian
     {
         public static List<Vector3> GetPathBetween(NodeObject startNode, NodeObject endNode)
         {
-            List<PedestrianPathNode> pathNodesForPath = AStarSearch(startNode, endNode);
+            List<PathNodeObject> pathNodesForPath = AStarSearch(startNode, endNode);
             List<Vector3> path = new();
             int numPathPoints = 15;
             for (int i = 0; i < pathNodesForPath.Count - 1; i++)
@@ -37,29 +37,29 @@ namespace Path.AI.Pedestrian
             return path;
         }
 
-        private static List<PedestrianPathNode> AStarSearch(NodeObject startNode, NodeObject endNode)
+        private static List<PathNodeObject> AStarSearch(NodeObject startNode, NodeObject endNode)
         {
             List<NodeObject> nodes = PathFinding.GetPathBetween(startNode, endNode);
             PathObject pathStart = PathManager.Instance.GetPathBetween(nodes[0], nodes[1]);
             PathObject pathEnd = PathManager.Instance.GetPathBetween(nodes[nodes.Count - 2], nodes[nodes.Count - 1]);
-            PedestrianPathNode startPathNode;
-            PedestrianPathNode endPathNode;
-            List<PedestrianPathNode> path = new();
+            PathNodeObject startPathNode;
+            PathNodeObject endPathNode;
+            List<PathNodeObject> path = new();
 
             if (startNode.IsStartNodeOf(pathStart))
-                startPathNode = startNode.GetPathNodeFor(pathStart, PedestrianPathNode.OnPathPosition.StartNodeStartPath);
+                startPathNode = startNode.GetPathNodeFor(pathStart, PathNodeObject.OnPathPosition.StartNodeStartPath);
             else
-                startPathNode = startNode.GetPathNodeFor(pathStart, PedestrianPathNode.OnPathPosition.EndNodeStartPath);
+                startPathNode = startNode.GetPathNodeFor(pathStart, PathNodeObject.OnPathPosition.EndNodeStartPath);
 
             if (endNode.IsStartNodeOf(pathEnd))
-                endPathNode = endNode.GetPathNodeFor(pathEnd, PedestrianPathNode.OnPathPosition.StartNodeEndPath);
+                endPathNode = endNode.GetPathNodeFor(pathEnd, PathNodeObject.OnPathPosition.StartNodeEndPath);
             else
-                endPathNode = endNode.GetPathNodeFor(pathEnd, PedestrianPathNode.OnPathPosition.EndNodeEndPath);
+                endPathNode = endNode.GetPathNodeFor(pathEnd, PathNodeObject.OnPathPosition.EndNodeEndPath);
 
-            List<PedestrianPathNode> nodesTocheck = new();
-            Dictionary<PedestrianPathNode, float> costDictionary = new();
-            Dictionary<PedestrianPathNode, float> priorityDictionary = new();
-            Dictionary<PedestrianPathNode, PedestrianPathNode> parentsDictionary = new();
+            List<PathNodeObject> nodesTocheck = new();
+            Dictionary<PathNodeObject, float> costDictionary = new();
+            Dictionary<PathNodeObject, float> priorityDictionary = new();
+            Dictionary<PathNodeObject, PathNodeObject> parentsDictionary = new();
 
             nodesTocheck.Add(startPathNode);
             priorityDictionary.Add(startPathNode, 0);
@@ -68,7 +68,7 @@ namespace Path.AI.Pedestrian
 
             while (nodesTocheck.Count > 0)
             {
-                PedestrianPathNode currentNode = GetClosestPathNode(nodesTocheck, priorityDictionary);
+                PathNodeObject currentNode = GetClosestPathNode(nodesTocheck, priorityDictionary);
                 nodesTocheck.Remove(currentNode);
                 if (currentNode.Equals(endPathNode))
                 {
@@ -76,7 +76,7 @@ namespace Path.AI.Pedestrian
                     return path;
                 }
 
-                foreach (PedestrianPathNode neighbour in currentNode.GetConnectedNodes())
+                foreach (PathNodeObject neighbour in currentNode.GetConnectedNodes())
                 {
                     float newCost = costDictionary[currentNode] + 1;
                     if (!costDictionary.ContainsKey(neighbour) || newCost < costDictionary[neighbour])
@@ -94,10 +94,10 @@ namespace Path.AI.Pedestrian
             return path;
         }
 
-        private static PedestrianPathNode GetClosestPathNode(List<PedestrianPathNode> list, Dictionary<PedestrianPathNode, float> distanceMap)
+        private static PathNodeObject GetClosestPathNode(List<PathNodeObject> list, Dictionary<PathNodeObject, float> distanceMap)
         {
-            PedestrianPathNode candidate = list[0];
-            foreach (PedestrianPathNode vertex in list)
+            PathNodeObject candidate = list[0];
+            foreach (PathNodeObject vertex in list)
             {
                 if (distanceMap[vertex] < distanceMap[candidate])
                 {
@@ -107,15 +107,15 @@ namespace Path.AI.Pedestrian
             return candidate;
         }
 
-        private static float ManhattanDiscance(PedestrianPathNode endPos, PedestrianPathNode position)
+        private static float ManhattanDiscance(PathNodeObject endPos, PathNodeObject position)
         {
             return Math.Abs(endPos.Position.x - position.Position.x) + Math.Abs(endPos.Position.z - position.Position.z);
         }
 
-        public static List<PedestrianPathNode> GeneratePath(Dictionary<PedestrianPathNode, PedestrianPathNode> parentMap, PedestrianPathNode endState)
+        public static List<PathNodeObject> GeneratePath(Dictionary<PathNodeObject, PathNodeObject> parentMap, PathNodeObject endState)
         {
-            List<PedestrianPathNode> path = new();
-            PedestrianPathNode parent = endState;
+            List<PathNodeObject> path = new();
+            PathNodeObject parent = endState;
             while (parent != null && parentMap.ContainsKey(parent))
             {
                 path.Add(parent);

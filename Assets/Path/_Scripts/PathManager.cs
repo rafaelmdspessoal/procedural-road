@@ -15,7 +15,6 @@ namespace Path {
 
         [SerializeField] private Transform pathParentTransform;
         [SerializeField] private Transform nodeParentTransform;
-        [SerializeField] private GameObject nodePrefab;
 
         public bool updatePaths = false;
 
@@ -61,13 +60,13 @@ namespace Path {
         public bool HasNode(Vector3 position) => placedNodesDict.ContainsKey(position);
         public Transform PathParentTransform => pathParentTransform;
         public NodeObject GetNodeAt(Vector3 position) => placedNodesDict.GetValueOrDefault(position);
-        public NodeObject GetOrCreateNodeAt(Vector3 position) {
+        public NodeObject GetOrCreateNodeAt(Vector3 position, PathObject pathObject) {
             if (HasNode(position)) {
                 NodeObject existingNode = GetNodeAt(position);
                 return existingNode;
             }
 
-            GameObject nodeObject = Instantiate(nodePrefab, position, Quaternion.identity, nodeParentTransform);
+            GameObject nodeObject = Instantiate(pathObject.NodePrefab, position, Quaternion.identity, nodeParentTransform);
             NodeObject newNode = nodeObject.GetComponent<NodeObject>();
             AddNode(newNode);
             return newNode;

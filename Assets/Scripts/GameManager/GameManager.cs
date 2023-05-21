@@ -26,7 +26,7 @@ public class GameManager : MonoBehaviour
         uIController = UIController.Instance;
 
         state = State.Idle;
-        uIController.OnBuildingPath += UIController_OnBuildingPath;
+        uIController.OnBuildingObjects += UIController_OnBuildingPath;
         uIController.OnRemovingObjects += UIController_OnRemovingObjects;
 
         inputManager.OnEscape += InputManager_OnEscape;

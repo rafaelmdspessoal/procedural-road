@@ -86,5 +86,9 @@ namespace Path.Placement.States {
                 return;
             }
         }
+        public bool CanSnapAngle()
+        {
+            return false;
+        }
     }
 }

@@ -11,13 +11,14 @@ namespace Path.Entities{
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
     [RequireComponent(typeof(MeshCollider))]
-    public class PathObject : MonoBehaviour, IPath {
+    public abstract class PathObject : MonoBehaviour, IPath {
 
         public EventHandler OnPathBuilt;
         public EventHandler OnPathRemoved;
         public EventHandler OnPathUpdated;
         
         [SerializeField] private PathSO pathSO;
+        [SerializeField] private GameObject nodePrefab;
 
         private MeshFilter meshFilter;
         private MeshRenderer meshRenderer;
@@ -53,7 +54,7 @@ namespace Path.Entities{
         public Vector3 ControlPosition => controlNodeObject.transform.position;
         public NodeObject StartNode => startNode;
         public NodeObject EndNode => endNode;
-
+        public GameObject NodePrefab => nodePrefab;
 
         public void SetMesh()
         {
@@ -68,11 +69,11 @@ namespace Path.Entities{
 
         private void ConnectPathNodes()
         {
-            PedestrianPathNode startNodeStartPath = startNode.GetPathNodeFor(this, PedestrianPathNode.OnPathPosition.StartNodeStartPath);
-            PedestrianPathNode startNodeEndPath = startNode.GetPathNodeFor(this, PedestrianPathNode.OnPathPosition.StartNodeEndPath);
+            PathNodeObject startNodeStartPath = startNode.GetPathNodeFor(this, PathNodeObject.OnPathPosition.StartNodeStartPath);
+            PathNodeObject startNodeEndPath = startNode.GetPathNodeFor(this, PathNodeObject.OnPathPosition.StartNodeEndPath);
 
-            PedestrianPathNode endNodeStartPath = endNode.GetPathNodeFor(this, PedestrianPathNode.OnPathPosition.EndNodeStartPath);
-            PedestrianPathNode endNodeEndPath = endNode.GetPathNodeFor(this, PedestrianPathNode.OnPathPosition.EndNodeEndPath);
+            PathNodeObject endNodeStartPath = endNode.GetPathNodeFor(this, PathNodeObject.OnPathPosition.EndNodeStartPath);
+            PathNodeObject endNodeEndPath = endNode.GetPathNodeFor(this, PathNodeObject.OnPathPosition.EndNodeEndPath);
 
             startNodeStartPath.AddPathNode(endNodeEndPath);
             endNodeStartPath.AddPathNode(startNodeEndPath);
