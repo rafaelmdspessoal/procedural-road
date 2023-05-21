@@ -24,8 +24,13 @@ namespace Path.Utilities {
             return leftSideVertice;
         }
 
-        public static GameObject CreateNodeGFX(PathSO pathObjectSO) {
-            GameObject nodeGFX = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        public static GameObject UpdateOrCreateNodeGFX(PathSO pathObjectSO, GameObject existingNodeGFX) 
+        {
+            GameObject nodeGFX = existingNodeGFX;
+            if (nodeGFX == null)
+            {
+                nodeGFX = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            }
             nodeGFX.layer = 2;
             nodeGFX.transform.GetComponent<SphereCollider>().radius = 1f;
             nodeGFX.transform.localScale = pathObjectSO.width * Vector3.one;

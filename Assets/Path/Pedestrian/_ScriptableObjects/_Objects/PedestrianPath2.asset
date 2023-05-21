@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 84295e6370b48d54cafa4c128529b973, type: 3}
-  m_Name: TestPedestrianPath
+  m_Name: PedestrianPath2
   m_EditorClassIdentifier: 
-  pathObjectPrefab: {fileID: 2335641471727730, guid: cbe3769974b95c44e907036f6ab72d05, type: 3}
-  material: {fileID: 2100000, guid: 77fe2bf290d8853459c2a74367a05e2c, type: 2}
-  width: 1
+  pathObjectPrefab: {fileID: 2335641471727730, guid: 85c7d8e635d8e4748ac519be9c638304, type: 3}
+  material: {fileID: 2100000, guid: e14c9009ee799f1439a02f3c53770fbd, type: 2}
+  width: 2
   resolution: 15
   textureTiling: 20
   minIntersectionAngle: 40

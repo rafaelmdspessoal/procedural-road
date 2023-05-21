@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 60f594df1f868a34fb429bc4ab29b355, type: 3}
-  m_Name: RoadForTesting
+  m_Name: RoadPath1
   m_EditorClassIdentifier: 
   pathObjectPrefab: {fileID: 8494609028928608496, guid: a6717fda7e7b63c47831bb3d1cb10adb, type: 3}
   material: {fileID: 2100000, guid: 97eea5cdb1de9445fb7f71ee7ce5083c, type: 2}

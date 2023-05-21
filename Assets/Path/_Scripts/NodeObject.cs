@@ -326,7 +326,7 @@ namespace Path.Entities
             Dictionary<float, PathObject> adjacentPaths = GetAdjacentPathsTo(pathObject);
             float offset;
             float cosAngle;
-            int width = pathObject.Width / 2;
+            int width = GetMaxWidthIn(adjacentPaths.Values.ToList()) / 2;
             if (adjacentPaths.Count == 1)
             {
                 float angle = adjacentPaths.First().Key;
@@ -334,7 +334,7 @@ namespace Path.Entities
                 angle = Mathf.Clamp(angle, 0, 90);
                 angle *= Mathf.Deg2Rad;
                 cosAngle = Mathf.Cos(angle - Mathf.PI / 2);
-                offset = (1 + Mathf.Cos(angle)) * (width + 0.15f) / cosAngle;
+                offset = (1 + Mathf.Cos(angle)) * (width * 1.2f) / cosAngle;
                 return offset;
             }
 
@@ -347,9 +347,18 @@ namespace Path.Entities
             smallestAngle = Mathf.Clamp(smallestAngle, 0, 90);
             smallestAngle *= Mathf.Deg2Rad;
             cosAngle = Mathf.Cos(smallestAngle - Mathf.PI / 2);
-            offset = (1 + Mathf.Cos(smallestAngle)) * (width + 0.15f) / cosAngle;
+            offset = (1 + Mathf.Cos(smallestAngle)) * (width * 1.2f) / cosAngle;
 
             return offset;
+        }
+        private int GetMaxWidthIn(List<PathObject> pathObjects)
+        {
+            int width = 0;
+            foreach (PathObject pathObject in pathObjects)
+            {
+                if (pathObject.Width > width) width = pathObject.Width;
+            }
+            return width;
         }
         public Vector3 Direction => Position - connectedPathList.First().ControlPosition;
         public Vector3 Position => transform.position;

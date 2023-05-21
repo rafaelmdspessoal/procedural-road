@@ -26,7 +26,8 @@ namespace Path {
             pathPlacementSystem = PathPlacementSystem.Instance;
             pathPlacementSystem.OnPathPlaced += PathPlacementSystem_OnPathPlaced;
         }
-        public void AddNode(NodeObject node) {
+        public void AddNode(NodeObject node) 
+        {
             if (!HasNode(node))
                 placedNodesDict.Add(node.Position, node);
         }
@@ -71,9 +72,17 @@ namespace Path {
             AddNode(newNode);
             return newNode;
         }
-        public NodeObject GetRandomNode()
+        public NodeObject GetRandomNode(NodeObject.PathFor pathFor)
         {
-            return placedNodesDict.Values.ToList()[UnityEngine.Random.Range(0, placedNodesDict.Count)];
+            int nodeIndex = 0;
+            List<NodeObject> pathNodes = placedNodesDict.Values.Where(x => x.PathEntity == pathFor).ToList();
+
+            for (int i = 0; i < pathNodes.Count; i++)
+            {
+                nodeIndex = UnityEngine.Random.Range(0, pathNodes.Count);
+                if (nodeIndex > 0) break;
+            }
+            return pathNodes[nodeIndex];
         }
         public PathObject GetPathBetween(NodeObject startNode, NodeObject endNode)
         {

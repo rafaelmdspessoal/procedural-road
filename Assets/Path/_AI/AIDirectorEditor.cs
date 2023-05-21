@@ -13,7 +13,7 @@ namespace Path.AI
         public override void OnInspectorGUI()
         {
             AIDirector aIDirector = (AIDirector)target;
-
+            DrawDefaultInspector();
             if (GUILayout.Button("Find Path"))
             {
                 startNode = aIDirector.GetRandomNode();

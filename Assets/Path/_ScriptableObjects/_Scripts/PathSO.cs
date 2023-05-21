@@ -358,9 +358,9 @@ namespace Path.Entities.SO
         {
             float t;
 
-            for (int i = resolution / 2 - 1; i < resolution - 1; i++)
+            for (int i = resolution / 2; i < resolution; i++)
             {
-                t = i / (float)(resolution - 2);
+                t = i / (float)(resolution - 1);
                 Vector3 leftPathVertice = Bezier.QuadraticCurve(startLeft, endLeft, controlLeft, t);
                 Vector3 centerPathVertice = Bezier.QuadraticCurve(startCenter, endCenter, controlCenter, t);
                 Vector3 rightPathVertice = Bezier.QuadraticCurve(startRight, endRight, controlRight, t);

@@ -2515,6 +2515,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e30f59c8504aa1f458ae61d7769155ef, type: 2}
   pedestrianPathList:
   - {fileID: 11400000, guid: 874652bef83c2bd459985e2e9a000b08, type: 2}
+  - {fileID: 11400000, guid: b810a3decab9c664487af7efa8048f99, type: 2}
   straightPathButton: {fileID: 374410297}
   curvePathButton: {fileID: 1919570089}
   freePathButton: {fileID: 1673245570}
@@ -3535,6 +3536,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8701ea3537d4ec4ba48c895a1067941, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pathFor: 0
   lineRenderer: {fileID: 0}
 --- !u!1 &1535615085
 GameObject:

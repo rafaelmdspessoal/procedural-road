@@ -168,23 +168,17 @@ namespace Path.PlacementSystem {
         }
         private void PathUIController_OnBuildingStraightPath() {
             ResetBuildingState();
-            if (nodeGFX == null) nodeGFX = PathUtilities.CreateNodeGFX(pathSO);
-            else nodeGFX.SetActive(true);
-
+            nodeGFX.SetActive(true);
             buildingState = new BuildingStraightPath(this);
         }
         private void PathUIController_OnBuildingCurvedPath() {
             ResetBuildingState();
-            if (nodeGFX == null) nodeGFX = PathUtilities.CreateNodeGFX(pathSO);
-            else nodeGFX.SetActive(true);
-
+            nodeGFX.SetActive(true);
             buildingState = new BuildingCurvedPath(this);
         }
         private void PathUIController_OnBuildingFreePath() {
             ResetBuildingState();
-            if (nodeGFX == null) nodeGFX = PathUtilities.CreateNodeGFX(pathSO);
-            else nodeGFX.SetActive(true);
-
+            nodeGFX.SetActive(true);
             buildingState = new BuildingFreePath(this);
         }
         private void PathUIController_OnObjectSelected(GameObject obj) 
@@ -193,8 +187,8 @@ namespace Path.PlacementSystem {
             PathSO pathObjectSO = obj.GetComponent<PathObject>().PathSO;
             pathSO = pathObjectSO;
             minPathLengh = pathObjectSO.width * 1.5f;
-            if (nodeGFX == null) nodeGFX = PathUtilities.CreateNodeGFX(pathSO);
-            else nodeGFX.SetActive(true);
+            nodeGFX = PathUtilities.UpdateOrCreateNodeGFX(pathSO, nodeGFX);
+            nodeGFX.SetActive(true);
 
             buildingState = new BuildingStraightPath(this);
         }
@@ -214,10 +208,10 @@ namespace Path.PlacementSystem {
         private void ResetPathPositions()
         {
             if (startNode != null && !startNode.HasConnectedPaths)
-                Destroy(startNode.gameObject);
+                pathManager.RemoveNode(startNode);
 
             if (endNode != null && !endNode.HasConnectedPaths)
-                Destroy(endNode.gameObject);
+                pathManager.RemoveNode(endNode);
 
             endNode = null;
             startNode = null;
@@ -302,9 +296,7 @@ namespace Path.PlacementSystem {
         }
         public Vector3 HandleAngleSnapping(Vector3 hitPosition, GameObject hitObject) 
         {
-            if (!buildingState.CanSnapAngle()) return hitPosition;
-            if (!hitObject.TryGetComponent(out Ground _)) return hitPosition;
-            if (!startNode.HasConnectedPaths) return hitPosition;
+            if (!CanSnapAngle(hitObject)) return hitPosition;
 
             Vector3 currentDirection = hitPosition - startNode.Position;
             Vector3 projection = Vector3.zero;
@@ -317,6 +309,12 @@ namespace Path.PlacementSystem {
 
             Vector3 targetPosition = projection + startNode.Position;
             return targetPosition;
+        }
+        public bool CanSnapAngle(GameObject hitObject)
+        {
+            if (!buildingState.CanSnapAngle() || !hitObject.TryGetComponent(out Ground _) || !startNode.HasConnectedPaths) 
+                return false;
+            return true;
         }
         public bool CheckPathAngleInRange(Vector3 pathDirection) {
             if (startNode == null && pathsToSplit.Count <= 0) 
