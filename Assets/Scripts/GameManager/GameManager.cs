@@ -1,5 +1,6 @@
 using UnityEngine;
-using UI.Controller;
+using Path;
+using Global.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -25,7 +26,7 @@ public class GameManager : MonoBehaviour
         uIController = UIController.Instance;
 
         state = State.Idle;
-        uIController.OnBuildingRoads += RoadUIController_OnBuildingRoads;
+        uIController.OnBuildingObjects += UIController_OnBuildingPath;
         uIController.OnRemovingObjects += UIController_OnRemovingObjects;
 
         inputManager.OnEscape += InputManager_OnEscape;
@@ -35,8 +36,8 @@ public class GameManager : MonoBehaviour
     // NOTE: This should be moved to a more appropriate place
     private void InputManager_OnObjectRemoved(object sender, InputManager.OnObjectHitedEventArgs e) {
         if (IsDemolishing()) {
-            if (e.obj.TryGetComponent(out IRemoveable removeableObject)) {
-                removeableObject.Remove(false);
+            if (e.obj.TryGetComponent(out IPath removeableObject)) {
+                removeableObject.RemovePath();
             }
         }
     }
@@ -51,7 +52,7 @@ public class GameManager : MonoBehaviour
         Debug.Log("State: " + state);
     }
 
-    private void RoadUIController_OnBuildingRoads() {
+    private void UIController_OnBuildingPath() {
         state = State.Building;
         Debug.Log("State: " + state);
     }

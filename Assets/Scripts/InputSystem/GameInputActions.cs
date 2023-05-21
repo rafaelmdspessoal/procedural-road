@@ -80,7 +80,7 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             ]
         },
         {
-            ""name"": ""BuildingRoad"",
+            ""name"": ""BuildingPath"",
             ""id"": ""57e63f8c-f288-4fa3-978c-6fa9d82069da"",
             ""actions"": [
                 {
@@ -164,10 +164,10 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         // Destroying
         m_Destroying = asset.FindActionMap("Destroying", throwIfNotFound: true);
         m_Destroying_Demolish = m_Destroying.FindAction("Demolish", throwIfNotFound: true);
-        // BuildingRoad
-        m_BuildingRoad = asset.FindActionMap("BuildingRoad", throwIfNotFound: true);
-        m_BuildingRoad_PlaceNode = m_BuildingRoad.FindAction("PlaceNode", throwIfNotFound: true);
-        m_BuildingRoad_Cancel = m_BuildingRoad.FindAction("Cancel", throwIfNotFound: true);
+        // BuildingPath
+        m_BuildingPath = asset.FindActionMap("BuildingPath", throwIfNotFound: true);
+        m_BuildingPath_PlaceNode = m_BuildingPath.FindAction("PlaceNode", throwIfNotFound: true);
+        m_BuildingPath_Cancel = m_BuildingPath.FindAction("Cancel", throwIfNotFound: true);
         // General
         m_General = asset.FindActionMap("General", throwIfNotFound: true);
         m_General_Escape = m_General.FindAction("Escape", throwIfNotFound: true);
@@ -321,26 +321,26 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
     }
     public DestroyingActions @Destroying => new DestroyingActions(this);
 
-    // BuildingRoad
-    private readonly InputActionMap m_BuildingRoad;
-    private List<IBuildingRoadActions> m_BuildingRoadActionsCallbackInterfaces = new List<IBuildingRoadActions>();
-    private readonly InputAction m_BuildingRoad_PlaceNode;
-    private readonly InputAction m_BuildingRoad_Cancel;
-    public struct BuildingRoadActions
+    // BuildingPath
+    private readonly InputActionMap m_BuildingPath;
+    private List<IBuildingPathActions> m_BuildingPathActionsCallbackInterfaces = new List<IBuildingPathActions>();
+    private readonly InputAction m_BuildingPath_PlaceNode;
+    private readonly InputAction m_BuildingPath_Cancel;
+    public struct BuildingPathActions
     {
         private @GameInputActions m_Wrapper;
-        public BuildingRoadActions(@GameInputActions wrapper) { m_Wrapper = wrapper; }
-        public InputAction @PlaceNode => m_Wrapper.m_BuildingRoad_PlaceNode;
-        public InputAction @Cancel => m_Wrapper.m_BuildingRoad_Cancel;
-        public InputActionMap Get() { return m_Wrapper.m_BuildingRoad; }
+        public BuildingPathActions(@GameInputActions wrapper) { m_Wrapper = wrapper; }
+        public InputAction @PlaceNode => m_Wrapper.m_BuildingPath_PlaceNode;
+        public InputAction @Cancel => m_Wrapper.m_BuildingPath_Cancel;
+        public InputActionMap Get() { return m_Wrapper.m_BuildingPath; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
         public bool enabled => Get().enabled;
-        public static implicit operator InputActionMap(BuildingRoadActions set) { return set.Get(); }
-        public void AddCallbacks(IBuildingRoadActions instance)
+        public static implicit operator InputActionMap(BuildingPathActions set) { return set.Get(); }
+        public void AddCallbacks(IBuildingPathActions instance)
         {
-            if (instance == null || m_Wrapper.m_BuildingRoadActionsCallbackInterfaces.Contains(instance)) return;
-            m_Wrapper.m_BuildingRoadActionsCallbackInterfaces.Add(instance);
+            if (instance == null || m_Wrapper.m_BuildingPathActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_BuildingPathActionsCallbackInterfaces.Add(instance);
             @PlaceNode.started += instance.OnPlaceNode;
             @PlaceNode.performed += instance.OnPlaceNode;
             @PlaceNode.canceled += instance.OnPlaceNode;
@@ -349,7 +349,7 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @Cancel.canceled += instance.OnCancel;
         }
 
-        private void UnregisterCallbacks(IBuildingRoadActions instance)
+        private void UnregisterCallbacks(IBuildingPathActions instance)
         {
             @PlaceNode.started -= instance.OnPlaceNode;
             @PlaceNode.performed -= instance.OnPlaceNode;
@@ -359,21 +359,21 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @Cancel.canceled -= instance.OnCancel;
         }
 
-        public void RemoveCallbacks(IBuildingRoadActions instance)
+        public void RemoveCallbacks(IBuildingPathActions instance)
         {
-            if (m_Wrapper.m_BuildingRoadActionsCallbackInterfaces.Remove(instance))
+            if (m_Wrapper.m_BuildingPathActionsCallbackInterfaces.Remove(instance))
                 UnregisterCallbacks(instance);
         }
 
-        public void SetCallbacks(IBuildingRoadActions instance)
+        public void SetCallbacks(IBuildingPathActions instance)
         {
-            foreach (var item in m_Wrapper.m_BuildingRoadActionsCallbackInterfaces)
+            foreach (var item in m_Wrapper.m_BuildingPathActionsCallbackInterfaces)
                 UnregisterCallbacks(item);
-            m_Wrapper.m_BuildingRoadActionsCallbackInterfaces.Clear();
+            m_Wrapper.m_BuildingPathActionsCallbackInterfaces.Clear();
             AddCallbacks(instance);
         }
     }
-    public BuildingRoadActions @BuildingRoad => new BuildingRoadActions(this);
+    public BuildingPathActions @BuildingPath => new BuildingPathActions(this);
 
     // General
     private readonly InputActionMap m_General;
@@ -428,7 +428,7 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
     {
         void OnDemolish(InputAction.CallbackContext context);
     }
-    public interface IBuildingRoadActions
+    public interface IBuildingPathActions
     {
         void OnPlaceNode(InputAction.CallbackContext context);
         void OnCancel(InputAction.CallbackContext context);
