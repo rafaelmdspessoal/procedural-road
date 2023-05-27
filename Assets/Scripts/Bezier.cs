@@ -1,6 +1,4 @@
 using Path.Entities;
-using Paths;
-using System.Drawing;
 using UnityEngine;
 
 public static class Bezier
@@ -17,7 +15,7 @@ public static class Bezier
         return Lerp(startControlLerp, controlEndLerp, t);
     }
 
-    private static Vector3 Lerp(Vector3 start, Vector3 end, float t) {
+    public static Vector3 Lerp(Vector3 start, Vector3 end, float t) {
         return start + (end - start) * t;
     }
 
