@@ -29,7 +29,6 @@ namespace Path.AI
                 }
 
                 aIDirector.GetPathBetween(startNode, endNode);
-                Debug.Log("Fount a Path!");
             }
         }
     }

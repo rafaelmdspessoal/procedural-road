@@ -33,7 +33,7 @@ namespace Path.Utilities {
             }
             nodeGFX.layer = 2;
             nodeGFX.transform.GetComponent<SphereCollider>().radius = 1f;
-            nodeGFX.transform.localScale = pathObjectSO.width * Vector3.one;
+            nodeGFX.transform.localScale = pathObjectSO.Width * Vector3.one;
             nodeGFX.transform.name = "Node GFX";
             return nodeGFX;
         }

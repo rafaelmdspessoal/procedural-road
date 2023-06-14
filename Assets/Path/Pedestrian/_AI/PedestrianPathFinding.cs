@@ -40,26 +40,48 @@ namespace Path.AI.Pedestrian
         private static List<PedestrianPathNode> AStarSearch(NodeObject startNode, NodeObject endNode)
         {
             List<NodeObject> nodes = PathFinding.GetPathBetween(startNode, endNode);
-            PathObject pathStart = PathManager.Instance.GetPathBetween(nodes[0], nodes[1]);
-            PathObject pathEnd = PathManager.Instance.GetPathBetween(nodes[nodes.Count - 2], nodes[nodes.Count - 1]);
+            PathObject pathStart;
+            PathObject pathEnd;
+
             PedestrianPathNode startPathNode;
             PedestrianPathNode endPathNode;
             List<PedestrianPathNode> path = new();
-
-            if (startNode.IsStartNodeOf(pathStart))
-                startPathNode = (PedestrianPathNode)startNode.GetPathNodeFor(pathStart, PathNodeObject.OnPathPosition.StartNodeStartPath);
-            else
-                startPathNode = (PedestrianPathNode)startNode.GetPathNodeFor(pathStart, PathNodeObject.OnPathPosition.EndNodeStartPath);
-
-            if (endNode.IsStartNodeOf(pathEnd))
-                endPathNode = (PedestrianPathNode)endNode.GetPathNodeFor(pathEnd, PathNodeObject.OnPathPosition.StartNodeEndPath);
-            else
-                endPathNode = (PedestrianPathNode)endNode.GetPathNodeFor(pathEnd, PathNodeObject.OnPathPosition.EndNodeEndPath);
 
             List<PedestrianPathNode> nodesTocheck = new();
             Dictionary<PedestrianPathNode, float> costDictionary = new();
             Dictionary<PedestrianPathNode, float> priorityDictionary = new();
             Dictionary<PedestrianPathNode, PedestrianPathNode> parentsDictionary = new();
+
+            try
+            {
+                pathStart = PathManager.Instance.GetPathBetween(nodes[0], nodes[1]);
+                pathEnd = PathManager.Instance.GetPathBetween(nodes[nodes.Count - 2], nodes[nodes.Count - 1]);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                Debug.LogError("Start and end have no connecting path");
+                // NOTE: Start and end have no connecting path between then.
+                return path;
+            }
+
+            try
+            {
+                if (startNode.IsStartNodeOf(pathStart))
+                    startPathNode = startNode.GetPedestrianPathNodeFor(pathStart, PathNodeObject.OnPathPosition.StartNodeStartPath);
+                else
+                    startPathNode = startNode.GetPedestrianPathNodeFor(pathStart, PathNodeObject.OnPathPosition.EndNodeStartPath);
+
+                if (endNode.IsStartNodeOf(pathEnd))
+                    endPathNode = endNode.GetPedestrianPathNodeFor(pathEnd, PathNodeObject.OnPathPosition.StartNodeEndPath);
+                else
+                    endPathNode = endNode.GetPedestrianPathNodeFor(pathEnd, PathNodeObject.OnPathPosition.EndNodeEndPath);
+            }
+            catch(KeyNotFoundException)
+            {
+                Debug.LogError("Path not found!");
+                // TODO: Handle when path not found!
+                return path;
+            }
 
             nodesTocheck.Add(startPathNode);
             priorityDictionary.Add(startPathNode, 0);

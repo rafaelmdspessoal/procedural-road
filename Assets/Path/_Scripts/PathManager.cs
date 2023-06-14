@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Linq;
 using Path.Entities;
 using Path.PlacementSystem;
+using Path.Entities.Vehicle;
 
 namespace Path {
 
@@ -75,7 +76,14 @@ namespace Path {
         public NodeObject GetRandomNode(NodeObject.PathFor pathFor)
         {
             int nodeIndex = 0;
-            List<NodeObject> pathNodes = placedNodesDict.Values.Where(x => x.PathEntity == pathFor).ToList();
+            List<NodeObject> pathNodes;
+            if (pathFor == NodeObject.PathFor.Vehicle)
+                pathNodes = placedNodesDict.Values.Where(x => x.PathEntity == pathFor).ToList();
+            else
+            {
+                pathNodes = placedNodesDict.Values.Where(x => x.PathEntity == pathFor).ToList();
+                pathNodes.AddRange(placedNodesDict.Values.Where(x => x.PathEntity == NodeObject.PathFor.Vehicle && (x as VehicleNode).hasPathWithSidewalk == true).ToList());
+            }
 
             for (int i = 0; i < pathNodes.Count; i++)
             {

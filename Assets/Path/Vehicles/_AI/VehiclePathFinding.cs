@@ -40,21 +40,21 @@ namespace Path.AI.Pedestrian
         private static List<VehiclePathNode> AStarSearch(NodeObject startNode, NodeObject endNode)
         {
             List<NodeObject> nodes = PathFinding.GetPathBetween(startNode, endNode);
-            PathObject pathStart = PathManager.Instance.GetPathBetween(nodes[0], nodes[1]);
-            PathObject pathEnd = PathManager.Instance.GetPathBetween(nodes[nodes.Count - 2], nodes[nodes.Count - 1]);
+            VehiclePath pathStart = PathManager.Instance.GetPathBetween(nodes[0], nodes[1]) as VehiclePath;
+            VehiclePath pathEnd = PathManager.Instance.GetPathBetween(nodes[nodes.Count - 2], nodes[nodes.Count - 1]) as VehiclePath;
             VehiclePathNode startPathNode;
             VehiclePathNode endPathNode;
             List<VehiclePathNode> path = new();
 
             if (startNode.IsStartNodeOf(pathStart))
-                startPathNode = (VehiclePathNode)startNode.GetPathNodeFor(pathStart, PathNodeObject.OnPathPosition.StartNodeStartPath);
+                startPathNode = startNode.GetVehiclePathNodeFor(pathStart, PathNodeObject.OnPathPosition.StartNodeStartPath);
             else
-                startPathNode = (VehiclePathNode)startNode.GetPathNodeFor(pathStart, PathNodeObject.OnPathPosition.EndNodeStartPath);
+                startPathNode = startNode.GetVehiclePathNodeFor(pathStart, PathNodeObject.OnPathPosition.EndNodeStartPath);
 
             if (endNode.IsStartNodeOf(pathEnd))
-                endPathNode = (VehiclePathNode)endNode.GetPathNodeFor(pathEnd, PathNodeObject.OnPathPosition.StartNodeEndPath);
+                endPathNode = endNode.GetVehiclePathNodeFor(pathEnd, PathNodeObject.OnPathPosition.StartNodeEndPath);
             else
-                endPathNode = (VehiclePathNode)endNode.GetPathNodeFor(pathEnd, PathNodeObject.OnPathPosition.EndNodeEndPath);
+                endPathNode = endNode.GetVehiclePathNodeFor(pathEnd, PathNodeObject.OnPathPosition.EndNodeEndPath);
 
             List<VehiclePathNode> nodesTocheck = new();
             Dictionary<VehiclePathNode, float> costDictionary = new();

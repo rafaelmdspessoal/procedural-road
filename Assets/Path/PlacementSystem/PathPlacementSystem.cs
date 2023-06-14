@@ -10,6 +10,7 @@ using Path.Entities;
 using Path.Entities.SO;
 using Path.UI;
 using Global.UI;
+using System.Diagnostics.Eventing.Reader;
 
 namespace Path.PlacementSystem {
 
@@ -96,23 +97,10 @@ namespace Path.PlacementSystem {
         {
             if (buildingState == null) return;
 
-            if (PathUtilities.TryRaycastObject(out Vector3 hitPosition, out GameObject hitObject))
-            {
-                hitPosition = GetPositionForMinPathLengh(hitPosition);
-                if (startNode != null)
-                {
-                    canBuildPath = ValidateAngle(hitObject, hitPosition);
-                    Vector3 controlPos = (startNode.Position + hitPosition) / 2;
-                    if (Bezier.GetLengh(startNode.Position, hitPosition, controlPos) < minPathLengh)
-                        canBuildPath = false;
+            Vector3 position = HandlePathPositioning(out _);          
 
-                    if (IsSnappingAngle)
-                        hitPosition = HandleAngleSnapping(hitPosition, hitObject);
-                }
-
-                nodeGFX.transform.position = hitPosition;
-                buildingState.UpdateState(hitPosition, pathSO, canBuildPath);
-            }
+            nodeGFX.transform.position = position;
+            buildingState.UpdateState(position, pathSO, canBuildPath);           
         }
 
         private void InputManager_OnCancel() {
@@ -123,14 +111,14 @@ namespace Path.PlacementSystem {
         {
             ResetBuildingState();
         }
-        private void InputManager_OnNodePlaced(object sender, InputManager.OnObjectHitedEventArgs e)
+        private void InputManager_OnNodePlaced()
         {
-            Vector3 hitPosition = e.position;
-            if (startNode != null && IsSnappingAngle)
-                hitPosition = HandleAngleSnapping(hitPosition, e.obj);
-
-            hitPosition = GetPositionForMinPathLengh(hitPosition);
-            buildingState.OnAction(hitPosition, canBuildPath);
+            Vector3 position = HandlePathPositioning(out GameObject hitObject);
+            if (hitObject.TryGetComponent(out PathObject pathObject))
+            {
+                AddPathToSplit(position, pathObject);
+            }
+            buildingState.OnAction(position, canBuildPath);
         }
         private void PathUIController_OnPathDown() {
             throw new NotImplementedException();
@@ -184,9 +172,8 @@ namespace Path.PlacementSystem {
         private void PathUIController_OnObjectSelected(GameObject obj) 
         {
             ResetBuildingState();
-            PathSO pathObjectSO = obj.GetComponent<PathObject>().PathSO;
-            pathSO = pathObjectSO;
-            minPathLengh = pathObjectSO.width * 1.5f;
+            pathSO = obj.GetComponent<PathObject>().PathSO;
+            minPathLengh = pathSO.Width * 1.5f;
             nodeGFX = PathUtilities.UpdateOrCreateNodeGFX(pathSO, nodeGFX);
             nodeGFX.SetActive(true);
 
@@ -270,13 +257,11 @@ namespace Path.PlacementSystem {
         {
             nodeBuildingState = state;
         }
-        public Vector3 GetPositionForMinPathLengh(Vector3 position) {
-            if (startNode != null) {
-                Vector3 pathDir = position - startNode.Position;
-
-                if (pathDir.magnitude < minPathLengh)
-                    position += pathDir.normalized * minPathLengh - pathDir;
-            }
+        public Vector3 GetPositionForMinPathLengh(Vector3 position)
+        {
+            Vector3 pathDir = position - startNode.Position;
+            if (pathDir.magnitude < minPathLengh)
+                position += pathDir.normalized * minPathLengh - pathDir;
 
             return position;
         }
@@ -309,6 +294,25 @@ namespace Path.PlacementSystem {
 
             Vector3 targetPosition = projection + startNode.Position;
             return targetPosition;
+        }
+        private Vector3 HandlePathPositioning(out GameObject hitObject)
+        {
+            if (pathSO.TryGetPathPositions(out Vector3 hitPosition, out hitObject))
+            {
+                if (startNode != null)
+                {
+                    hitPosition = GetPositionForMinPathLengh(hitPosition);
+                    if (IsSnappingAngle)
+                        hitPosition = HandleAngleSnapping(hitPosition, hitObject);
+                    canBuildPath = ValidateCanBuildPath(hitObject, hitPosition);
+                }
+            }
+            return hitPosition;
+        }
+
+        private bool ValidateCanBuildPath(GameObject hitObject, Vector3 hitPosition)
+        {
+            return ValidateAngle(hitObject, hitPosition) && ValidateLengh(hitPosition);
         }
         public bool CanSnapAngle(GameObject hitObject)
         {
@@ -387,6 +391,13 @@ namespace Path.PlacementSystem {
                 return CheckPathAngleInRange(ControlPosition - hitPosition, hitObject, hitPosition);
 
             return false;
+        }
+        private bool ValidateLengh(Vector3 hitPosition)
+        {
+            Vector3 controlPos = (startNode.Position + hitPosition) / 2;
+            if (Bezier.GetLengh(startNode.Position, hitPosition, controlPos) < minPathLengh)
+                return false;
+            return true;
         }
         public bool IsSnappingAngle => snappingAngle != AngleSnap.Zero;
         public NodeObject StartNode { get { return startNode; } }

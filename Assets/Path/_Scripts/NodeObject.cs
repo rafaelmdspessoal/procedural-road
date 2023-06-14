@@ -5,9 +5,7 @@ using System;
 using Path.Entities.Pedestrian;
 using Path.Entities.Meshes;
 using Path.Utilities;
-using Path.Entities.SO;
-using UnityEditor.Experimental.GraphView;
-using UnityEngine.UIElements;
+using Path.Entities.Vehicle;
 
 namespace Path.Entities
 {
@@ -22,12 +20,10 @@ namespace Path.Entities
             Vehicle,
         }
 
-        [SerializeField] private GameObject pathNodePrefab;
-        [SerializeField] private GameObject meshEdjePrefab;
-
         [SerializeField] private List<PathObject> connectedPathList = new();
+        protected readonly Dictionary<PathObject, List<PedestrianPathNode>> pedestrianPathNodesDict = new();
+        protected readonly Dictionary<PathObject, List<VehiclePathNode>> vehiclePathNodesDict = new();
 
-        private readonly Dictionary<PathObject, List<PathNodeObject>> pathNodesDict = new();
         private readonly Dictionary<PathObject, List<MeshEdje>> meshEdjesDict = new();
 
         private MeshFilter meshFilter;
@@ -55,7 +51,6 @@ namespace Path.Entities
                 {
                     UpdateEdjePositions(connectedPath);
                     UpdatePathPostions(connectedPath);
-                    ConnectPathNodes();
                 }
                 UpdateEdjePositions(pathObject);
                 UpdatePathPostions(pathObject);
@@ -63,14 +58,14 @@ namespace Path.Entities
                 pathObject.OnPathRemoved += PathObject_OnPathRemoved;
             }
         }
-        public void ConnectPathNodes()
+        public virtual void ConnectPathNodes()
         {
-            List<PathNodeObject> pathNodesList = GetAllPathNodes();
+            List<VehiclePathNode> pathNodesList = GetAllPathNodes();
 
-            foreach (PathNodeObject endPathNode in pathNodesList)
+            foreach (VehiclePathNode endPathNode in pathNodesList)
             {
                 if (endPathNode.IsStartOfPath) continue;
-                foreach (PathNodeObject startPathNode in pathNodesList)
+                foreach (VehiclePathNode startPathNode in pathNodesList)
                 {
                     if (!startPathNode.IsStartOfPath) continue;
                     endPathNode.AddPathNode(startPathNode);
@@ -82,7 +77,7 @@ namespace Path.Entities
             MeshEdje.EdjePosition edjePosition;
             bool isStartNode = IsStartNodeOf(pathObject);
             MeshEdje centerEdje = Instantiate(
-                meshEdjePrefab,
+                pathObject.PathSO.meshEdjePrefab,
                 transform.position,
                 Quaternion.identity,
                 transform).GetComponent<MeshEdje>();
@@ -94,7 +89,7 @@ namespace Path.Entities
             centerEdje.Init(edjePosition);
 
             MeshEdje leftEdje = Instantiate(
-                meshEdjePrefab,
+                pathObject.PathSO.meshEdjePrefab,
                 transform.position,
                 Quaternion.identity,
                 transform).GetComponent<MeshEdje>();
@@ -107,7 +102,7 @@ namespace Path.Entities
             leftEdje.Init(edjePosition);
 
             MeshEdje rightEdje = Instantiate(
-                meshEdjePrefab,
+                pathObject.PathSO.meshEdjePrefab,
                 transform.position,
                 Quaternion.identity,
                 transform).GetComponent<MeshEdje>();
@@ -124,32 +119,7 @@ namespace Path.Entities
             else
                 meshEdjesDict.Add(pathObject, new List<MeshEdje> { centerEdje, leftEdje, rightEdje });
         }
-        private void CreatePathNodeFor(PathObject pathObject)
-        {
-            PathNodeObject newEndPathNode = Instantiate(
-                pathNodePrefab,
-                transform.position,
-                Quaternion.identity,
-                transform).GetComponent<PathNodeObject>();
-
-            PathNodeObject newStartPathNode = Instantiate(
-                pathNodePrefab,
-                transform.position,
-                Quaternion.identity,
-                transform).GetComponent<PathNodeObject>();
-
-            if (IsStartNodeOf(pathObject))
-            {
-                newStartPathNode.Init(PathNodeObject.OnPathPosition.StartNodeStartPath);
-                newEndPathNode.Init(PathNodeObject.OnPathPosition.StartNodeEndPath);
-            }
-            else
-            {
-                newStartPathNode.Init(PathNodeObject.OnPathPosition.EndNodeStartPath);
-                newEndPathNode.Init(PathNodeObject.OnPathPosition.EndNodeEndPath);
-            }
-            pathNodesDict.Add(pathObject, new List<PathNodeObject> { newStartPathNode, newEndPathNode });
-        }
+        protected virtual void CreatePathNodeFor(PathObject pathObject) {}
         private void PathObject_OnPathRemoved(object sender, EventArgs e)
         {
             PathObject pathObject = (PathObject)sender;
@@ -158,7 +128,7 @@ namespace Path.Entities
             {
                 connectedPathList.Remove(pathObject);
                 RemoveMeshEdjesFor(pathObject);
-                RemovePedestrianPathNodesFor(pathObject);
+                RemovePathNodesFor(pathObject);
             }
 
             foreach (PathObject pathToUpdate in adjacentPaths)
@@ -167,7 +137,6 @@ namespace Path.Entities
                 UpdatePathPostions(pathToUpdate);
                 pathToUpdate.UpdateMesh();
             }
-
             if (HasConnectedPaths)
             {
                 ConnectPathNodes();
@@ -222,13 +191,26 @@ namespace Path.Entities
             }
             meshEdjesDict.Remove(pathObject);
         }
-        private void RemovePedestrianPathNodesFor(PathObject pathObject)
+        private void RemovePathNodesFor(PathObject pathObject)
         {
-            foreach (PathNodeObject pathNode in pathNodesDict[pathObject])
+            if (pedestrianPathNodesDict.ContainsKey(pathObject))
             {
-                Destroy(pathNode.gameObject);
+
+                foreach (PedestrianPathNode pathNode in pedestrianPathNodesDict[pathObject])
+                {
+                    Destroy(pathNode.gameObject);
+                }
+                pedestrianPathNodesDict.Remove(pathObject);
             }
-            pathNodesDict.Remove(pathObject);
+            if (vehiclePathNodesDict.ContainsKey(pathObject))
+            {
+
+                foreach (VehiclePathNode pathNode in vehiclePathNodesDict[pathObject])
+                {
+                    Destroy(pathNode.gameObject);
+                }
+                vehiclePathNodesDict.Remove(pathObject);
+            }
         }
         public void UpdateEdjePositions(PathObject pathObject)
         {
@@ -278,47 +260,7 @@ namespace Path.Entities
             left.transform.rotation = Quaternion.LookRotation(direction * flipDirection);
             right.transform.rotation = Quaternion.LookRotation(direction * flipDirection);
         }
-        public void UpdatePathPostions(PathObject pathObject)
-        {
-            MeshEdje center;
-            MeshEdje left;
-            MeshEdje right;
-
-            PathNodeObject startPathNode;
-            PathNodeObject endPathNode;
-
-            if (IsStartNodeOf(pathObject))
-            {
-                center = GetMeshEdjeFor(pathObject, MeshEdje.EdjePosition.StartCenter);
-                left = GetMeshEdjeFor(pathObject, MeshEdje.EdjePosition.StartLeft);
-                right = GetMeshEdjeFor(pathObject, MeshEdje.EdjePosition.StartRight);
-
-                startPathNode = GetPathNodeFor(pathObject, PathNodeObject.OnPathPosition.StartNodeStartPath);
-                endPathNode = GetPathNodeFor(pathObject, PathNodeObject.OnPathPosition.StartNodeEndPath);
-            }
-            else
-            {
-                center = GetMeshEdjeFor(pathObject, MeshEdje.EdjePosition.EndCenter);
-                left = GetMeshEdjeFor(pathObject, MeshEdje.EdjePosition.EndLeft);
-                right = GetMeshEdjeFor(pathObject, MeshEdje.EdjePosition.EndRight);
-
-                startPathNode = GetPathNodeFor(pathObject, PathNodeObject.OnPathPosition.EndNodeStartPath);
-                endPathNode = GetPathNodeFor(pathObject, PathNodeObject.OnPathPosition.EndNodeEndPath);
-            }
-
-            Vector3 centerPos = center.Position; 
-            Vector3 leftPos = left.Position;
-            Vector3 rightPos = right.Position;
-
-            Vector3 startPathPosition = (centerPos + leftPos) / 2f;
-            Vector3 endPathPosition = (centerPos + rightPos) / 2f;
-
-            startPathNode.transform.position = startPathPosition;
-            endPathNode.transform.position = endPathPosition;
-
-            startPathNode.transform.rotation = Quaternion.LookRotation(center.Direction);
-            endPathNode.transform.rotation = Quaternion.LookRotation(center.Direction);
-        }
+        protected virtual void UpdatePathPostions(PathObject pathObject) { }
         public float GetNodeSizeFor(PathObject pathObject)
         {
             if (!HasIntersection) return 0;
@@ -373,11 +315,11 @@ namespace Path.Entities
 
             return connectedNodes;
         }
-        public List<PathNodeObject> GetAllPathNodes()
+        private List<VehiclePathNode> GetAllPathNodes()
         {
-            List<PathNodeObject> pathNodesList = new();
+            List<VehiclePathNode> pathNodesList = new();
 
-            foreach (List<PathNodeObject> pathNodes in pathNodesDict.Values)
+            foreach (List<VehiclePathNode> pathNodes in vehiclePathNodesDict.Values)
             {
                 pathNodesList.AddRange(pathNodes);
             }
@@ -389,7 +331,7 @@ namespace Path.Entities
 
             if (!HasIntersection) return connectedPathsDict;
 
-            if (HasIntersection && pathObject != null)
+            if (pathObject != null)
             {
                 Vector3 pathObjectDirection = Position - pathObject.ControlPosition;
 
@@ -433,12 +375,16 @@ namespace Path.Entities
             List<MeshEdje> meshEdjes = meshEdjesDict[pathObject];
             return meshEdjes.Find(x => x.EdjePos == edjePosition);
         }
-        public PathNodeObject GetPathNodeFor(PathObject pathObject, PathNodeObject.OnPathPosition pathPosition)
+        public VehiclePathNode GetVehiclePathNodeFor(VehiclePath pathObject, PathNodeObject.OnPathPosition pathPosition)
         {
-            List<PathNodeObject> pathNodes = pathNodesDict[pathObject];
+            List<VehiclePathNode> pathNodes = vehiclePathNodesDict[pathObject];
             return pathNodes.Find(x => x.PathPosition == pathPosition);
         }
-
+        public PedestrianPathNode GetPedestrianPathNodeFor(PathObject pathObject, PathNodeObject.OnPathPosition pathPosition)
+        {
+            List<PedestrianPathNode> pathNodes = pedestrianPathNodesDict[pathObject];
+            return pathNodes.Find(x => x.PathPosition == pathPosition);
+        }
         private void OnDrawGizmos()
         {
             Gizmos.color = Color.red;
@@ -451,7 +397,7 @@ namespace Path.Entities
             }
 
             Gizmos.color = Color.blue;
-            foreach (var items in pathNodesDict.Values)
+            foreach (var items in vehiclePathNodesDict.Values)
             {
                 foreach (var item in items)
                 {

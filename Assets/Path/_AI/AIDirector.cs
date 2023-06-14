@@ -36,7 +36,11 @@ namespace Path.AI
                     positions[i] = path[i] + Vector3.up * 0.1f;
                 }
                 lineRenderer.SetPositions(positions);
+
+                Debug.Log("Fount a Path!");
             }
+            else
+                print("what?");
         }
 
         public NodeObject GetRandomNode()

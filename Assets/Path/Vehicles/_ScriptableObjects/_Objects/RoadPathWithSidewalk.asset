@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 60f594df1f868a34fb429bc4ab29b355, type: 3}
-  m_Name: RoadPath1
+  m_Name: RoadPathWithSidewalk
   m_EditorClassIdentifier: 
   pathNodePrefab: {fileID: 6624171338857112703, guid: 81fea8b114831d34f8f09ac0d8f4be63, type: 3}
   meshEdjePrefab: {fileID: 2375173470940681689, guid: ef6f856f3a208674c9de00ab23f463f6, type: 3}
-  pathObjectPrefab: {fileID: 8494609028928608496, guid: a6717fda7e7b63c47831bb3d1cb10adb, type: 3}
+  pathObjectPrefab: {fileID: 8494609028928608496, guid: 5bac23472cba4324bb4d02b6ea6ecde0, type: 3}
   material: {fileID: 2100000, guid: 97eea5cdb1de9445fb7f71ee7ce5083c, type: 2}
+  laneWidth: 2
+  laneCount: 2
   resolution: 15
   textureTiling: 10
   minIntersectionAngle: 40
-  laneWidth: 2
-  laneCount: 2
-  hasSidewalk: 0
-  sidewalkWidth: 0
-  pedestrianPathNode: {fileID: 0}
+  hasSidewalk: 1
+  sidewalkWidth: 1
+  pedestrianPathNode: {fileID: 5788400746027219347, guid: 5d6ce945c3cec6e4d861368e01807f5b, type: 3}

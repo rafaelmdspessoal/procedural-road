@@ -17,15 +17,15 @@ namespace Path.Entities{
         public EventHandler OnPathRemoved;
         public EventHandler OnPathUpdated;
         
-        [SerializeField] private PathSO pathSO;
+        [SerializeField] protected PathSO pathSO;
         [SerializeField] private GameObject nodePrefab;
 
         private MeshFilter meshFilter;
         private MeshRenderer meshRenderer;
         private MeshCollider meshCollider;
 
-        private NodeObject startNode;
-        private NodeObject endNode;
+        protected NodeObject startNode;
+        protected NodeObject endNode;
         private GameObject controlNodeObject;
 
 
@@ -48,7 +48,7 @@ namespace Path.Entities{
             }
         }
 
-        public int Width => pathSO.width;
+        public int Width => pathSO.Width;
         public int Resolution => pathSO.resolution;
         public PathSO PathSO => pathSO;
         public Vector3 ControlPosition => controlNodeObject.transform.position;
@@ -67,17 +67,7 @@ namespace Path.Entities{
             endNode.SetMesh(endNodeMesh);
         }
 
-        private void ConnectPathNodes()
-        {
-            PathNodeObject startNodeStartPath = startNode.GetPathNodeFor(this, PathNodeObject.OnPathPosition.StartNodeStartPath);
-            PathNodeObject startNodeEndPath = startNode.GetPathNodeFor(this, PathNodeObject.OnPathPosition.StartNodeEndPath);
-
-            PathNodeObject endNodeStartPath = endNode.GetPathNodeFor(this, PathNodeObject.OnPathPosition.EndNodeStartPath);
-            PathNodeObject endNodeEndPath = endNode.GetPathNodeFor(this, PathNodeObject.OnPathPosition.EndNodeEndPath);
-
-            startNodeStartPath.AddPathNode(endNodeEndPath);
-            endNodeStartPath.AddPathNode(startNodeEndPath);
-        }
+        protected virtual void ConnectPathNodes() {}
 
         public void SetPathMesh(Mesh mesh) {
             meshFilter.mesh = mesh;
@@ -112,7 +102,7 @@ namespace Path.Entities{
         }
 
         # region CRUD
-        public void PlacePath(NodeObject startNode, NodeObject endNode, Vector3 controlPosition)
+        public virtual void PlacePath(NodeObject startNode, NodeObject endNode, Vector3 controlPosition)
         {
             this.startNode = startNode;
             this.endNode = endNode;

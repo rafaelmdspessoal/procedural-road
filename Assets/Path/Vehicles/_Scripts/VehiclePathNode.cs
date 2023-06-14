@@ -1,10 +1,11 @@
-using Path.Entities;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 namespace Path.Entities.Vehicle
 {
     public class VehiclePathNode : PathNodeObject
-    { }
+    {
+        public override void Init(OnPathPosition pathPosition)
+        {
+            base.Init(pathPosition);
+            transform.name = "Vehicle " + pathPosition.ToString();
+        }
+    }
 }

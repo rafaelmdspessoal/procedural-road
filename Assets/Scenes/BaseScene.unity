@@ -2470,6 +2470,7 @@ MonoBehaviour:
   vehiclePathList:
   - {fileID: 11400000, guid: e30f59c8504aa1f458ae61d7769155ef, type: 2}
   - {fileID: 11400000, guid: 7570f13bc4acdec42b6205620bb77532, type: 2}
+  - {fileID: 11400000, guid: 7bfb28667e56b1b49bd0ac6888e82179, type: 2}
   pedestrianPathList:
   - {fileID: 11400000, guid: 874652bef83c2bd459985e2e9a000b08, type: 2}
   - {fileID: 11400000, guid: b810a3decab9c664487af7efa8048f99, type: 2}

@@ -12,9 +12,9 @@ public class InputManager : MonoBehaviour
 
 	public Action OnEscape;
 	public Action OnCancel;
+	public Action OnNodePlaced;
 
 	public event EventHandler<OnObjectHitedEventArgs> OnSelected;
-	public event EventHandler<OnObjectHitedEventArgs> OnNodePlaced;
 	public event EventHandler<OnObjectHitedEventArgs> OnObjectRemoved;
 	public class OnObjectHitedEventArgs : EventArgs {
 		public Vector3 position;
@@ -72,14 +72,7 @@ public class InputManager : MonoBehaviour
     private void PlaceNode_performed(InputAction.CallbackContext obj) {
 		if (EventSystem.current.IsPointerOverGameObject()) return;
 
-		if (PathUtilities.TryRaycastObject(out Vector3 hitPosition, out GameObject hitObject, splitPath: true)) 
-		{
-            OnNodePlaced?.Invoke(this, new OnObjectHitedEventArgs 
-			{
-				position = hitPosition,
-				obj = hitObject
-			});
-		}
+        OnNodePlaced?.Invoke();
 	}
 
     private void Building_Escape_performed(InputAction.CallbackContext obj) 
