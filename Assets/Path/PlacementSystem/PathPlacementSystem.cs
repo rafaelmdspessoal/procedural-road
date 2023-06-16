@@ -3,18 +3,43 @@ using System;
 using System.Collections.Generic;
 using World;
 using System.Linq;
-using Path;
 using Path.Utilities;
 using Path.Placement.States;
 using Path.Entities;
 using Path.Entities.SO;
 using Path.UI;
 using Global.UI;
+using Path.Entities.Vehicle;
+using Path.Entities.Pedestrian;
+using Path.Entities.Vehicle.SO;
+using UnityEditor.Experimental.GraphView;
 
 namespace Path.PlacementSystem {
+   
+    public class PathPlacementSystem : MonoBehaviour 
+    {
+        struct PathToConnectSidewalk
+        {
+            public Vector3 positionToConnect;
+            public VehiclePath pathToConnect;
+            public PedestrianNode nodeToConnect;
+            public PedestrianPathNode startSidewalk;
+            public PedestrianPathNode endSidewalk;
 
-    public class PathPlacementSystem : MonoBehaviour {
-
+            public PathToConnectSidewalk(
+                Vector3 positionToConnect,
+                VehiclePath pathToConnect,
+                PedestrianNode nodeToConnect,
+                PedestrianPathNode startSidewalk,
+                PedestrianPathNode endSidewalk)
+            {
+                this.positionToConnect = positionToConnect;
+                this.pathToConnect = pathToConnect;
+                this.nodeToConnect = nodeToConnect;
+                this.startSidewalk = startSidewalk;
+                this.endSidewalk = endSidewalk;
+            }
+        }
         public static PathPlacementSystem Instance { get; private set; }
 
         public enum NodeBuildingState {
@@ -35,6 +60,7 @@ namespace Path.PlacementSystem {
         public class OnPathPlacedEventArgs : EventArgs { public PathObject pathObject; }
 
         private readonly Dictionary<Vector3, PathObject> pathsToSplit = new();
+        private readonly List<PathToConnectSidewalk> pathsToConnectSidewalk = new();
 
         private PathUIController pathUIController;
         private InputManager inputManager;
@@ -96,25 +122,26 @@ namespace Path.PlacementSystem {
         {
             if (buildingState == null) return;
 
-            if (PathUtilities.TryRaycastObject(out Vector3 hitPosition, out GameObject hitObject))
-            {
-                hitPosition = GetPositionForMinPathLengh(hitPosition);
-                if (startNode != null)
-                {
-                    canBuildPath = ValidateAngle(hitObject, hitPosition);
-                    Vector3 controlPos = (startNode.Position + hitPosition) / 2;
-                    if (Bezier.GetLengh(startNode.Position, hitPosition, controlPos) < minPathLengh)
-                        canBuildPath = false;
+            Vector3 position = HandlePathPositioning(out _);
+            pathSO.TryConnectToSidewalk(out _, out _, out _, out _);
 
-                    if (IsSnappingAngle)
-                        hitPosition = HandleAngleSnapping(hitPosition, hitObject);
-                }
-
-                nodeGFX.transform.position = hitPosition;
-                buildingState.UpdateState(hitPosition, pathSO, canBuildPath);
-            }
+            nodeGFX.transform.position = position;
+            buildingState.UpdateState(position, pathSO, canBuildPath);           
         }
+        private void ConnectSidewalk()
+        {
+            foreach (PathToConnectSidewalk pathToConnectSidewalk in pathsToConnectSidewalk)
+            {
+                VehiclePathSO vehiclePathSO = pathToConnectSidewalk.pathToConnect.PathSO as VehiclePathSO;
+                vehiclePathSO.AddPedestrianPathNodeBetween(
+                    pathToConnectSidewalk.startSidewalk,
+                    pathToConnectSidewalk.endSidewalk,
+                    pathToConnectSidewalk.nodeToConnect,
+                    pathToConnectSidewalk.positionToConnect);
 
+            }
+            pathsToConnectSidewalk.Clear();
+        }
         private void InputManager_OnCancel() {
             nodeBuildingState = NodeBuildingState.StartNode;
             ResetDisplayPath();
@@ -123,14 +150,30 @@ namespace Path.PlacementSystem {
         {
             ResetBuildingState();
         }
-        private void InputManager_OnNodePlaced(object sender, InputManager.OnObjectHitedEventArgs e)
+        private void InputManager_OnNodePlaced()
         {
-            Vector3 hitPosition = e.position;
-            if (startNode != null && IsSnappingAngle)
-                hitPosition = HandleAngleSnapping(hitPosition, e.obj);
+            Vector3 position = HandlePathPositioning(out GameObject hitObject);
+            if (hitObject.TryGetComponent(out PathObject pathObject))
+            {
+                AddPathToSplit(position, pathObject);
+            }
 
-            hitPosition = GetPositionForMinPathLengh(hitPosition);
-            buildingState.OnAction(hitPosition, canBuildPath);
+            buildingState.OnAction(position, canBuildPath);
+
+            if (pathSO.TryConnectToSidewalk(
+                out VehiclePath pathToConnect,
+                out PedestrianPathNode startSidewalk,
+                out PedestrianPathNode endSidewalk,
+                out Vector3 positionToConnect))
+            {
+                AddPathToConnectSidewalk(new PathToConnectSidewalk(
+                    positionToConnect,
+                    pathToConnect,
+                    startNode as PedestrianNode,
+                    startSidewalk,
+                    endSidewalk
+                ));
+            }
         }
         private void PathUIController_OnPathDown() {
             throw new NotImplementedException();
@@ -168,35 +211,52 @@ namespace Path.PlacementSystem {
         }
         private void PathUIController_OnBuildingStraightPath() {
             ResetBuildingState();
-            if (nodeGFX == null) nodeGFX = PathUtilities.CreateNodeGFX(pathSO);
-            else nodeGFX.SetActive(true);
-
+            nodeGFX.SetActive(true);
             buildingState = new BuildingStraightPath(this);
         }
         private void PathUIController_OnBuildingCurvedPath() {
             ResetBuildingState();
-            if (nodeGFX == null) nodeGFX = PathUtilities.CreateNodeGFX(pathSO);
-            else nodeGFX.SetActive(true);
-
+            nodeGFX.SetActive(true);
             buildingState = new BuildingCurvedPath(this);
         }
         private void PathUIController_OnBuildingFreePath() {
             ResetBuildingState();
-            if (nodeGFX == null) nodeGFX = PathUtilities.CreateNodeGFX(pathSO);
-            else nodeGFX.SetActive(true);
-
+            nodeGFX.SetActive(true);
             buildingState = new BuildingFreePath(this);
         }
         private void PathUIController_OnObjectSelected(GameObject obj) 
         {
             ResetBuildingState();
-            PathSO pathObjectSO = obj.GetComponent<PathObject>().PathSO;
-            pathSO = pathObjectSO;
-            minPathLengh = pathObjectSO.width * 1.5f;
-            if (nodeGFX == null) nodeGFX = PathUtilities.CreateNodeGFX(pathSO);
-            else nodeGFX.SetActive(true);
+            pathSO = obj.GetComponent<PathObject>().PathSO;
+            minPathLengh = pathSO.Width * 1.5f;
+            nodeGFX = PathUtilities.UpdateOrCreateNodeGFX(pathSO, nodeGFX);
+            nodeGFX.SetActive(true);
 
             buildingState = new BuildingStraightPath(this);
+        }
+        public void PlacePath()
+        {
+            PathObject placedPath = pathSO.CreatePathObject(startNode, endNode, controlPosition, pathManager.PathParentTransform); 
+            
+            if (pathSO.TryConnectToSidewalk(
+                out VehiclePath pathToConnect,
+                out PedestrianPathNode startSidewalk,
+                out PedestrianPathNode endSidewalk,
+                out Vector3 positionToConnect))
+            {
+                AddPathToConnectSidewalk(new PathToConnectSidewalk(
+                    positionToConnect,
+                    pathToConnect,
+                    endNode as PedestrianNode,
+                    startSidewalk,
+                    endSidewalk
+                ));
+            }
+            ConnectSidewalk();
+            NodeObject cachedEndNode = endNode;
+            ResetPathPositions();
+            startNode = cachedEndNode;
+            OnPathPlaced?.Invoke(this, new OnPathPlacedEventArgs { pathObject = placedPath });
         }
         private void ResetBuildingState()
         {
@@ -209,15 +269,16 @@ namespace Path.PlacementSystem {
             ResetPathPositions();
             canBuildPath = true;
             pathsToSplit.Clear();
+            pathsToConnectSidewalk.Clear();
             buildingState?.StopPreviewDisplay();
         }
         private void ResetPathPositions()
         {
             if (startNode != null && !startNode.HasConnectedPaths)
-                Destroy(startNode.gameObject);
+                pathManager.RemoveNode(startNode);
 
             if (endNode != null && !endNode.HasConnectedPaths)
-                Destroy(endNode.gameObject);
+                pathManager.RemoveNode(endNode);
 
             endNode = null;
             startNode = null;
@@ -226,13 +287,6 @@ namespace Path.PlacementSystem {
         private void UIController_OnRemovingObjects()
         {
             ResetBuildingState();
-        }
-        public void PlacePath() {
-            PathObject placedPath = pathSO.CreatePathObject(startNode, endNode, controlPosition, pathManager.PathParentTransform);
-            NodeObject cachedEndNode = endNode;
-            ResetPathPositions();
-            startNode = cachedEndNode;
-            OnPathPlaced?.Invoke(this, new OnPathPlacedEventArgs { pathObject = placedPath });
         }
         public void SplitPath() {
             foreach (Vector3 positionToSplit in pathsToSplit.Keys) {
@@ -267,22 +321,27 @@ namespace Path.PlacementSystem {
             }
             pathsToSplit.Clear();
         }
-        public void AddPathToSplit(Vector3 position, PathObject pathObject) {
+        private void AddPathToSplit(Vector3 position, PathObject pathObject) {
             if (!pathsToSplit.ContainsKey(position)) {
                 pathsToSplit.Add(position, pathObject);
+            }
+        }
+        private void AddPathToConnectSidewalk(PathToConnectSidewalk pathToConnectSidewalk)
+        {
+            if (!pathsToConnectSidewalk.Contains(pathToConnectSidewalk))
+            {
+                pathsToConnectSidewalk.Add(pathToConnectSidewalk);
             }
         }
         public void UpdateBuildingState(NodeBuildingState state)
         {
             nodeBuildingState = state;
         }
-        public Vector3 GetPositionForMinPathLengh(Vector3 position) {
-            if (startNode != null) {
-                Vector3 pathDir = position - startNode.Position;
-
-                if (pathDir.magnitude < minPathLengh)
-                    position += pathDir.normalized * minPathLengh - pathDir;
-            }
+        public Vector3 GetPositionForMinPathLengh(Vector3 position)
+        {
+            Vector3 pathDir = position - startNode.Position;
+            if (pathDir.magnitude < minPathLengh)
+                position += pathDir.normalized * minPathLengh - pathDir;
 
             return position;
         }
@@ -302,9 +361,7 @@ namespace Path.PlacementSystem {
         }
         public Vector3 HandleAngleSnapping(Vector3 hitPosition, GameObject hitObject) 
         {
-            if (!buildingState.CanSnapAngle()) return hitPosition;
-            if (!hitObject.TryGetComponent(out Ground _)) return hitPosition;
-            if (!startNode.HasConnectedPaths) return hitPosition;
+            if (!CanSnapAngle(hitObject)) return hitPosition;
 
             Vector3 currentDirection = hitPosition - startNode.Position;
             Vector3 projection = Vector3.zero;
@@ -317,6 +374,31 @@ namespace Path.PlacementSystem {
 
             Vector3 targetPosition = projection + startNode.Position;
             return targetPosition;
+        }
+        private Vector3 HandlePathPositioning(out GameObject hitObject)
+        {
+            if (pathSO.TryGetPathPositions(out Vector3 hitPosition, out hitObject))
+            {
+                if (startNode != null)
+                {
+                    hitPosition = GetPositionForMinPathLengh(hitPosition);
+                    if (IsSnappingAngle)
+                        hitPosition = HandleAngleSnapping(hitPosition, hitObject);
+                    canBuildPath = ValidateCanBuildPath(hitObject, hitPosition);
+                }
+            }
+            return hitPosition;
+        }
+
+        private bool ValidateCanBuildPath(GameObject hitObject, Vector3 hitPosition)
+        {
+            return ValidateAngle(hitObject, hitPosition) && ValidateLengh(hitPosition);
+        }
+        public bool CanSnapAngle(GameObject hitObject)
+        {
+            if (!buildingState.CanSnapAngle() || !hitObject.TryGetComponent(out Ground _) || !startNode.HasConnectedPaths) 
+                return false;
+            return true;
         }
         public bool CheckPathAngleInRange(Vector3 pathDirection) {
             if (startNode == null && pathsToSplit.Count <= 0) 
@@ -389,6 +471,13 @@ namespace Path.PlacementSystem {
                 return CheckPathAngleInRange(ControlPosition - hitPosition, hitObject, hitPosition);
 
             return false;
+        }
+        private bool ValidateLengh(Vector3 hitPosition)
+        {
+            Vector3 controlPos = (startNode.Position + hitPosition) / 2;
+            if (Bezier.GetLengh(startNode.Position, hitPosition, controlPos) < minPathLengh)
+                return false;
+            return true;
         }
         public bool IsSnappingAngle => snappingAngle != AngleSnap.Zero;
         public NodeObject StartNode { get { return startNode; } }

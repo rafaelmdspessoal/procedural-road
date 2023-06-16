@@ -1,6 +1,4 @@
 using Path.Entities;
-using Paths;
-using System.Drawing;
 using UnityEngine;
 
 public static class Bezier
@@ -17,11 +15,20 @@ public static class Bezier
         return Lerp(startControlLerp, controlEndLerp, t);
     }
 
-    private static Vector3 Lerp(Vector3 start, Vector3 end, float t) {
+    public static Vector3 Lerp(Vector3 start, Vector3 end, float t) {
         return start + (end - start) * t;
     }
 
     public static Vector3 GetClosestPointTo(PathObject pathObject, Vector3 position)
+    {
+        Vector3 point = GetClosestPointTo(
+            pathObject.StartNode.Position, 
+            pathObject.EndNode.Position, 
+            pathObject.ControlPosition,
+            position);
+        return point;
+    }
+    public static Vector3 GetClosestPointTo(Vector3 startPostiion, Vector3 endPosition, Vector3 controlPosition, Vector3 position)
     {
         float t = 0;
         float minDistanceToSegment = Mathf.Infinity;
@@ -30,9 +37,9 @@ public static class Bezier
         {
             t += .001f;
             point = QuadraticCurve(
-                pathObject.StartNode.Position, 
-                pathObject.EndNode.Position, 
-                pathObject.ControlPosition, 
+                startPostiion,
+                endPosition,
+                controlPosition,
                 t
             );
             float distance = Vector3.Distance(position, point);

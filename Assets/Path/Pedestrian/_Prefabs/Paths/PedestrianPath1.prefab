@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8310330583807213603}
   - component: {fileID: 5758525422499931771}
   m_Layer: 0
-  m_Name: TestPedestrianPathPrefab
+  m_Name: PedestrianPath1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

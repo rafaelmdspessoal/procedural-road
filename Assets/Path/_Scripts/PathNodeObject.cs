@@ -25,8 +25,11 @@ namespace Path.Entities
 
         public void AddPathNode(PathNodeObject pathNode)
         {
-            connectedNodesList.Add(pathNode);
-            pathNode.OnConnectionRemoved += PathNode_OnConnectionRemoved;
+            if (!connectedNodesList.Contains(pathNode))
+            {
+                connectedNodesList.Add(pathNode);
+                pathNode.OnConnectionRemoved += PathNode_OnConnectionRemoved;
+            }
         }
 
         public void ClearConnections()
@@ -48,10 +51,9 @@ namespace Path.Entities
             return connectedNodesList;
         }
 
-        public void Init(OnPathPosition pathPosition)
+        public virtual void Init(OnPathPosition pathPosition)
         {
             this.pathPosition = pathPosition;
-            transform.name = pathPosition.ToString();
         }
 
         public bool IsStartOfPath => (
@@ -70,7 +72,7 @@ namespace Path.Entities
             connectedNodesList.Remove(pathNode);
         }
 
-        private void OnDestroy()
+        protected virtual void OnDestroy()
         {
             OnConnectionRemoved?.Invoke(this, EventArgs.Empty);
             OnConnectionRemoved = null;

@@ -4,19 +4,29 @@ using Path.Entities.Meshes;
 using Rafael.Utils;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.InputSystem;
+using World;
+using Path.Entities.Pedestrian;
+using Path.Entities.Vehicle;
 
 namespace Path.Entities.SO
 {
     public abstract class PathSO : ScriptableObject
     {
+        public GameObject pathNodePrefab;
+        public GameObject meshEdjePrefab;
+
         public GameObject pathObjectPrefab;
         public Material material;
 
-        public int width;
+        public int laneWidth;
+        public int laneCount;
+        public virtual int Width => laneWidth * laneCount;
+
         public int resolution;
         public int textureTiling;
 
-        public int minIntersectionAngle;        
+        public int minIntersectionAngle;
 
         public PathObject CreatePathObject(
             NodeObject startNode,
@@ -47,6 +57,7 @@ namespace Path.Entities.SO
             CreatePathObject(intersectionNode, endNode, endControlPosition, parentTransform);
         }
 
+        #region handle mesh creation
         public Mesh CreatePathMesh(PathObject pathObject)
         {
             MeshData meshData = new();
@@ -78,7 +89,6 @@ namespace Path.Entities.SO
             mesh.CombineMeshes(meshes, true, false);
             return mesh;
         }
-        
         private MeshData PopulatePathMesh(MeshData meshData, PathObject pathObject)
         {
             NodeObject startNode = pathObject.StartNode;
@@ -166,10 +176,10 @@ namespace Path.Entities.SO
             Vector3 pathLeftPos = pathLeft.Position - nodePosition;
             Vector3 pathRightPos = pathRight.Position - nodePosition;
 
-            Vector3 leftDir = (pathLeftPos - pathCenterPos).normalized;
-            Vector3 startPosition = pathCenterPos - pathCenterPos.normalized * width / 2;
-            Vector3 controlLeft = startPosition + leftDir * width / 2;
-            Vector3 controlRight = startPosition - leftDir * width / 2;
+            Vector3 leftDir = pathLeftPos - pathCenterPos;
+            Vector3 startPosition = pathCenterPos - pathCenterPos.normalized * leftDir.magnitude;
+            Vector3 controlLeft = startPosition + leftDir;
+            Vector3 controlRight = startPosition - leftDir;
 
             for (int i = 0; i < resolution; i++)
             {
@@ -358,9 +368,9 @@ namespace Path.Entities.SO
         {
             float t;
 
-            for (int i = resolution / 2 - 1; i < resolution - 1; i++)
+            for (int i = resolution / 2; i < resolution; i++)
             {
-                t = i / (float)(resolution - 2);
+                t = i / (float)(resolution - 1);
                 Vector3 leftPathVertice = Bezier.QuadraticCurve(startLeft, endLeft, controlLeft, t);
                 Vector3 centerPathVertice = Bezier.QuadraticCurve(startCenter, endCenter, controlCenter, t);
                 Vector3 rightPathVertice = Bezier.QuadraticCurve(startRight, endRight, controlRight, t);
@@ -370,6 +380,58 @@ namespace Path.Entities.SO
                 meshData.AddVertice(rightPathVertice);
             }
             return meshData;
+        }
+        #endregion
+
+        public virtual bool TryGetPathPositions(out Vector3 hitPosition, out GameObject hitObject)
+        {
+            hitObject = default;
+
+            if (TryRaycastObject(out hitPosition, out Ground ground))
+            {
+                hitPosition = new Vector3(hitPosition.x, hitPosition.y + 0.1f, hitPosition.z);
+                hitObject = ground.gameObject;
+                return true;
+            }
+
+            return false;
+        }
+        public bool TryRaycastObject<T>(out Vector3 hitPosition, out T hitObject)
+        {
+            int radius = Width * 2;
+            hitObject = default;
+            hitPosition = Vector3.zero;
+            Vector3 mousePosition = Mouse.current.position.ReadValue();
+            Ray ray = Camera.main.ScreenPointToRay(mousePosition);
+
+            if (Physics.Raycast(ray, out RaycastHit rayHit, Mathf.Infinity))
+            {
+                hitPosition = rayHit.point;
+                RaycastHit[] sphereHits = Physics.SphereCastAll(hitPosition, radius, new Vector3(1f, 0, 0), radius);
+                foreach (RaycastHit sphereHit in sphereHits)
+                {
+                    GameObject hitObj = sphereHit.transform.gameObject;
+
+                    if (hitObj.TryGetComponent(out T obj))
+                    {
+                        hitObject = obj;
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        public virtual bool TryConnectToSidewalk(
+            out VehiclePath pathToConnect,
+            out PedestrianPathNode startPathNode,
+            out PedestrianPathNode endPathNode,
+            out Vector3 positionToConnect)
+        {
+            pathToConnect = default;
+            startPathNode = default;
+            endPathNode = default;
+            positionToConnect = Vector3.negativeInfinity;
+            return false;
         }
     }
 }

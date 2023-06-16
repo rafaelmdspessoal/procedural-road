@@ -87,15 +87,17 @@
     <Compile Include="Assets\Path\PlacementSystem\PathPreviewSystem.cs" />
     <Compile Include="Assets\Scripts\TestVectorScript.cs" />
     <Compile Include="Assets\Path\_Scripts\PathNodeObject.cs" />
+    <Compile Include="Assets\Path\Vehicles\_AI\VehiclePathFinding.cs" />
     <Compile Include="Assets\Path\_Scripts\PathObject.cs" />
-    <Compile Include="Assets\Path\_Scripts\PathFinding.cs" />
+    <Compile Include="Assets\Path\_AI\PathFindingManager.cs" />
     <Compile Include="Assets\Scripts\UI\UIController.cs" />
     <Compile Include="Assets\Path\PlacementSystem\PathPlacementSystem.cs" />
     <Compile Include="Assets\Path\Pedestrian\_Scripts\PedestrianNode.cs" />
+    <Compile Include="Assets\Path\_AI\PathFinding.cs" />
     <Compile Include="Assets\Path\Vehicles\_Scripts\VehiclePathNode.cs" />
     <Compile Include="Assets\Scripts\InputManagers\InputManager.cs" />
-    <Compile Include="Assets\Path\Pedestrian\_Scripts\PedestrianPathFinding.cs" />
     <Compile Include="Assets\Path\Mesh\_Scripts\MeshUtilities.cs" />
+    <Compile Include="Assets\Path\Pedestrian\_AI\PedestrianPathFinding.cs" />
     <Compile Include="Assets\Path\UI\PathUIController.cs" />
   </ItemGroup>
   <ItemGroup>

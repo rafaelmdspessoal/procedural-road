@@ -35,7 +35,7 @@ namespace Path.Placement.States {
                startPosition,
                controlPosition,
                hitPosition,
-               pathObjectSO.width,
+               pathObjectSO.Width,
                pathObjectSO.resolution,
                canBuildPath);
         }

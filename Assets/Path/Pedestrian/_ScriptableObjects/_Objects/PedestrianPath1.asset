@@ -10,11 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 84295e6370b48d54cafa4c128529b973, type: 3}
-  m_Name: TestPedestrianPath
+  m_Name: PedestrianPath1
   m_EditorClassIdentifier: 
+  pathNodePrefab: {fileID: 5788400746027219347, guid: 5d6ce945c3cec6e4d861368e01807f5b, type: 3}
+  meshEdjePrefab: {fileID: 2375173470940681689, guid: ef6f856f3a208674c9de00ab23f463f6, type: 3}
   pathObjectPrefab: {fileID: 2335641471727730, guid: cbe3769974b95c44e907036f6ab72d05, type: 3}
   material: {fileID: 2100000, guid: 77fe2bf290d8853459c2a74367a05e2c, type: 2}
-  width: 1
+  laneWidth: 2
+  laneCount: 2
   resolution: 15
   textureTiling: 20
   minIntersectionAngle: 40

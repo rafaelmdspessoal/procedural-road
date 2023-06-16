@@ -1,5 +1,5 @@
 using Path.Entities;
-using Path.Entities.Pedestrian;
+using Path.Entities.Vehicle;
 using Rafael.Utils;
 using System;
 using System.Collections.Generic;
@@ -7,11 +7,11 @@ using UnityEngine;
 
 namespace Path.AI.Pedestrian
 {
-    public class PedestrianPathFinding
+    public class VehiclePathFinding
     {
         public static List<Vector3> GetPathBetween(NodeObject startNode, NodeObject endNode)
         {
-            List<PathNodeObject> pathNodesForPath = AStarSearch(startNode, endNode);
+            List<VehiclePathNode> pathNodesForPath = AStarSearch(startNode, endNode);
             List<Vector3> path = new();
             int numPathPoints = 15;
             for (int i = 0; i < pathNodesForPath.Count - 1; i++)
@@ -37,29 +37,51 @@ namespace Path.AI.Pedestrian
             return path;
         }
 
-        private static List<PathNodeObject> AStarSearch(NodeObject startNode, NodeObject endNode)
+        private static List<VehiclePathNode> AStarSearch(NodeObject startNode, NodeObject endNode)
         {
             List<NodeObject> nodes = PathFinding.GetPathBetween(startNode, endNode);
-            PathObject pathStart = PathManager.Instance.GetPathBetween(nodes[0], nodes[1]);
-            PathObject pathEnd = PathManager.Instance.GetPathBetween(nodes[nodes.Count - 2], nodes[nodes.Count - 1]);
-            PathNodeObject startPathNode;
-            PathNodeObject endPathNode;
-            List<PathNodeObject> path = new();
+            VehiclePath pathStart;
+            VehiclePath pathEnd;
+            VehiclePathNode startPathNode;
+            VehiclePathNode endPathNode;
 
-            if (startNode.IsStartNodeOf(pathStart))
-                startPathNode = startNode.GetPathNodeFor(pathStart, PathNodeObject.OnPathPosition.StartNodeStartPath);
-            else
-                startPathNode = startNode.GetPathNodeFor(pathStart, PathNodeObject.OnPathPosition.EndNodeStartPath);
+            List<VehiclePathNode> path = new();
+            List<VehiclePathNode> nodesTocheck = new();
+            Dictionary<VehiclePathNode, float> costDictionary = new();
+            Dictionary<VehiclePathNode, float> priorityDictionary = new();
+            Dictionary<VehiclePathNode, VehiclePathNode> parentsDictionary = new();
 
-            if (endNode.IsStartNodeOf(pathEnd))
-                endPathNode = endNode.GetPathNodeFor(pathEnd, PathNodeObject.OnPathPosition.StartNodeEndPath);
-            else
-                endPathNode = endNode.GetPathNodeFor(pathEnd, PathNodeObject.OnPathPosition.EndNodeEndPath);
 
-            List<PathNodeObject> nodesTocheck = new();
-            Dictionary<PathNodeObject, float> costDictionary = new();
-            Dictionary<PathNodeObject, float> priorityDictionary = new();
-            Dictionary<PathNodeObject, PathNodeObject> parentsDictionary = new();
+            try
+            {
+                pathStart = PathManager.Instance.GetPathBetween(nodes[0], nodes[1]) as VehiclePath;
+                pathEnd = PathManager.Instance.GetPathBetween(nodes[nodes.Count - 2], nodes[nodes.Count - 1]) as VehiclePath;
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                Debug.LogError("Start and end have no connecting path");
+                // NOTE: Start and end have no connecting path between then.
+                return path;
+            }
+
+            try
+            {
+                if (startNode.IsStartNodeOf(pathStart))
+                    startPathNode = startNode.GetVehiclePathNodeFor(pathStart, PathNodeObject.OnPathPosition.StartNodeStartPath);
+                else
+                    startPathNode = startNode.GetVehiclePathNodeFor(pathStart, PathNodeObject.OnPathPosition.EndNodeStartPath);
+
+                if (endNode.IsStartNodeOf(pathEnd))
+                    endPathNode = endNode.GetVehiclePathNodeFor(pathEnd, PathNodeObject.OnPathPosition.StartNodeEndPath);
+                else
+                    endPathNode = endNode.GetVehiclePathNodeFor(pathEnd, PathNodeObject.OnPathPosition.EndNodeEndPath);
+            }
+            catch (KeyNotFoundException)
+            {
+                Debug.LogError("Path not found!");
+                // TODO: Handle when path not found!
+                return path;
+            }
 
             nodesTocheck.Add(startPathNode);
             priorityDictionary.Add(startPathNode, 0);
@@ -68,7 +90,7 @@ namespace Path.AI.Pedestrian
 
             while (nodesTocheck.Count > 0)
             {
-                PathNodeObject currentNode = GetClosestPathNode(nodesTocheck, priorityDictionary);
+                VehiclePathNode currentNode = GetClosestPathNode(nodesTocheck, priorityDictionary);
                 nodesTocheck.Remove(currentNode);
                 if (currentNode.Equals(endPathNode))
                 {
@@ -76,7 +98,7 @@ namespace Path.AI.Pedestrian
                     return path;
                 }
 
-                foreach (PathNodeObject neighbour in currentNode.GetConnectedNodes())
+                foreach (VehiclePathNode neighbour in currentNode.GetConnectedNodes())
                 {
                     float newCost = costDictionary[currentNode] + 1;
                     if (!costDictionary.ContainsKey(neighbour) || newCost < costDictionary[neighbour])
@@ -94,10 +116,10 @@ namespace Path.AI.Pedestrian
             return path;
         }
 
-        private static PathNodeObject GetClosestPathNode(List<PathNodeObject> list, Dictionary<PathNodeObject, float> distanceMap)
+        private static VehiclePathNode GetClosestPathNode(List<VehiclePathNode> list, Dictionary<VehiclePathNode, float> distanceMap)
         {
-            PathNodeObject candidate = list[0];
-            foreach (PathNodeObject vertex in list)
+            VehiclePathNode candidate = list[0];
+            foreach (VehiclePathNode vertex in list)
             {
                 if (distanceMap[vertex] < distanceMap[candidate])
                 {
@@ -107,15 +129,15 @@ namespace Path.AI.Pedestrian
             return candidate;
         }
 
-        private static float ManhattanDiscance(PathNodeObject endPos, PathNodeObject position)
+        private static float ManhattanDiscance(VehiclePathNode endPos, VehiclePathNode position)
         {
             return Math.Abs(endPos.Position.x - position.Position.x) + Math.Abs(endPos.Position.z - position.Position.z);
         }
 
-        public static List<PathNodeObject> GeneratePath(Dictionary<PathNodeObject, PathNodeObject> parentMap, PathNodeObject endState)
+        public static List<VehiclePathNode> GeneratePath(Dictionary<VehiclePathNode, VehiclePathNode> parentMap, VehiclePathNode endState)
         {
-            List<PathNodeObject> path = new();
-            PathNodeObject parent = endState;
+            List<VehiclePathNode> path = new();
+            VehiclePathNode parent = endState;
             while (parent != null && parentMap.ContainsKey(parent))
             {
                 path.Add(parent);

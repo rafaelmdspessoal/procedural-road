@@ -8,6 +8,8 @@ namespace Path.AI
     public class AIDirector : MonoBehaviour
     {
         private PathManager pathManager;
+        [SerializeReference] private NodeObject.PathFor pathFor;
+
         private List<Vector3> path = new();
 
         public LineRenderer lineRenderer;
@@ -20,7 +22,10 @@ namespace Path.AI
 
         public void GetPathBetween(NodeObject startNode, NodeObject endNode)
         {
-            path = PedestrianPathFinding.GetPathBetween(startNode, endNode);
+            if (pathFor == NodeObject.PathFor.Pedestrian) 
+                path = PedestrianPathFinding.GetPathBetween(startNode, endNode);
+            else
+                path = VehiclePathFinding.GetPathBetween(startNode, endNode);
 
             if (path.Count > 1)
             {
@@ -31,12 +36,16 @@ namespace Path.AI
                     positions[i] = path[i] + Vector3.up * 0.1f;
                 }
                 lineRenderer.SetPositions(positions);
+
+                Debug.Log("Fount a Path!");
             }
+            else
+                print("what?");
         }
 
         public NodeObject GetRandomNode()
         {
-            return pathManager.GetRandomNode();
+            return pathManager.GetRandomNode(pathFor);
         }
     }
 }
