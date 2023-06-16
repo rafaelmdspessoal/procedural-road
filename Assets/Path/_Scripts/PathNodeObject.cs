@@ -72,7 +72,7 @@ namespace Path.Entities
             connectedNodesList.Remove(pathNode);
         }
 
-        private void OnDestroy()
+        protected virtual void OnDestroy()
         {
             OnConnectionRemoved?.Invoke(this, EventArgs.Empty);
             OnConnectionRemoved = null;

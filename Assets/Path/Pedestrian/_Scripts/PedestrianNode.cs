@@ -1,3 +1,4 @@
+using Path.AI;
 using Path.Entities.Meshes;
 using Path.Entities.Pedestrian.SO;
 using System.Collections.Generic;
@@ -43,8 +44,6 @@ namespace Path.Entities.Pedestrian
         }
         protected override void UpdatePathPostions(PathObject pathObject)
         {
-            base.UpdatePathPostions(pathObject);
-
             MeshEdje center;
             MeshEdje left;
 
@@ -84,6 +83,51 @@ namespace Path.Entities.Pedestrian
             startPathNode.transform.rotation = Quaternion.LookRotation(center.Direction);
             endPathNode.transform.rotation = Quaternion.LookRotation(center.Direction);
         }
+        public override void ConnectPathNodes()
+        {
+            PedestrianPathNode thisPathStart;
+            PedestrianPathNode thisPathEnd;
 
+            PedestrianPathNode nextPathStart;
+
+            foreach (PathObject connectedPath in ConnectedPaths)
+            {
+                if (IsStartNodeOf(connectedPath))
+                {
+                    thisPathStart = GetPedestrianPathNodeFor(connectedPath, PathNodeObject.OnPathPosition.StartNodeStartPath);
+                    thisPathEnd = GetPedestrianPathNodeFor(connectedPath, PathNodeObject.OnPathPosition.StartNodeEndPath);
+                }
+                else
+                {
+                    thisPathStart = GetPedestrianPathNodeFor(connectedPath, PathNodeObject.OnPathPosition.EndNodeStartPath);
+                    thisPathEnd = GetPedestrianPathNodeFor(connectedPath, PathNodeObject.OnPathPosition.EndNodeEndPath);
+                }
+
+                if (ConnectedPaths.Count == 1)
+                {
+                    thisPathEnd.AddPathNode(thisPathStart);
+                    return;
+                }
+
+                foreach (PathObject nextConnectedPath in ConnectedPaths)
+                {
+                    if (connectedPath == nextConnectedPath) continue;
+                    if (IsStartNodeOf(nextConnectedPath))
+                        nextPathStart = GetPedestrianPathNodeFor(nextConnectedPath, PathNodeObject.OnPathPosition.StartNodeStartPath);
+                    else
+                        nextPathStart = GetPedestrianPathNodeFor(nextConnectedPath, PathNodeObject.OnPathPosition.EndNodeStartPath);
+
+                    thisPathEnd.AddPathNode(nextPathStart);
+                }
+            }
+        }
+        public void ConnectToSidewalk(PedestrianPathNode sidewalkNode)
+        {
+            foreach (PedestrianPathNode pedestrianPathNode in GetAllPedestrianPathNodes())
+            {
+                pedestrianPathNode.AddPathNode(sidewalkNode);
+                sidewalkNode.AddPathNode(pedestrianPathNode);
+            }
+        }
     }
 }

@@ -1,3 +1,4 @@
+using Path.AI;
 using Path.Entities.Meshes;
 using Path.Entities.Pedestrian;
 using Path.Entities.Pedestrian.SO;
@@ -76,17 +77,53 @@ namespace Path.Entities.Vehicle
         }
         protected override void UpdatePathPostions(PathObject pathObject)
         {
-            base.UpdatePathPostions(pathObject);
+            MeshEdje center;
+            MeshEdje left;
 
+            VehiclePathNode startVehiclePathNode;
+            VehiclePathNode endVehiclePathNode;
+
+            int laneWidth = pathObject.PathSO.laneWidth;
+
+            if (IsStartNodeOf(pathObject))
+            {
+                center = GetMeshEdjeFor(pathObject, MeshEdje.EdjePosition.StartCenter);
+                left = GetMeshEdjeFor(pathObject, MeshEdje.EdjePosition.StartLeft);
+
+                startVehiclePathNode = GetVehiclePathNodeFor(pathObject, PathNodeObject.OnPathPosition.StartNodeStartPath);
+                endVehiclePathNode = GetVehiclePathNodeFor(pathObject, PathNodeObject.OnPathPosition.StartNodeEndPath);
+            }
+            else
+            {
+                center = GetMeshEdjeFor(pathObject, MeshEdje.EdjePosition.EndCenter);
+                left = GetMeshEdjeFor(pathObject, MeshEdje.EdjePosition.EndLeft);
+
+                startVehiclePathNode = GetVehiclePathNodeFor(pathObject, PathNodeObject.OnPathPosition.EndNodeStartPath);
+                endVehiclePathNode = GetVehiclePathNodeFor(pathObject, PathNodeObject.OnPathPosition.EndNodeEndPath);
+            }
+
+            Vector3 centerPos = center.Position;
+            Vector3 leftPos = left.Position;
+
+            Vector3 leftDir = (leftPos - centerPos).normalized;
+
+            Vector3 startPathPosition = centerPos + leftDir * laneWidth / 2;
+            Vector3 endPathPosition = centerPos - leftDir * laneWidth / 2;
+
+            startVehiclePathNode.transform.position = startPathPosition;
+            endVehiclePathNode.transform.position = endPathPosition;
+
+            startVehiclePathNode.transform.rotation = Quaternion.LookRotation(center.Direction);
+            endVehiclePathNode.transform.rotation = Quaternion.LookRotation(center.Direction);
+
+            // Handle widewalks
             VehiclePath path = pathObject as VehiclePath;
             VehiclePathSO vehiclePathSO = path.PathSO as VehiclePathSO;
             if (!vehiclePathSO.hasSidewalk) return;
             hasPathWithSidewalk = true;
-            MeshEdje center;
-            MeshEdje left;
 
-            PedestrianPathNode startPathNode;
-            PedestrianPathNode endPathNode;
+            PedestrianPathNode startPedestrianPathNode;
+            PedestrianPathNode endPedestrianPathNode;
 
             int width = vehiclePathSO.Width;
             int sidewalkWidth = vehiclePathSO.sidewalkWidth;
@@ -96,36 +133,72 @@ namespace Path.Entities.Vehicle
                 center = GetMeshEdjeFor(path, MeshEdje.EdjePosition.StartCenter);
                 left = GetMeshEdjeFor(path, MeshEdje.EdjePosition.StartLeft);
 
-                startPathNode = GetPedestrianPathNodeFor(path, PathNodeObject.OnPathPosition.StartNodeStartPath);
-                endPathNode = GetPedestrianPathNodeFor(path, PathNodeObject.OnPathPosition.StartNodeEndPath);
+                startPedestrianPathNode = GetPedestrianPathNodeFor(path, PathNodeObject.OnPathPosition.StartNodeStartPath);
+                endPedestrianPathNode = GetPedestrianPathNodeFor(path, PathNodeObject.OnPathPosition.StartNodeEndPath);
             }
             else
             {
                 center = GetMeshEdjeFor(path, MeshEdje.EdjePosition.EndCenter);
                 left = GetMeshEdjeFor(path, MeshEdje.EdjePosition.EndLeft);
 
-                startPathNode = GetPedestrianPathNodeFor(path, PathNodeObject.OnPathPosition.EndNodeStartPath);
-                endPathNode = GetPedestrianPathNodeFor(path, PathNodeObject.OnPathPosition.EndNodeEndPath);
+                startPedestrianPathNode = GetPedestrianPathNodeFor(path, PathNodeObject.OnPathPosition.EndNodeStartPath);
+                endPedestrianPathNode = GetPedestrianPathNodeFor(path, PathNodeObject.OnPathPosition.EndNodeEndPath);
             }
 
-            Vector3 centerPos = center.Position;
-            Vector3 leftPos = left.Position;
+            centerPos = center.Position;
+            leftPos = left.Position;
 
-            Vector3 leftDir = (leftPos - centerPos).normalized;
+            leftDir = (leftPos - centerPos).normalized;
 
-            Vector3 startPathPosition = centerPos + leftDir * (width / 2 - sidewalkWidth + sidewalkWidth / 2f);
-            Vector3 endPathPosition = centerPos - leftDir * (width / 2 - sidewalkWidth + sidewalkWidth / 2f);
+            startPathPosition = centerPos + leftDir * (width / 2 - sidewalkWidth + sidewalkWidth / 2f);
+            endPathPosition = centerPos - leftDir * (width / 2 - sidewalkWidth + sidewalkWidth / 2f);
 
-            startPathNode.transform.position = startPathPosition;
-            endPathNode.transform.position = endPathPosition;
+            startPedestrianPathNode.transform.position = startPathPosition;
+            endPedestrianPathNode.transform.position = endPathPosition;
 
-            startPathNode.transform.rotation = Quaternion.LookRotation(center.Direction);
-            endPathNode.transform.rotation = Quaternion.LookRotation(center.Direction);
+            startPedestrianPathNode.transform.rotation = Quaternion.LookRotation(center.Direction);
+            endPedestrianPathNode.transform.rotation = Quaternion.LookRotation(center.Direction);
         }
         public override void ConnectPathNodes()
         {
-            base.ConnectPathNodes();
+            VehiclePathNode thisPathStart;
+            VehiclePathNode thisPathEnd;
 
+            VehiclePathNode nextPathStart;
+
+            foreach (PathObject connectedPath in ConnectedPaths)
+            {
+                if (IsStartNodeOf(connectedPath))
+                {
+                    thisPathStart = GetVehiclePathNodeFor(connectedPath, PathNodeObject.OnPathPosition.StartNodeStartPath);
+                    thisPathEnd = GetVehiclePathNodeFor(connectedPath, PathNodeObject.OnPathPosition.StartNodeEndPath);
+                }
+                else
+                {
+                    thisPathStart = GetVehiclePathNodeFor(connectedPath, PathNodeObject.OnPathPosition.EndNodeStartPath);
+                    thisPathEnd = GetVehiclePathNodeFor(connectedPath, PathNodeObject.OnPathPosition.EndNodeEndPath);
+                }
+
+                if (ConnectedPaths.Count == 1)
+                {
+                    thisPathEnd.AddPathNode(thisPathStart);
+                }
+                else
+                {
+                    foreach (PathObject nextConnectedPath in ConnectedPaths)
+                    {
+                        if (connectedPath == nextConnectedPath) continue;
+                        if (IsStartNodeOf(nextConnectedPath))
+                            nextPathStart = GetVehiclePathNodeFor(nextConnectedPath, PathNodeObject.OnPathPosition.StartNodeStartPath);
+                        else
+                            nextPathStart = GetVehiclePathNodeFor(nextConnectedPath, PathNodeObject.OnPathPosition.EndNodeStartPath);
+
+                        thisPathEnd.AddPathNode(nextPathStart);
+                    }
+                }
+            }
+
+            // Handle sidewalks
             PedestrianPathNode thiPathNodeLeft;
             PedestrianPathNode thiPathNodeRight;
 
@@ -149,7 +222,7 @@ namespace Path.Entities.Vehicle
                     thiPathNodeRight = GetPedestrianPathNodeFor(thisPath, PathNodeObject.OnPathPosition.EndNodeEndPath);
                 }
 
-                if (!HasIntersection)
+                if (ConnectedPaths.Count == 1)
                 {
                     thiPathNodeRight.AddPathNode(thiPathNodeLeft);
                     thiPathNodeLeft.AddPathNode(thiPathNodeRight);
@@ -213,23 +286,6 @@ namespace Path.Entities.Vehicle
             thiPathNodeLeft.AddPathNode(leftPathNodeRight);
             leftPathNodeRight.AddPathNode(thiPathNodeLeft);
             return leftPathNodeRight;
-        }
-
-        private void OnDrawGizmos()
-        {
-            Gizmos.color = Color.red;
-            foreach (var items in pedestrianPathNodesDict.Values)
-            {
-               foreach (var item in items)
-                {
-                    List<PathNodeObject> connectedNodes = item.GetConnectedNodes();
-                    foreach (var node in connectedNodes)
-                    {
-
-                        Gizmos.DrawLine(item.Position, node.Position);
-                    }
-                }
-            }
         }
     }
 }

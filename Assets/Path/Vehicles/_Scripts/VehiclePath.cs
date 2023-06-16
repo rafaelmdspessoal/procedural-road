@@ -7,8 +7,6 @@ namespace Path.Entities.Vehicle
     {
         protected override void ConnectPathNodes()
         {
-            base.ConnectPathNodes();
-
             VehiclePathNode startNodeStartPath = startNode.GetVehiclePathNodeFor(this, PathNodeObject.OnPathPosition.StartNodeStartPath);
             VehiclePathNode startNodeEndPath = startNode.GetVehiclePathNodeFor(this, PathNodeObject.OnPathPosition.StartNodeEndPath);
 

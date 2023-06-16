@@ -66,48 +66,5 @@ namespace Path.Utilities {
             Vector3 projectedPosition = minProjectionLengh * directionToProject.normalized;
             return projectedPosition + intersectionPosition;
         }
-
-        public static bool TryRaycastObject(out Vector3 hitPosition, out GameObject hitObject, int radius = 4, bool splitPath = false)
-        {
-            hitObject = null;
-            hitPosition = Vector3.zero;
-            Vector3 mousePosition = Mouse.current.position.ReadValue();
-            Ray ray = Camera.main.ScreenPointToRay(mousePosition);
-
-            if (Physics.Raycast(ray, out RaycastHit rayHit, Mathf.Infinity))
-            {
-                hitPosition = rayHit.point;
-                hitObject = rayHit.transform.gameObject;
-                RaycastHit[] sphereHits = Physics.SphereCastAll(hitPosition, radius, new Vector3(1f, 0, 0), radius);
-                foreach (RaycastHit sphereHit in sphereHits)
-                {
-                    GameObject hitObj = sphereHit.transform.gameObject;
-
-                    if (hitObj.TryGetComponent(out NodeObject _))
-                    {
-                        hitObject = hitObj;
-                        hitPosition = hitObj.transform.position;
-                        return true;
-                    }
-                }
-                foreach (RaycastHit sphereHit in sphereHits)
-                {
-                    GameObject hitObj = sphereHit.transform.gameObject;
-                    if (hitObj.TryGetComponent(out PathObject pathObject))
-                    {
-                        hitObject = hitObj;
-                        hitPosition = Bezier.GetClosestPointTo(pathObject, hitPosition);
-                        if (splitPath)
-                            PathPlacementSystem.Instance.AddPathToSplit(hitPosition, pathObject);
-                        return true;
-                    }
-                }
-                if (hitObject.TryGetComponent(out Ground _))
-                    hitPosition = new Vector3(hitPosition.x, hitPosition.y + 0.1f, hitPosition.z);
-                
-                return true;
-            }
-            return false;
-        }
     }
 }

@@ -115,13 +115,4 @@ public class TestVectorScript : MonoBehaviour
             }
         }
     }
-
-    //private void OnDrawGizmos()
-    //{
-    //    return;
-    //    Gizmos.color = Color.red;
-    //    Gizmos.DrawLine(point_1.transform.position, point_1.transform.position + point_1.transform.forward);
-    //    Gizmos.DrawLine(point_2.transform.position, point_2.transform.position + point_2.transform.forward);
-    //    //Gizmos.DrawLine(point_3.transform.position, point_3.transform.position + point_3.transform.forward);
-    //}
 }

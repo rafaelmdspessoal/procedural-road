@@ -89,6 +89,7 @@
     <Compile Include="Assets\Path\_Scripts\PathNodeObject.cs" />
     <Compile Include="Assets\Path\Vehicles\_AI\VehiclePathFinding.cs" />
     <Compile Include="Assets\Path\_Scripts\PathObject.cs" />
+    <Compile Include="Assets\Path\_AI\PathFindingManager.cs" />
     <Compile Include="Assets\Scripts\UI\UIController.cs" />
     <Compile Include="Assets\Path\PlacementSystem\PathPlacementSystem.cs" />
     <Compile Include="Assets\Path\Pedestrian\_Scripts\PedestrianNode.cs" />

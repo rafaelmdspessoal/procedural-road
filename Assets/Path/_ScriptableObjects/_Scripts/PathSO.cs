@@ -57,6 +57,7 @@ namespace Path.Entities.SO
             CreatePathObject(intersectionNode, endNode, endControlPosition, parentTransform);
         }
 
+        #region handle mesh creation
         public Mesh CreatePathMesh(PathObject pathObject)
         {
             MeshData meshData = new();
@@ -88,7 +89,6 @@ namespace Path.Entities.SO
             mesh.CombineMeshes(meshes, true, false);
             return mesh;
         }
-
         private MeshData PopulatePathMesh(MeshData meshData, PathObject pathObject)
         {
             NodeObject startNode = pathObject.StartNode;
@@ -381,45 +381,12 @@ namespace Path.Entities.SO
             }
             return meshData;
         }
+        #endregion
 
-
-        public bool TryGetPathPositions(out Vector3 hitPosition, out GameObject hitObject)
+        public virtual bool TryGetPathPositions(out Vector3 hitPosition, out GameObject hitObject)
         {
             hitObject = default;
-            hitPosition = Vector3.zero;
 
-            if (pathObjectPrefab.TryGetComponent<PedestrianPath>(out _))
-            {
-                if (TryRaycastObject(out _, out PedestrianNode nodeObj))
-                {
-                    hitPosition = nodeObj.transform.position;
-                    hitObject = nodeObj.gameObject;
-                    return true;
-                }
-
-                if (TryRaycastObject(out hitPosition, out PedestrianPath pathObj))
-                {
-                    hitPosition = Bezier.GetClosestPointTo(pathObj, hitPosition);
-                    hitObject = pathObj.gameObject;
-                    return true;
-                }
-            }
-            if (pathObjectPrefab.TryGetComponent<VehiclePath>(out _))
-            {
-                if (TryRaycastObject(out _, out VehicleNode nodeObj))
-                {
-                    hitPosition = nodeObj.transform.position;
-                    hitObject = nodeObj.gameObject;
-                    return true;
-                }
-
-                if (TryRaycastObject(out hitPosition, out VehiclePath pathObj))
-                {
-                    hitPosition = Bezier.GetClosestPointTo(pathObj, hitPosition);
-                    hitObject = pathObj.gameObject;;
-                    return true;
-                }
-            }
             if (TryRaycastObject(out hitPosition, out Ground ground))
             {
                 hitPosition = new Vector3(hitPosition.x, hitPosition.y + 0.1f, hitPosition.z);
@@ -452,6 +419,18 @@ namespace Path.Entities.SO
                     }
                 }
             }
+            return false;
+        }
+        public virtual bool TryConnectToSidewalk(
+            out VehiclePath pathToConnect,
+            out PedestrianPathNode startPathNode,
+            out PedestrianPathNode endPathNode,
+            out Vector3 positionToConnect)
+        {
+            pathToConnect = default;
+            startPathNode = default;
+            endPathNode = default;
+            positionToConnect = Vector3.negativeInfinity;
             return false;
         }
     }

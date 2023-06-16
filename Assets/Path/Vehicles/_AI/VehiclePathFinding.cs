@@ -40,26 +40,48 @@ namespace Path.AI.Pedestrian
         private static List<VehiclePathNode> AStarSearch(NodeObject startNode, NodeObject endNode)
         {
             List<NodeObject> nodes = PathFinding.GetPathBetween(startNode, endNode);
-            VehiclePath pathStart = PathManager.Instance.GetPathBetween(nodes[0], nodes[1]) as VehiclePath;
-            VehiclePath pathEnd = PathManager.Instance.GetPathBetween(nodes[nodes.Count - 2], nodes[nodes.Count - 1]) as VehiclePath;
+            VehiclePath pathStart;
+            VehiclePath pathEnd;
             VehiclePathNode startPathNode;
             VehiclePathNode endPathNode;
+
             List<VehiclePathNode> path = new();
-
-            if (startNode.IsStartNodeOf(pathStart))
-                startPathNode = startNode.GetVehiclePathNodeFor(pathStart, PathNodeObject.OnPathPosition.StartNodeStartPath);
-            else
-                startPathNode = startNode.GetVehiclePathNodeFor(pathStart, PathNodeObject.OnPathPosition.EndNodeStartPath);
-
-            if (endNode.IsStartNodeOf(pathEnd))
-                endPathNode = endNode.GetVehiclePathNodeFor(pathEnd, PathNodeObject.OnPathPosition.StartNodeEndPath);
-            else
-                endPathNode = endNode.GetVehiclePathNodeFor(pathEnd, PathNodeObject.OnPathPosition.EndNodeEndPath);
-
             List<VehiclePathNode> nodesTocheck = new();
             Dictionary<VehiclePathNode, float> costDictionary = new();
             Dictionary<VehiclePathNode, float> priorityDictionary = new();
             Dictionary<VehiclePathNode, VehiclePathNode> parentsDictionary = new();
+
+
+            try
+            {
+                pathStart = PathManager.Instance.GetPathBetween(nodes[0], nodes[1]) as VehiclePath;
+                pathEnd = PathManager.Instance.GetPathBetween(nodes[nodes.Count - 2], nodes[nodes.Count - 1]) as VehiclePath;
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                Debug.LogError("Start and end have no connecting path");
+                // NOTE: Start and end have no connecting path between then.
+                return path;
+            }
+
+            try
+            {
+                if (startNode.IsStartNodeOf(pathStart))
+                    startPathNode = startNode.GetVehiclePathNodeFor(pathStart, PathNodeObject.OnPathPosition.StartNodeStartPath);
+                else
+                    startPathNode = startNode.GetVehiclePathNodeFor(pathStart, PathNodeObject.OnPathPosition.EndNodeStartPath);
+
+                if (endNode.IsStartNodeOf(pathEnd))
+                    endPathNode = endNode.GetVehiclePathNodeFor(pathEnd, PathNodeObject.OnPathPosition.StartNodeEndPath);
+                else
+                    endPathNode = endNode.GetVehiclePathNodeFor(pathEnd, PathNodeObject.OnPathPosition.EndNodeEndPath);
+            }
+            catch (KeyNotFoundException)
+            {
+                Debug.LogError("Path not found!");
+                // TODO: Handle when path not found!
+                return path;
+            }
 
             nodesTocheck.Add(startPathNode);
             priorityDictionary.Add(startPathNode, 0);
