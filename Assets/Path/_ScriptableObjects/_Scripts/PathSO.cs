@@ -51,10 +51,12 @@ namespace Path.Entities.SO
             NodeObject intersectionNode,
             Vector3 startControlPosition,
             Vector3 endControlPosition,
-            Transform parentTransform)
+            Transform parentTransform,
+            out PathObject firstPlacedPath,
+            out PathObject secondPlacedPath)
         {
-            CreatePathObject(startNode, intersectionNode, startControlPosition, parentTransform);
-            CreatePathObject(intersectionNode, endNode, endControlPosition, parentTransform);
+            firstPlacedPath = CreatePathObject(startNode, intersectionNode, startControlPosition, parentTransform);
+            secondPlacedPath = CreatePathObject(intersectionNode, endNode, endControlPosition, parentTransform);
         }
 
         #region handle mesh creation
@@ -396,11 +398,28 @@ namespace Path.Entities.SO
 
             return false;
         }
-        public bool TryRaycastObject<T>(out Vector3 hitPosition, out T hitObject)
+        public bool TryRaycastObject<T>(out Vector3 hitPosition, out T hitObject, NodeObject nodeObject = null)
         {
             int radius = Width * 2;
             hitObject = default;
             hitPosition = Vector3.zero;
+
+            if (nodeObject != null)
+            {
+                hitPosition = nodeObject.Position;
+                RaycastHit[] sphereHits = Physics.SphereCastAll(hitPosition, radius, new Vector3(1f, 0, 0), radius);
+                foreach (RaycastHit sphereHit in sphereHits)
+                {
+                    GameObject hitObj = sphereHit.transform.gameObject;
+
+                    if (hitObj.TryGetComponent(out T obj))
+                    {
+                        hitObject = obj;
+                        return true;
+                    }
+                }
+            }
+
             Vector3 mousePosition = Mouse.current.position.ReadValue();
             Ray ray = Camera.main.ScreenPointToRay(mousePosition);
 
@@ -425,7 +444,8 @@ namespace Path.Entities.SO
             out VehiclePath pathToConnect,
             out PedestrianPathNode startPathNode,
             out PedestrianPathNode endPathNode,
-            out Vector3 positionToConnect)
+            out Vector3 positionToConnect,
+            NodeObject nodeObject = null)
         {
             pathToConnect = default;
             startPathNode = default;

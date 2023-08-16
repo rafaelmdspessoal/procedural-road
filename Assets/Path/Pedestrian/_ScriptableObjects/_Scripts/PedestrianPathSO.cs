@@ -2,6 +2,7 @@ using Path.Entities.SO;
 using Path.Entities.Vehicle;
 using Path.Entities.Vehicle.SO;
 using Rafael.Utils;
+using System.Drawing.Printing;
 using System.IO;
 using UnityEngine;
 
@@ -34,13 +35,15 @@ namespace Path.Entities.Pedestrian.SO {
             out VehiclePath pathToConnect,
             out PedestrianPathNode startPathNode,
             out PedestrianPathNode endPathNode,
-            out Vector3 positionToConnect)
+            out Vector3 positionToConnect,
+            NodeObject nodeObject = null)
         {
             startPathNode = default;
             endPathNode = default;
             positionToConnect = Vector3.negativeInfinity;
 
-            if (TryRaycastObject(out Vector3 hitPosition, out pathToConnect))
+
+            if (TryRaycastObject(out Vector3 hitPosition, out pathToConnect, nodeObject))
             {
                 VehiclePathSO vehiclePathSO = pathToConnect.PathSO as VehiclePathSO;
                 if ((vehiclePathSO).hasSidewalk)
