@@ -6,6 +6,7 @@ using Path.Entities.Pedestrian;
 using Path.Entities.Meshes;
 using Path.Utilities;
 using Path.Entities.Vehicle;
+using Global.Utils;
 
 namespace Path.Entities
 {

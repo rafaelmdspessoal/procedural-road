@@ -2,13 +2,10 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using Path.Entities.SO;
 using Global.UI;
-using Path.PlacementSystem;
 using System.Collections.Generic;
 using Path.Entities.Vehicle.SO;
 using Path.Entities.Pedestrian.SO;
-using Path.Entities.Pedestrian;
 
 namespace Path.UI {
     public class PathUIController : MonoBehaviour {
@@ -16,7 +13,6 @@ namespace Path.UI {
 
         private InputManager inputManager;
         private UIController uIController;
-        private PathPlacementSystem pathPlacementManager;
 
         public Action OnBuildingStraightPath, OnBuildingCurvedPath, OnBuildingFreePath;
         public Action OnGridSnapping, OnAngleSnapping, OnPathUp, OnPathDown;
@@ -60,12 +56,10 @@ namespace Path.UI {
         private void Start() {
             inputManager = InputManager.Instance;
             uIController = UIController.Instance;
-            pathPlacementManager = PathPlacementSystem.Instance;
 
             inputManager.OnEscape += InputManager_OnEscape;
             uIController.OnBuildingObjects += UIController_OnBuildingObjects;
             uIController.OnRemovingObjects += UIController_OnRemovingObjects;
-            pathPlacementManager.OnAngleSnapChanged += PathPlacementManager_OnAngleSnapChanged;
 
             DesablePathOptions();
             buildPathButton.onClick.AddListener(BuildPathButton_onClick);

@@ -1,6 +1,7 @@
 using Path.Entities.Pedestrian;
 using Path.Entities.SO;
 using UnityEngine;
+using Global.Utils;
 
 namespace Path.Entities.Vehicle.SO
 {
@@ -38,13 +39,14 @@ namespace Path.Entities.Vehicle.SO
             out VehiclePath pathToConnect,
             out PedestrianPathNode startPathNode,
             out PedestrianPathNode endPathNode,
-            out Vector3 positionToConnect)
+            out Vector3 positionToConnect,
+            NodeObject nodeObject = null)
         {
             pathToConnect = default;
             startPathNode = default;
             endPathNode = default;
             positionToConnect = Vector3.negativeInfinity;
-            // Debug.Log("Missing logic for hits!");
+
             return false;
         }
         public override bool TryGetPathPositions(out Vector3 hitPosition, out GameObject hitObject)

@@ -1,10 +1,8 @@
 using System;
 using UnityEngine;
 using System.Collections.Generic;
-using Path.Utilities;
-using Path.Entities.Pedestrian;
 using Path.Entities.SO;
-using Paths.MeshHandler;
+using Global.Utils;
 using Rafael.Utils;
 
 namespace Path.Entities{

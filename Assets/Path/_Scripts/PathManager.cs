@@ -5,39 +5,105 @@ using System.Linq;
 using Path.Entities;
 using Path.PlacementSystem;
 using Path.Entities.Vehicle;
+using Path.Entities.SO;
+using UnityEditor;
 
 namespace Path {
 
     public class PathManager : MonoBehaviour {
+        struct SerializeablePath
+        {
+            public Vector3 startNodePosition;
+            public Vector3 endNodePosition;
+            public Vector3 controlPosition;
+            public string pathSOName;
+
+            public SerializeablePath(
+                Vector3 startNodePosition,
+                Vector3 endNodePosition,
+                Vector3 controlPosition,
+                string pathSOName)
+            {
+                this.startNodePosition = startNodePosition;
+                this.endNodePosition = endNodePosition;
+                this.controlPosition = controlPosition;
+                this.pathSOName = pathSOName;
+            }
+        }
         public static PathManager Instance { get; private set; }
 
-        private PathPlacementSystem pathPlacementSystem;
         private readonly Dictionary<Vector3, NodeObject> placedNodesDict = new();
+        private List<SerializeablePath> pathObjects = new();
 
         [SerializeField] private Transform pathParentTransform;
         [SerializeField] private Transform nodeParentTransform;
 
         public bool updatePaths = false;
+        private IDataService DataService = new JsonDataService();
+        private bool encryptionEnabled;
 
         private void Awake() {
             Instance = this;
         }
 
         private void Start() {
-            pathPlacementSystem = PathPlacementSystem.Instance;
-            pathPlacementSystem.OnPathPlaced += PathPlacementSystem_OnPathPlaced;
+
+        }
+        public void ToggleEncryption(bool encryptionEnabled)
+        {
+            this.encryptionEnabled = encryptionEnabled;
+        }
+        public void LoadJson()
+        {
+            pathObjects = DataService.LoadData<List<SerializeablePath>>("/xuxa.json", encryptionEnabled);
+            foreach (SerializeablePath pathObject in pathObjects)
+            {
+                Vector3 startNodePosition = pathObject.startNodePosition;
+                Vector3 endNodePosition = pathObject.endNodePosition;
+                Vector3 controlPosition = pathObject.controlPosition;
+                PathSO pathSO = Resources.Load(pathObject.pathSOName) as PathSO;
+
+                PathPlacementSystem.Instance.LoadRoadData(
+                    startNodePosition,
+                    endNodePosition,
+                    controlPosition,
+                    pathSO);
+            }
+        }
+        public void SerializeJson()
+        {
+            if(DataService.SaveData("/xuxa.json", pathObjects, encryptionEnabled))
+            {
+
+            }
+            else
+            {
+                Debug.LogError("Could not save file!");
+            }
         }
         public void AddNode(NodeObject node) 
         {
             if (!HasNode(node))
                 placedNodesDict.Add(node.Position, node);
         }
-        private void PathPlacementSystem_OnPathPlaced(object sender, PathPlacementSystem.OnPathPlacedEventArgs e)
+        public void AddPath(PathObject pathObject)
         {
-            PathObject pathObject = e.pathObject;
             pathObject.OnPathRemoved += PathObject_OnPathRemoved;
             pathObject.OnPathUpdated += PathObject_OnPathUpdated;
             pathObject.OnPathBuilt += PathObject_OnPathBuilt;
+
+            bool hasPath = pathObjects.Where(
+                x => x.startNodePosition == pathObject.StartNode.Position
+            ).Where(
+                y => y.endNodePosition == pathObject.EndNode.Position).Count() > 0;
+            if (!hasPath)
+            {
+                pathObjects.Add(new SerializeablePath(
+                    pathObject.StartNode.Position,
+                    pathObject.EndNode.Position,
+                    pathObject.ControlPosition,
+                    pathObject.PathSO.name));
+            }
         }
         private void PathObject_OnPathBuilt(object sender, EventArgs e) {
             throw new NotImplementedException();
@@ -46,9 +112,16 @@ namespace Path {
             throw new NotImplementedException();
         }
         private void PathObject_OnPathRemoved(object sender, EventArgs e) {
-            //PathObject pathObject = (PathObject)sender;
-            //if (pathObject.StartNode != null && !pathObject.StartNode.HasConnectedPaths) RemoveNode(pathObject.StartNode);
-            //if (pathObject.EndNode != null && !pathObject.EndNode.HasConnectedPaths) RemoveNode(pathObject.EndNode);
+            PathObject pathObject = (PathObject)sender;
+            SerializeablePath path = pathObjects.Where(
+               x => x.startNodePosition == pathObject.StartNode.Position
+           ).Where(
+               y => y.endNodePosition == pathObject.EndNode.Position).First();
+            if (pathObjects.Contains(path))
+            {
+                pathObjects.Remove(path);
+            }
+
         }
         public void RemoveNode(NodeObject node)
         {

@@ -12,7 +12,7 @@ using Global.UI;
 using Path.Entities.Vehicle;
 using Path.Entities.Pedestrian;
 using Path.Entities.Vehicle.SO;
-using UnityEditor.Experimental.GraphView;
+using Global.Utils;
 
 namespace Path.PlacementSystem {
    
@@ -56,8 +56,6 @@ namespace Path.PlacementSystem {
         }
 
         public Action<int> OnAngleSnapChanged;
-        public EventHandler<OnPathPlacedEventArgs> OnPathPlaced;
-        public class OnPathPlacedEventArgs : EventArgs { public PathObject pathObject; }
 
         private readonly Dictionary<Vector3, PathObject> pathsToSplit = new();
         private readonly List<PathToConnectSidewalk> pathsToConnectSidewalk = new();
@@ -229,14 +227,64 @@ namespace Path.PlacementSystem {
             ResetBuildingState();
             pathSO = obj.GetComponent<PathObject>().PathSO;
             minPathLengh = pathSO.Width * 1.5f;
-            nodeGFX = PathUtilities.UpdateOrCreateNodeGFX(pathSO, nodeGFX);
+            nodeGFX = PathUtilities.UpdateOrCreateNodeGFX(1, nodeGFX);
             nodeGFX.SetActive(true);
 
             buildingState = new BuildingStraightPath(this);
         }
+        public void LoadRoadData(
+            Vector3 startNodePosition,
+            Vector3 endNodePosition,
+            Vector3 controlPosition,
+            PathSO pathSO)
+        {
+            ResetBuildingState();
+
+            this.pathSO = pathSO;
+
+            StartPosition = startNodePosition;
+            EndPosition = endNodePosition;
+            ControlPosition = controlPosition;
+
+
+            if (pathSO.TryConnectToSidewalk(
+                out VehiclePath pathToConnect,
+                out PedestrianPathNode startSidewalk,
+                out PedestrianPathNode endSidewalk,
+                out Vector3 positionToConnect,
+                startNode))
+            {
+                AddPathToConnectSidewalk(new PathToConnectSidewalk(
+                    positionToConnect,
+                    pathToConnect,
+                    startNode as PedestrianNode,
+                    startSidewalk,
+                    endSidewalk
+                ));
+            }
+
+            if (pathSO.TryConnectToSidewalk(
+                out pathToConnect,
+                out startSidewalk,
+                out endSidewalk,
+                out positionToConnect,
+                endNode))
+            {
+                AddPathToConnectSidewalk(new PathToConnectSidewalk(
+                    positionToConnect,
+                    pathToConnect,
+                    endNode as PedestrianNode,
+                    startSidewalk,
+                    endSidewalk
+                ));
+            }
+
+            PlacePath();
+        }
         public void PlacePath()
         {
             PathObject placedPath = pathSO.CreatePathObject(startNode, endNode, controlPosition, pathManager.PathParentTransform); 
+            pathManager.AddPath(placedPath);
             
             if (pathSO.TryConnectToSidewalk(
                 out VehiclePath pathToConnect,
@@ -256,7 +304,6 @@ namespace Path.PlacementSystem {
             NodeObject cachedEndNode = endNode;
             ResetPathPositions();
             startNode = cachedEndNode;
-            OnPathPlaced?.Invoke(this, new OnPathPlacedEventArgs { pathObject = placedPath });
         }
         private void ResetBuildingState()
         {
@@ -317,7 +364,11 @@ namespace Path.PlacementSystem {
                     intersectionNode,
                     startControlPosition,
                     endControlPosition,
-                    pathManager.PathParentTransform);
+                    pathManager.PathParentTransform, 
+                    out PathObject firstPlacedPath,
+                    out PathObject secondPlacedPath);
+                    pathManager.AddPath(firstPlacedPath);
+                    pathManager.AddPath(secondPlacedPath);    
             }
             pathsToSplit.Clear();
         }

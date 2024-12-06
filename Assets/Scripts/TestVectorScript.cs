@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Rafael.Utils;
+using Global.Utils;
 
 public class TestVectorScript : MonoBehaviour
 {

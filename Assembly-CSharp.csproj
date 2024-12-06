@@ -9,7 +9,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{B1B5071D-7D84-09AA-68E1-EAE4581E32A2}</ProjectGuid>
+    <ProjectGuid>{C1D49BAD-476E-6626-133D-DB57604BC638}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -62,10 +62,17 @@
     <Compile Include="Assets\Scripts\InputSystem\GameInputActions.cs" />
     <Compile Include="Assets\Path\_AI\AIDirector.cs" />
     <Compile Include="Assets\Scripts\GameManager\GameManager.cs" />
+    <Compile Include="Assets\Spline\_Objects\Segment.cs" />
+    <Compile Include="Assets\Spline\_Scripts\SplineManager.cs" />
+    <Compile Include="Assets\Scripts\SaveSystem\IDataService.cs" />
     <Compile Include="Assets\Path\_Scripts\NodeObject.cs" />
     <Compile Include="Assets\Path\PlacementSystem\States\BuildingStraightRoad.cs" />
+    <Compile Include="Assets\Spline\PlacementSystem\States\BuildingStraightSpline.cs" />
+    <Compile Include="Assets\Spline\_Objects\Segment1.cs" />
+    <Compile Include="Assets\Spline\PlacementSystem\SplinePlacementSystem.cs" />
     <Compile Include="Assets\Path\PlacementSystem\States\BuildingCurvedRoad.cs" />
     <Compile Include="Assets\Path\_ScriptableObjects\_Scripts\PathSO.cs" />
+    <Compile Include="Assets\Spline\PlacementSystem\SplinePreviewSystem.cs" />
     <Compile Include="Assets\Scripts\Ground.cs" />
     <Compile Include="Assets\Scripts\RafaelUtils.cs" />
     <Compile Include="Assets\Scripts\Bezier.cs" />
@@ -73,21 +80,29 @@
     <Compile Include="Assets\Path\PlacementSystem\Interfaces\IBuildingState.cs" />
     <Compile Include="Assets\Path\_Scripts\PathUtilities.cs" />
     <Compile Include="Assets\Path\Pedestrian\_Scripts\PedestrianPathNode.cs" />
+    <Compile Include="Assets\Spline\UI\BuildObjectButton.cs" />
     <Compile Include="Assets\Path\_AI\AIDirectorEditor.cs" />
     <Compile Include="Assets\Path\PlacementSystem\PathPreview\PreviewRoadMeshData.cs" />
     <Compile Include="Assets\Path\PlacementSystem\States\BuildingFreeRoad.cs" />
+    <Compile Include="Assets\Spline\UI\SplineUIController.cs" />
+    <Compile Include="Assets\Scripts\OrientedPoint.cs" />
     <Compile Include="Assets\Path\_Interfaces\IPath.cs" />
+    <Compile Include="Assets\Spline\_Objects\Node.cs" />
+    <Compile Include="Assets\Scripts\SaveSystem\JsonDataService.cs" />
     <Compile Include="Assets\Path\Vehicles\_ScriptableObjects\_Scripts\VehiclePathSO.cs" />
     <Compile Include="Assets\Path\Vehicles\_Scripts\VehiclePath.cs" />
     <Compile Include="Assets\Path\Mesh\_Scripts\MeshEdje.cs" />
     <Compile Include="Assets\Path\Pedestrian\_Scripts\PedestrianPath.cs" />
     <Compile Include="Assets\Path\UI\BuildObjectButton.cs" />
     <Compile Include="Assets\Path\_Scripts\PathManager.cs" />
+    <Compile Include="Assets\Spline\Bezier.cs" />
+    <Compile Include="Assets\Spline\PlacementSystem\States\BuildingFreeSpline.cs" />
     <Compile Include="Assets\Path\Vehicles\_Scripts\VehicleNode.cs" />
     <Compile Include="Assets\Path\PlacementSystem\PathPreviewSystem.cs" />
     <Compile Include="Assets\Scripts\TestVectorScript.cs" />
     <Compile Include="Assets\Path\_Scripts\PathNodeObject.cs" />
     <Compile Include="Assets\Path\Vehicles\_AI\VehiclePathFinding.cs" />
+    <Compile Include="Assets\Spline\PlacementSystem\States\BuildingCurvedSpline.cs" />
     <Compile Include="Assets\Path\_Scripts\PathObject.cs" />
     <Compile Include="Assets\Path\_AI\PathFindingManager.cs" />
     <Compile Include="Assets\Scripts\UI\UIController.cs" />
@@ -97,8 +112,10 @@
     <Compile Include="Assets\Path\Vehicles\_Scripts\VehiclePathNode.cs" />
     <Compile Include="Assets\Scripts\InputManagers\InputManager.cs" />
     <Compile Include="Assets\Path\Mesh\_Scripts\MeshUtilities.cs" />
+    <Compile Include="Assets\Spline\PlacementSystem\Interfaces\IPlacementState.cs" />
     <Compile Include="Assets\Path\Pedestrian\_AI\PedestrianPathFinding.cs" />
     <Compile Include="Assets\Path\UI\PathUIController.cs" />
+    <Compile Include="Assets\Testing\Path\Mesh2D.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
@@ -115,6 +132,7 @@
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro_Properties.cginc" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro_Surface.cginc" />
+    <None Include="Assets\Testing\Path\NormalDir.shader" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Following Characters.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Masking.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF Overlay.shader" />
@@ -372,6 +390,9 @@
     </Reference>
     <Reference Include="UnityEditor.UnityConnectModule">
       <HintPath>C:\Program Files\Unity\Hub\Editor\2022.2.13f1\Editor\Data\Managed\UnityEngine\UnityEditor.UnityConnectModule.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>Library\PackageCache\com.unity.nuget.newtonsoft-json@3.0.2\Runtime\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib">
       <HintPath>C:\Program Files\Unity\Hub\Editor\2022.2.13f1\Editor\Data\UnityReferenceAssemblies\unity-4.8-api\mscorlib.dll</HintPath>
