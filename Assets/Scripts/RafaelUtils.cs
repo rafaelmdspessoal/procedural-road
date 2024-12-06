@@ -1,5 +1,6 @@
 using UnityEngine.InputSystem;
 using UnityEngine;
+using Path.Entities;
 
 namespace Rafael.Utils
 {
@@ -51,6 +52,68 @@ namespace Rafael.Utils
             sphere.transform.name = name;
             sphere.transform.parent = parent;
             return sphere;
+        }
+
+        public static bool TryRaycastObjectt<T>(out Vector3 hitPosition, out T hitObject, int width, NodeObject nodeObject = null)
+        {
+            int radius = width * 2;
+            hitObject = default;
+            hitPosition = Vector3.zero;
+
+            if (nodeObject != null)
+            {
+                hitPosition = nodeObject.Position;
+                RaycastHit[] sphereHits = Physics.SphereCastAll(hitPosition, radius, new Vector3(1f, 0, 0), radius);
+                foreach (RaycastHit sphereHit in sphereHits)
+                {
+                    GameObject hitObj = sphereHit.transform.gameObject;
+
+                    if (hitObj.TryGetComponent(out T obj))
+                    {
+                        hitObject = obj;
+                        return true;
+                    }
+                }
+            }
+
+            Vector3 mousePosition = Mouse.current.position.ReadValue();
+            Ray ray = Camera.main.ScreenPointToRay(mousePosition);
+
+            if (Physics.Raycast(ray, out RaycastHit rayHit, Mathf.Infinity))
+            {
+                hitPosition = rayHit.point;
+                RaycastHit[] sphereHits = Physics.SphereCastAll(hitPosition, radius, new Vector3(1f, 0, 0), radius);
+                foreach (RaycastHit sphereHit in sphereHits)
+                {
+                    GameObject hitObj = sphereHit.transform.gameObject;
+
+                    if (hitObj.TryGetComponent(out T obj))
+                    {
+                        hitObject = obj;
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        public static Vector3 GetProjectedPosition(
+            Vector3 positionToProject,
+            Vector3 directionToProject,
+            Vector3 intersectionPosition)
+        {
+            Vector3 currentDirection = positionToProject - intersectionPosition;
+            float angle = Vector3.Angle(currentDirection, directionToProject);
+
+            //float minProjectionLengh = Mathf.Clamp(
+            //    currentDirection.magnitude * Mathf.Cos(angle * Mathf.Deg2Rad),
+            //    10f,
+            //    Mathf.Infinity);
+
+            float minProjectionLengh = currentDirection.magnitude * Mathf.Cos(angle * Mathf.Deg2Rad);
+
+            Vector3 projectedPosition = Mathf.Abs(minProjectionLengh) * directionToProject.normalized;
+            return projectedPosition + intersectionPosition;
         }
     }
 

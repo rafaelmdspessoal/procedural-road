@@ -2,8 +2,7 @@ using Path.Entities.SO;
 using Path.Entities.Vehicle;
 using Path.Entities.Vehicle.SO;
 using Rafael.Utils;
-using System.Drawing.Printing;
-using System.IO;
+using Global.Utils;
 using UnityEngine;
 
 namespace Path.Entities.Pedestrian.SO {

@@ -12,7 +12,7 @@ using Global.UI;
 using Path.Entities.Vehicle;
 using Path.Entities.Pedestrian;
 using Path.Entities.Vehicle.SO;
-using UnityEditor.Experimental.GraphView;
+using Global.Utils;
 
 namespace Path.PlacementSystem {
    
@@ -227,7 +227,7 @@ namespace Path.PlacementSystem {
             ResetBuildingState();
             pathSO = obj.GetComponent<PathObject>().PathSO;
             minPathLengh = pathSO.Width * 1.5f;
-            nodeGFX = PathUtilities.UpdateOrCreateNodeGFX(pathSO, nodeGFX);
+            nodeGFX = PathUtilities.UpdateOrCreateNodeGFX(1, nodeGFX);
             nodeGFX.SetActive(true);
 
             buildingState = new BuildingStraightPath(this);

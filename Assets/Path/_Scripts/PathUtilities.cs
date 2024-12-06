@@ -24,7 +24,7 @@ namespace Path.Utilities {
             return leftSideVertice;
         }
 
-        public static GameObject UpdateOrCreateNodeGFX(PathSO pathObjectSO, GameObject existingNodeGFX) 
+        public static GameObject UpdateOrCreateNodeGFX(float width, GameObject existingNodeGFX) 
         {
             GameObject nodeGFX = existingNodeGFX;
             if (nodeGFX == null)
@@ -33,7 +33,7 @@ namespace Path.Utilities {
             }
             nodeGFX.layer = 2;
             nodeGFX.transform.GetComponent<SphereCollider>().radius = 1f;
-            nodeGFX.transform.localScale = pathObjectSO.Width * Vector3.one;
+            nodeGFX.transform.localScale = width * Vector3.one;
             nodeGFX.transform.name = "Node GFX";
             return nodeGFX;
         }
@@ -53,7 +53,10 @@ namespace Path.Utilities {
             return q * current;
         }
 
-        public static Vector3 GetProjectedPosition(Vector3 positionToProject, Vector3 directionToProject, Vector3 intersectionPosition) 
+        public static Vector3 GetProjectedPosition(
+            Vector3 positionToProject, 
+            Vector3 directionToProject, 
+            Vector3 intersectionPosition) 
         {
             Vector3 currentDirection = positionToProject - intersectionPosition;
             float angle = Vector3.Angle(currentDirection, directionToProject);

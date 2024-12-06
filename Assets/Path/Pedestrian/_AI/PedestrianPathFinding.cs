@@ -4,6 +4,7 @@ using Rafael.Utils;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Global.Utils;
 
 namespace Path.AI.Pedestrian
 {

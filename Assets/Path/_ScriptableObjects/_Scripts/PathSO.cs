@@ -8,6 +8,7 @@ using UnityEngine.InputSystem;
 using World;
 using Path.Entities.Pedestrian;
 using Path.Entities.Vehicle;
+using Global.Utils;
 
 namespace Path.Entities.SO
 {

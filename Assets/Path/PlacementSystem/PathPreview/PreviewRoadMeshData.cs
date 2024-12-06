@@ -1,6 +1,6 @@
 using UnityEngine;
 using Paths.MeshHandler;
-using Path.Utilities;
+using Global.Utils;
 
 namespace Paths.Preview.MeshHandler
 {

@@ -1,6 +1,7 @@
 using Path.Entities.Pedestrian;
 using Path.Entities.SO;
 using UnityEngine;
+using Global.Utils;
 
 namespace Path.Entities.Vehicle.SO
 {
